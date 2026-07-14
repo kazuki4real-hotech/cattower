@@ -8,4 +8,15 @@
     "bindings": [{ "name": "TOWN_ROOM", "class_name": "TownRoom" }],
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TownRoom"] }],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 0.1,
+      "invocation_logs": false,
+    },
+    "traces": {
+      "enabled": false,
+    },
+  },
 }

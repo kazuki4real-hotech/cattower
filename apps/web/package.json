@@ -19,6 +19,7 @@
     "@better-auth/drizzle-adapter": "1.6.23",
     "@cattower/db": "workspace:*",
     "@cattower/domain": "workspace:*",
+    "@cattower/observability": "workspace:*",
     "@cattower/ui": "workspace:*",
     "@opennextjs/cloudflare": "1.20.1",
     "@radix-ui/react-dialog": "1.1.19",

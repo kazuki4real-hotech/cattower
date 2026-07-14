@@ -116,6 +116,7 @@ skip は画面ごとに意味を分ける。必須の猫名を未入力のまま
 - OpenNext の生成物 `.open-next/` は commit しない
 - D1、R2、Images binding は `wrangler.jsonc` で定義し、`cloudflare-env.d.ts` は `wrangler types` で生成する
 - secret は設定ファイルとリポジトリへ保存しない
+- Route Handlerは`@cattower/observability`で包み、完全なURLや入力値ではなく固定route名、status、所要時間、request ID、非機密error codeだけをstructured logへ出す
 
 ## 9. Initial implementation acceptance
 

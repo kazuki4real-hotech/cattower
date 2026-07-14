@@ -22,6 +22,10 @@ importers:
         version: 4.1.10(@types/node@26.1.1)(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.16.9)(tsx@4.23.1)(yaml@2.9.0))
 
   apps/realtime:
+    dependencies:
+      '@cattower/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: 0.18.4
@@ -53,6 +57,9 @@ importers:
       '@cattower/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@cattower/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@cattower/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -132,6 +139,15 @@ importers:
         version: 5.9.3
 
   packages/domain:
+    devDependencies:
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@26.1.1)(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.16.9)(tsx@4.23.1)(yaml@2.9.0))
+
+  packages/observability:
     devDependencies:
       typescript:
         specifier: 5.9.3

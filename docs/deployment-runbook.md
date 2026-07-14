@@ -84,10 +84,13 @@ pnpm --filter @cattower/realtime build
 
 ## 5. Logs and versions
 
-ログを一時的に確認する。
+両WorkerはWorkers Logsを有効化し、10% head sampling、invocation log無効、traces無効で運用する。アプリログは固定route名、status、所要時間、request ID、非機密error codeだけをJSON objectで出力する。
+
+ログを一時的に確認する。real-time logの出力自体をissueや文書へ貼らず、必要な非機密fieldだけを転記する。
 
 ```bash
-pnpm --filter @cattower/web exec wrangler tail cattower-web
+pnpm --filter @cattower/web exec wrangler tail cattower-web --format json
+pnpm --filter @cattower/realtime exec wrangler tail cattower-realtime --format json
 ```
 
 versions と deployments を確認する。
@@ -97,7 +100,7 @@ pnpm --filter @cattower/web exec wrangler versions list
 pnpm --filter @cattower/web exec wrangler deployments list
 ```
 
-ログ本文を issue や文書へコピーする前に、token、cookie、利用者本文、署名 URL が含まれないことを確認する。
+`event`、`requestId`、`service`、`route`、`status`、`durationMs`、`errorCode`以外のcustom fieldが追加されていないことを確認する。完全なURL、query、token、cookie、Authorization header、利用者本文、検索語、メディアURL、署名URL、例外メッセージ、stackが見つかった場合はログの共有を止め、該当コードを修正してcredentialを必要に応じて失効する。
 
 ## 6. Rollback
 

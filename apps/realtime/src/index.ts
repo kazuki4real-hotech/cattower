@@ -1,3 +1,5 @@
+import { instrumentRequestHandler } from "@cattower/observability";
+
 export { TownRoom } from "./town-room";
 
 const JSON_HEADERS = {
@@ -21,8 +23,20 @@ export function handleRequest(request: Request): Response {
   );
 }
 
+const handleHealthRequest = instrumentRequestHandler(
+  { service: "cattower-realtime", route: "/health" },
+  handleRequest,
+);
+const handleUnmatchedRequest = instrumentRequestHandler(
+  { service: "cattower-realtime", route: "unmatched" },
+  handleRequest,
+);
+
 export default {
   fetch(request) {
-    return handleRequest(request);
+    const url = new URL(request.url);
+    return request.method === "GET" && url.pathname === "/health"
+      ? handleHealthRequest(request)
+      : handleUnmatchedRequest(request);
   },
 } satisfies ExportedHandler<CloudflareEnv>;
