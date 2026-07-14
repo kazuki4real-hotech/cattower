@@ -39,6 +39,7 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
 
 .material-symbols-rounded { display: inline-flex; flex: none; align-items: center; justify-content: center; font-family: "Material Symbols Rounded"; font-size: 22px; font-weight: normal; font-style: normal; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap; font-feature-settings: "liga"; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
 .material-symbols-rounded.filled { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
+.material-symbols-outlined { display: inline-flex; flex: none; align-items: center; justify-content: center; font-family: "Material Symbols Outlined"; font-size: 22px; font-weight: normal; font-style: normal; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap; font-feature-settings: "liga"; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
 .skip-link { position: fixed; left: 12px; top: -80px; z-index: 100; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--ink); color: var(--surface); }
 .skip-link:focus { top: 12px; }
 .app-shell { min-height: 100vh; }
@@ -59,7 +60,7 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
 .page { width: min(100%, 1080px); margin: 0 auto; padding: 44px 48px 96px; }
 .page-narrow { width: min(100%, 780px); }
 .page-wide { width: min(100%, 1180px); }
-.mobile-top, .mobile-nav { display: none; }
+.mobile-top, .mobile-nav, .mobile-nav-fab { display: none; }
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
 .eyebrow { margin: 0 0 4px; color: var(--mint-strong); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .lede, .muted { color: var(--ink-soft); }
@@ -224,9 +225,14 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
   .sidebar { display: none; } .main { margin-left: 0; }
   .mobile-top { position: sticky; top: 0; z-index: 30; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgb(255 255 255 / 94%); backdrop-filter: blur(10px); }
   .mobile-top .brand { margin: 0; font-size: 18px; }
-  .mobile-nav { position: fixed; inset: auto 0 0; z-index: 30; display: grid; grid-template-columns: repeat(4,1fr); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgb(255 255 255 / 96%); backdrop-filter: blur(12px); }
-  .mobile-nav-link { display: grid; justify-items: center; gap: 2px; padding: 5px 2px; color: var(--ink-soft); font-size: 11px; }
+  .mobile-top-actions { display: flex; align-items: center; gap: 10px; }
+  .record-button { border-color: transparent; background: transparent; color: var(--peach); }
+  .record-button .material-symbols-outlined { font-size: 28px; }
+  .mobile-nav { position: fixed; left: 16px; right: 16px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 30; display: grid; grid-template-columns: repeat(3,1fr) auto; align-items: center; gap: 4px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgb(255 255 255 / 96%); box-shadow: 0 12px 30px rgb(42 42 42 / 14%); backdrop-filter: blur(12px); }
+  .mobile-nav-link { display: grid; justify-items: center; gap: 2px; padding: 5px 2px; border-radius: var(--radius-lg); color: var(--ink-soft); font-size: 11px; }
   .mobile-nav-link[aria-current="page"] { color: var(--mint-strong); font-weight: 800; }
+  .mobile-nav-collapse { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--sunken); color: var(--ink-soft); }
+  .mobile-nav-fab { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 30; width: 54px; height: 54px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgb(255 255 255 / 96%); color: var(--mint-strong); box-shadow: 0 12px 30px rgb(42 42 42 / 16%); backdrop-filter: blur(12px); }
   .page { padding: 28px 20px 100px; }
   .today-card { grid-template-columns: 1fr; } .today-card img { height: 350px; } .today-copy { min-height: 250px; }
   .entry-layout { grid-template-columns: 1fr; } .entry-aside { position: static; }
