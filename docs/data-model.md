@@ -56,6 +56,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | reduced_motion_override | nullable; normally system setting |
 | analytics_consent | regional requirement に応じる |
 | onboarding_step | `0` profile / `1` cat / `2` photo / `3` theme / `4` complete preparation |
+| active_household_id | nullable。現在表示・保存先として選択中の active membership の household |
 | onboarding_prompted_at | nullable。新規登録 callback から自動案内した時刻。既存利用者は migration で backfill |
 | onboarding_completed_at | nullable。完了時刻 |
 
@@ -71,6 +72,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | deletion_requested_at | nullable |
 
 初回 onboarding で利用者が owner となる household を一つ自動作成する。一人の利用者が owner になれる household は MVP では一つとし、招待された複数の household には editor として参加できる。
+選択中の household は `user_preferences.active_household_id` に保存し、利用時に active な `household_members` が存在することを再検証する。無効な選択値は owner household、または参加中の先頭 household に戻す。
 
 ### household_members
 

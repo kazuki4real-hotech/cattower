@@ -177,6 +177,7 @@ MVP の household policy:
 
 - 初回 onboarding で owner household を一つ作る
 - 一人の利用者は一つを所有し、複数 household に editor として参加できる
+- active household は `user_preferences.active_household_id` に保存し、各 request で active membership を再検証する
 - editor は全記録を閲覧できるが、作成・編集・soft delete・restore は自分の記録だけ
 - owner は household 内のすべての記録、猫、家族、お散歩設定を管理できる
 
