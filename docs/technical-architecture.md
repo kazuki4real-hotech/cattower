@@ -15,22 +15,22 @@
 
 ## 2. Selected stack
 
-| Area | Choice | Reason |
-| --- | --- | --- |
-| Monorepo | pnpm workspaces | Web と realtime Worker、共有 package を小さな構成で管理できる |
-| Frontend | Next.js App Router + React + TypeScript | 要件指定。SSR、Route Handler、Server Component を使い分けられる |
-| Cloudflare adapter | `@opennextjs/cloudflare` | Next.js を Cloudflare Workers へ正式なガイドに沿って配置できる |
-| Styling | Tailwind CSS + Radix UI primitives | 独自の静かなデザインを保ちつつ、アクセシブルな基本操作を使える |
-| Forms/validation | React Hook Form + Zod | クライアントとサーバーで同じ入力契約を共有できる |
-| Authentication | Better Auth + Google OAuth | Workers/D1 と組み合わせやすく、認証データを自分たちの DB で管理できる |
-| Database | Cloudflare D1 | 関係データ、検索条件、共有権限を SQL で扱える |
-| ORM | Drizzle ORM | D1 を公式にサポートし、schema と migration を TypeScript 側で管理できる |
-| Image storage | Cloudflare R2 private bucket | 原本と派生画像を公開せず保存できる |
-| Image inspection | Cloudflare Images Binding | upload 後の decode 可否、寸法、派生画像生成を Worker 内の native library に依存せず扱える |
-| Video | Cloudflare Stream | MOV を含む投稿動画をエンコードし、端末ごとの差を減らせる |
-| Realtime | Cloudflare Durable Objects + Hibernatable WebSockets | 猫町の部屋ごとの presence と低頻度イベントを調停できる |
-| Tests | Vitest + Testing Library + Playwright | domain、UI、Cloudflare binding、主要導線を層別に検証できる |
-| Analytics | Cloudflare Web Analytics + structured Workers logs + consented first-party events | 性能・障害と product success signal を目的別に分離する |
+| Area               | Choice                                                                            | Reason                                                                                    |
+| ------------------ | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Monorepo           | pnpm workspaces                                                                   | Web と realtime Worker、共有 package を小さな構成で管理できる                             |
+| Frontend           | Next.js App Router + React + TypeScript                                           | 要件指定。SSR、Route Handler、Server Component を使い分けられる                           |
+| Cloudflare adapter | `@opennextjs/cloudflare`                                                          | Next.js を Cloudflare Workers へ正式なガイドに沿って配置できる                            |
+| Styling            | Tailwind CSS + Radix UI primitives                                                | 独自の静かなデザインを保ちつつ、アクセシブルな基本操作を使える                            |
+| Forms/validation   | React Hook Form + Zod                                                             | クライアントとサーバーで同じ入力契約を共有できる                                          |
+| Authentication     | Better Auth + Google OAuth                                                        | Workers/D1 と組み合わせやすく、認証データを自分たちの DB で管理できる                     |
+| Database           | Cloudflare D1                                                                     | 関係データ、検索条件、共有権限を SQL で扱える                                             |
+| ORM                | Drizzle ORM                                                                       | D1 を公式にサポートし、schema と migration を TypeScript 側で管理できる                   |
+| Image storage      | Cloudflare R2 private bucket                                                      | 原本と派生画像を公開せず保存できる                                                        |
+| Image inspection   | Cloudflare Images Binding                                                         | upload 後の decode 可否、寸法、派生画像生成を Worker 内の native library に依存せず扱える |
+| Video              | Cloudflare Stream                                                                 | MOV を含む投稿動画をエンコードし、端末ごとの差を減らせる                                  |
+| Realtime           | Cloudflare Durable Objects + Hibernatable WebSockets                              | 猫町の部屋ごとの presence と低頻度イベントを調停できる                                    |
+| Tests              | Vitest + Testing Library + Playwright                                             | domain、UI、Cloudflare binding、主要導線を層別に検証できる                                |
+| Analytics          | Cloudflare Web Analytics + structured Workers logs + consented first-party events | 性能・障害と product success signal を目的別に分離する                                    |
 
 バージョン番号は実装開始日に互換性を確認して固定する。README に `latest` のまま残さず、lockfile と Renovate/Dependabot で更新する。
 
@@ -51,8 +51,8 @@ Cloudflare の公式ガイドは Next.js を OpenNext adapter で Workers にデ
 - Build command: `pnpm cf:build`
 - Deploy command: `pnpm --filter @cattower/web exec wrangler deploy`
 - Trigger: Cloudflare Workers Builds receives a push to `main`
-- Current boundary: Better Auth endpoint、D1 schema、owner household 自動作成、オンボーディング永続化、R2 presigned PUT/検査/private delivery は production binding に接続済み。Google/R2 credentials と本番 origin CORS の登録、Stream、Durable Objects、通常画面の sample data 置換は未完了
-- Public hostname: Cloudflare 管理画面を正本とする。独自ドメインは P0-07 で決定するまで `wrangler.jsonc` に推測値を追加しない
+- Current boundary: Better Auth endpoint、D1 schema、owner household 自動作成、オンボーディング永続化、R2 presigned PUT/検査/private delivery は production binding に接続済み。Google/R2 credentials の登録、Stream、Durable Objects、通常画面の sample data 置換は未完了
+- Public hostname: `https://cattower-web.kazuki-kitada.workers.dev/`。独自ドメインは P0-07 で決定後に追加し、Workers URL は運用確認用として維持する
 
 build、確認、ログ、rollback の操作手順は [deployment-runbook.md](deployment-runbook.md) を正本とする。
 

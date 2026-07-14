@@ -6,18 +6,19 @@
 
 ## 1. Current production setup
 
-| Item | Value |
-| --- | --- |
-| Platform | Cloudflare Workers |
-| Worker | `cattower-web` |
-| Repository | `kazuki4real-hotech/cattower` |
-| Production branch | `main` |
-| Root directory | `/` |
-| Build command | `pnpm cf:build` |
-| Deploy command | `pnpm --filter @cattower/web exec wrangler deploy` |
-| Trigger | push to `main` |
+| Item              | Value                                              |
+| ----------------- | -------------------------------------------------- |
+| Platform          | Cloudflare Workers                                 |
+| Worker            | `cattower-web`                                     |
+| Production URL    | `https://cattower-web.kazuki-kitada.workers.dev/`  |
+| Repository        | `kazuki4real-hotech/cattower`                      |
+| Production branch | `main`                                             |
+| Root directory    | `/`                                                |
+| Build command     | `pnpm cf:build`                                    |
+| Deploy command    | `pnpm --filter @cattower/web exec wrangler deploy` |
+| Trigger           | push to `main`                                     |
 
-初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding とオンボーディングの永続化コードは接続済み。Google OAuth と R2 presigned upload は credentials 登録後に smoke test する。公開 hostname は Cloudflare 管理画面を正本とし、独自ドメイン決定前に文書へ推測値を記載しない。
+初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding とオンボーディングの永続化コードは接続済み。Google OAuth と R2 presigned upload は credentials 登録後に smoke test する。独自ドメインを追加する場合も、この Workers URL は運用確認用の既定 URL として維持する。
 
 ## 2. Normal release flow
 
@@ -96,10 +97,10 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 初期運用は environment を分離せず、本番とローカルで次を共用する。
 
-| Resource | Name |
-| --- | --- |
-| D1 | `cattower-db-production` |
-| R2 | `cattower-media-production` (private) |
+| Resource | Name                                  |
+| -------- | ------------------------------------- |
+| D1       | `cattower-db-production`              |
+| R2       | `cattower-media-production` (private) |
 
 schema 変更を含む push の前に migration を適用する。
 
@@ -124,7 +125,7 @@ pnpm --filter @cattower/web exec wrangler secret put R2_ACCESS_KEY_ID --name cat
 pnpm --filter @cattower/web exec wrangler secret put R2_SECRET_ACCESS_KEY --name cattower-web
 ```
 
-`BETTER_AUTH_SECRET` は 2026-07-14 に登録済み。Google Cloud Console の redirect URI は `http://localhost:3000/api/auth/callback/google` と `https://<production-host>/api/auth/callback/google`。R2 API token は Object Read & Write を `cattower-media-production` だけに限定する。
+`BETTER_AUTH_SECRET` と `BETTER_AUTH_URL` は 2026-07-14 に登録済み。`BETTER_AUTH_URL` は末尾スラッシュなしの `https://cattower-web.kazuki-kitada.workers.dev` とする。Google Cloud Console の redirect URI は `http://localhost:3000/api/auth/callback/google` と `https://cattower-web.kazuki-kitada.workers.dev/api/auth/callback/google`。R2 API token は Object Read & Write を `cattower-media-production` だけに限定する。
 
 `infra/r2-cors.production.json` に production origin を追加してから適用する。
 
@@ -132,7 +133,7 @@ pnpm --filter @cattower/web exec wrangler secret put R2_SECRET_ACCESS_KEY --name
 pnpm --filter @cattower/web exec wrangler r2 bucket cors set cattower-media-production --file ../../infra/r2-cors.production.json --force
 ```
 
-現在の CORS は localhost 2 origin、`PUT`、`Content-Type`、`x-amz-meta-asset-id` だけを許可している。本番 hostname を追加するまで本番ブラウザからの直接 upload は成功しない。
+CORS は localhost 2 origin と `https://cattower-web.kazuki-kitada.workers.dev`、`PUT`、`Content-Type`、`x-amz-meta-asset-id` だけを許可する。独自ドメインを追加した場合は、その origin も明示的に追加する。
 
 Stream と Durable Objects の resource は未作成。追加時に本節を更新する。
 
