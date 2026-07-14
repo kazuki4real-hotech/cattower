@@ -17,6 +17,8 @@ type ConnectionAttachment = Readonly<{
 
 /** Coordination boundary for one `place + cohort shard` room. */
 export class TownRoom extends DurableObject<CloudflareEnv> {
+  private readonly generationId = crypto.randomUUID();
+
   fetch(request: Request): Response {
     const url = new URL(request.url);
     if (
@@ -58,23 +60,53 @@ export class TownRoom extends DurableObject<CloudflareEnv> {
         v: 1,
         type: "connection.ready",
         connectionId: attachment.connectionId,
+        generationId: this.generationId,
       }),
     );
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  webSocketMessage(socket: WebSocket): void {
+  webSocketMessage(socket: WebSocket, message: string | ArrayBuffer): void {
+    const envelope = parseEnvelope(message);
+    if (envelope?.v === 1 && envelope.type === "connection.ping") {
+      const attachment =
+        socket.deserializeAttachment() as ConnectionAttachment | null;
+      if (!attachment) {
+        socket.close(1011, "connection state unavailable");
+        return;
+      }
+      socket.send(
+        JSON.stringify({
+          v: 1,
+          type: "connection.pong",
+          connectionId: attachment.connectionId,
+          generationId: this.generationId,
+        }),
+      );
+      return;
+    }
+
     socket.send(
-      JSON.stringify({
-        v: 1,
-        type: "error",
-        code: "message_not_supported",
-      }),
+      JSON.stringify({ v: 1, type: "error", code: "message_not_supported" }),
     );
   }
 
   webSocketClose(socket: WebSocket, code: number, reason: string): void {
     socket.close(code, reason);
+  }
+}
+
+function parseEnvelope(
+  message: string | ArrayBuffer,
+): Record<string, unknown> | null {
+  if (typeof message !== "string") return null;
+  try {
+    const value = JSON.parse(message) as unknown;
+    return value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
   }
 }
 

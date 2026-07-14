@@ -83,6 +83,7 @@ pnpm --filter @cattower/realtime build
 - realtimeの未実装routeがstructured `404`を返す
 - realtimeの`/connect`が通常HTTPを`426`、不正ticketを`401`、許可外originを`403`で拒否する
 - Web Worker発行の5分以内ticketで`/connect`が`101`へupgradeし、`connection.ready`を返す
+- WebSocketをidleにしてDOをhibernateさせた後、`connection.ping`へ同じconnection IDと新しいgeneration IDを返す
 
 ## 5. Logs and versions
 

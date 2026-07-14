@@ -76,8 +76,22 @@ describe("realtime Worker", () => {
 
     expect(response.status).toBe(101);
     expect(response.webSocket).not.toBeNull();
-    response.webSocket?.accept();
-    response.webSocket?.close(1000, "test complete");
+    const socket = response.webSocket;
+    if (!socket) throw new Error("missing test websocket");
+    const readyMessage = nextJsonMessage(socket);
+    socket.accept();
+    const ready = await readyMessage;
+
+    const pongMessage = nextJsonMessage(socket);
+    socket.send(JSON.stringify({ v: 1, type: "connection.ping" }));
+    const pong = await pongMessage;
+    expect(pong).toMatchObject({
+      v: 1,
+      type: "connection.pong",
+      connectionId: ready.connectionId,
+      generationId: ready.generationId,
+    });
+    socket.close(1000, "test complete");
   });
 
   it("does not expose the Durable Object without internal connection scope", async () => {
@@ -94,3 +108,14 @@ describe("realtime Worker", () => {
     });
   });
 });
+
+function nextJsonMessage(socket: WebSocket): Promise<Record<string, unknown>> {
+  return new Promise((resolve) => {
+    socket.addEventListener(
+      "message",
+      (event) =>
+        resolve(JSON.parse(String(event.data)) as Record<string, unknown>),
+      { once: true },
+    );
+  });
+}

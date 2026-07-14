@@ -328,6 +328,7 @@ WebSocket attachment に持たせるもの:
 - `setInterval` に依存せず、activity timestamp と alarm/次回 event で expiry を評価する
 - 切断時も最大 30 分 `resting`、最大 6 時間 `trace` として曖昧表示できる
 - 重要な状態は memory だけに置かない
+- P1-20のhibernation検証では`connection.ping`時にserialized attachmentからconnection IDを復元し、instance generation IDの変化で再起動を確認する
 - room 内の presence は connection ではなく `cat_id` 単位にまとめる
 - 同じ猫への複数の household member 接続は一匹へ統合し、すべて閉じた時点で resting へ遷移する
 - reaction cooldown と idempotency は cat 単位で評価する
