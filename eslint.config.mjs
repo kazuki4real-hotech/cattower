@@ -15,6 +15,7 @@ export default defineConfig([
   globalIgnores([
     "**/.next/**",
     "**/.open-next/**",
+    "**/.wrangler/**",
     "**/cloudflare-env.d.ts",
     "prototype/**",
     "node_modules/**",

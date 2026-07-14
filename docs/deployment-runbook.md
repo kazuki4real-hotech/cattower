@@ -44,6 +44,7 @@ pnpm --filter @cattower/web exec wrangler deploy --dry-run
 ```
 
 `pnpm cf:build` は `.open-next/worker.js` と `.open-next/assets` を生成する。生成物は commit しない。
+CI と production build は remote D1/R2 へ接続しないため、GitHub Actions に Cloudflare API token を登録しない。binding はデプロイ後の Worker runtime で解決する。
 
 ## 4. Post-deploy smoke test
 

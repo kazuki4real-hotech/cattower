@@ -56,6 +56,8 @@ Cloudflare の公式ガイドは Next.js を OpenNext adapter で Workers にデ
 
 build、確認、ログ、rollback の操作手順は [deployment-runbook.md](deployment-runbook.md) を正本とする。
 
+`initOpenNextCloudflareForDev()` は `next dev` でだけ実行する。CI と production build は D1/R2 の remote binding へ接続せず、runtime で Worker binding を解決する。これにより build credential を GitHub Actions へ渡さない。
+
 ### Services
 
 ```text
