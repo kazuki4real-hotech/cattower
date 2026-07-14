@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
+import { BrandWordmark } from "@/components/brand-wordmark";
 import { Icon } from "@/components/icon";
 import { OnboardingResumeBanner } from "@/components/onboarding-resume-banner";
 import { images } from "@/lib/demo-data";
@@ -27,8 +28,7 @@ const secondary = [
 function Brand() {
   return (
     <Link className="brand" href="/home">
-      <span className="brand-mark">T</span>
-      cattower
+      <BrandWordmark priority />
     </Link>
   );
 }

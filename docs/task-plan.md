@@ -76,7 +76,7 @@ Exit criteria: 単一の production URL 上で検証 account を使い、auth、
 - [x] P2-03UI onboarding 4 step の一列UI、前後移動、進捗、完了画面を実装する
 - [x] P2-03A onboarding の途中保存、再開、任意写真・テーマ色の「あとで」、reduced-motion を実装する
 - [x] P2-03B desktop補助ナビとmobile headerから`/settings`へ移動できる導線を実装する
-- [x] P2-03LP 透明背景のブランドビジュアルと Snow / Polar 背景比較を備えた公開ランディングを実装する
+- [x] P2-03LP 透明背景のブランドビジュアル、共通ワードマーク、Snow背景を備えた公開ランディングを実装する
 - [x] P2-04 初回 household 自動作成、owner 一つ・editor 複数所属、active household 切り替えを実装する（招待フローは P2-07 で実装）
 - [ ] P2-04A owner/editor の閲覧・編集・soft delete・restore policy を domain package に実装する
 - [ ] P2-05 猫の作成・編集・archive を実装する

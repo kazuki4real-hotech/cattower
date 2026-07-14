@@ -2,6 +2,8 @@
 
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 
+import { BrandWordmark } from "@/components/brand-wordmark";
+
 export function OnboardingShell({
   current,
   children,
@@ -24,9 +26,8 @@ export function OnboardingShell({
   return (
     <main className="onboarding">
       <header className="onboarding-header">
-        <div className="brand" aria-label="cattower">
-          <span className="brand-mark">T</span>
-          cattower
+        <div className="brand">
+          <BrandWordmark priority />
         </div>
         <span className="onboarding-count">{Math.min(current, 4)} / 4</span>
       </header>

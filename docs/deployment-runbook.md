@@ -73,7 +73,7 @@ pnpm --filter @cattower/realtime build
 最低限、次を確認する。
 
 - 未ログインの `/` が公開入口を表示し、ログイン済みの `/` が `/home` へ redirect する
-- 公開入口で透明背景のブランドビジュアルが表示され、Snow `#ffffff` と Polar `#f7f7f7` を切り替えられる
+- 公開入口が Snow `#ffffff` 背景で表示され、透明背景のブランドビジュアルと共通ワードマークが欠けずに表示される
 - Google login 後に owner household が一つ作られる
 - 設定からログアウトするとsessionが失効してログイン画面へ戻り、Googleで再ログインできる
 - 再ログイン後の再読み込みでsessionが継続し、期限更新設定が有効である
