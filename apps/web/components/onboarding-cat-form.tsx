@@ -31,6 +31,10 @@ const uploadErrorMessages = {
     "送信した写真が見つかりませんでした。もう一度お試しください。",
   image_decode_failed:
     "写真を読み取れませんでした。別のJPEG、PNG、WebPをお試しください。",
+  image_processing_failed:
+    "表示用の写真を作れませんでした。別のJPEG、PNG、WebPをお試しください。",
+  image_processing_not_configured:
+    "表示用の写真を準備できませんでした。時間をおいて、もう一度お試しください。",
 } as const;
 
 function getUploadErrorMessage(code: string) {

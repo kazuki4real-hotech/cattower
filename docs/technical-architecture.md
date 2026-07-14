@@ -229,8 +229,10 @@ object key は `households/{householdId}/cats/{catId}/{assetId}/original` 形式
 - upload 完了後に R2 binding で object metadata、size、Content-Type を再確認する
 - Cloudflare Images Binding の `.info()` で decode 可否、format、width、height を確認する
 - thumbnail/表示用画像の生成成功後に `ready` とし、失敗 asset は隔離して削除対象にする
-- Images Binding の入力上限に合わせて原画像の上限を決め、EXIF orientation、animated image、巨大寸法を spike で検証する
-- 表示用サイズは原本と分離し、生成済み derivative を再利用する
+- 原画像はImages Bindingの20MB入力上限より小さい10MBをアプリ上限とし、JPEG/PNG/WebPだけを受け付ける
+- profile derivative は512×512、`cover`、WebP quality 82、`anim: false`とする。EXIF orientationは変換時に画素へ適用し、位置情報を含むmetadataはWebP出力へ保持しない
+- animated WebPは先頭frameの静止画をprofile derivativeに使う。巨大画像は100MP、非WebP/AVIFの一辺12,000pxというImages上限より先に10MBのアプリ上限とdecode検査を適用する
+- 表示用サイズは原本と分離し、`{asset prefix}/profile-512.webp`の生成済み derivative を再利用する
 
 参考:
 

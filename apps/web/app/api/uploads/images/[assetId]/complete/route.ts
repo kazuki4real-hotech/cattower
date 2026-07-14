@@ -1,5 +1,10 @@
 import { cats, mediaAssets } from "@cattower/db";
-import { MAX_IMAGE_BYTES } from "@cattower/domain";
+import {
+  getProfileImageDerivativeKey,
+  MAX_IMAGE_BYTES,
+  PROFILE_IMAGE_MIME_TYPE,
+  PROFILE_IMAGE_SIZE,
+} from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
 import { and, eq } from "drizzle-orm";
 
@@ -52,9 +57,26 @@ async function post(
   const object = await viewer.env.MEDIA.get(asset.providerKey);
   if (!object)
     return Response.json({ error: "uploaded_object_missing" }, { status: 404 });
+  const images = viewer.env.IMAGES;
+  if (!images) {
+    await viewer.db
+      .update(mediaAssets)
+      .set({ status: "failed", updatedAt: new Date() })
+      .where(eq(mediaAssets.id, asset.id));
+    return Response.json(
+      { error: "image_processing_not_configured" },
+      { status: 503 },
+    );
+  }
 
+  const derivativeKey = getProfileImageDerivativeKey(asset.providerKey);
   try {
-    const info = await viewer.env.IMAGES!.info(object.body);
+    const originalBytes = await object.arrayBuffer();
+    const infoStream = new Response(originalBytes).body;
+    const transformStream = new Response(originalBytes).body;
+    if (!infoStream || !transformStream) throw new Error("invalid_image_stream");
+
+    const info = await images.info(infoStream);
     if (
       info.format === "image/svg+xml" ||
       !("width" in info) ||
@@ -62,6 +84,30 @@ async function post(
       info.height < 1
     )
       throw new Error("invalid_image");
+
+    const derivative = await images
+      .input(transformStream)
+      .transform({
+        width: PROFILE_IMAGE_SIZE,
+        height: PROFILE_IMAGE_SIZE,
+        fit: "cover",
+        gravity: "auto",
+      })
+      .output({
+        format: PROFILE_IMAGE_MIME_TYPE,
+        quality: 82,
+        anim: false,
+      });
+    const derivativeResponse = derivative.response();
+    if (!derivativeResponse.ok) throw new Error("derivative_failed");
+    await viewer.env.MEDIA.put(
+      derivativeKey,
+      await derivativeResponse.arrayBuffer(),
+      {
+        httpMetadata: { contentType: PROFILE_IMAGE_MIME_TYPE },
+        customMetadata: { "asset-id": asset.id, variant: "profile" },
+      },
+    );
 
     await viewer.db
       .update(mediaAssets)
@@ -86,11 +132,12 @@ async function post(
     }
     return Response.json({ ok: true, width: info.width, height: info.height });
   } catch {
+    await viewer.env.MEDIA.delete(derivativeKey).catch(() => undefined);
     await viewer.db
       .update(mediaAssets)
       .set({ status: "failed", updatedAt: new Date() })
       .where(eq(mediaAssets.id, asset.id));
-    return Response.json({ error: "image_decode_failed" }, { status: 422 });
+    return Response.json({ error: "image_processing_failed" }, { status: 422 });
   }
 }
 
