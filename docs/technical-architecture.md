@@ -187,6 +187,8 @@ MVP の household policy:
 
 P1-19のbrowser WebSocket接続ではcustom headerを付けられないため、発行responseの`connectUrl`へ接続直前だけ`ticket` queryを追加する。realtime Workerは検証後にqueryを破棄し、DOにはticketを渡さない。P6-07では再利用防止と、subprotocol/短命cookieを含む搬送方法を再評価する。town card/block table導入前のspike claimは`townCardId = cat:{catId}`、`blockVersion = 0`とし、P6で実データへ置換する。
 
+2026-07-15にproductionで、同一secretにより署名した5分ticketが`cattower-realtime`の`/connect`を`101`へupgradeし、DOから`{"v":1,"type":"connection.ready"}`を受信することを確認した。通常HTTPは`426`、不正ticketは`401`、許可外originは`403`、Web ticket endpointの未認証POSTは`401`だった。full user/cat/town policyとticket再利用防止はP6-01A/P6-07で追加する。
+
 ## 7. Database
 
 D1 と Drizzle を使用する。詳細なテーブルは [データモデル](data-model.md) を参照。
