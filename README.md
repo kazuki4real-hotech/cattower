@@ -1,0 +1,73 @@
+# Cattower
+
+Cattower は、猫との何気ない写真・動画・言葉・ご飯・おもちゃを、自分のために残して眺めるプライベートな Web サービスです。
+
+投稿を他人に評価してもらう SNS ではなく、猫との暮らしを収蔵する「私設ミュージアム」を目指します。交流したいときだけ、記憶を一枚持たせて疑似散歩空間「猫町」へ出かけられます。
+
+## Status
+
+現在は設計フェーズです。実装には未着手です。
+
+## Product principles
+
+- 非公開を初期値にする
+- 写真、動画、文章、物、出来事を同じ重さで扱う
+- タイムラインと無限スクロールを主画面にしない
+- いいね数、フォロワー数、連続投稿日数を表示しない
+- 投稿や交流を義務にしない
+- 古い記録を偶然見つけ直せるようにする
+- 利用者が自分のデータを書き出せるようにする
+
+## Documentation
+
+- [ドキュメント一覧](docs/README.md)
+- [既存サービス調査とポジショニング](docs/product-research.md)
+- [プロダクト仕様書](docs/product-spec.md)
+- [技術設計書](docs/technical-architecture.md)
+- [データモデル](docs/data-model.md)
+- [実装タスク](docs/task-plan.md)
+
+## Planned stack
+
+- Next.js / React / TypeScript
+- Cloudflare Workers via OpenNext
+- Cloudflare D1 + Drizzle ORM
+- Cloudflare R2 for images
+- Cloudflare Stream for videos
+- Cloudflare Durable Objects + WebSocket Hibernation for 猫町
+- Better Auth
+- Tailwind CSS + Radix UI primitives
+- Vitest / Testing Library / Playwright
+
+技術選定の理由と運用方針は [技術設計書](docs/technical-architecture.md) に記載しています。
+
+## Repository layout (planned)
+
+```text
+.
+├── apps/
+│   ├── web/                 # Next.js application
+│   └── realtime/            # 猫町用 Worker + Durable Objects
+├── packages/
+│   ├── db/                  # Drizzle schema and queries
+│   ├── domain/              # Shared domain types and rules
+│   └── ui/                  # Shared UI primitives
+├── docs/
+└── pnpm-workspace.yaml
+```
+
+実装開始時にこの構成を作成します。現時点では、設計文書のみをリポジトリに置いています。
+
+## Development
+
+開発・デプロイ手順は、基盤実装後にここへ追加します。予定している基本方針は次の通りです。
+
+- パッケージ管理は `pnpm`
+- ローカル環境、staging、production を分離
+- D1 の変更は追跡可能な SQL migration として管理
+- secret はリポジトリへ保存しない
+- `main` へ入る変更は lint、型検査、unit test、E2E smoke test を通す
+
+## License
+
+未定です。公開範囲を決定するまでライセンスは付与しません。
