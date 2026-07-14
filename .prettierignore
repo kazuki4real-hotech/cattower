@@ -1,0 +1,6 @@
+.next
+.open-next
+node_modules
+pnpm-lock.yaml
+prototype
+apps/web/cloudflare-env.d.ts

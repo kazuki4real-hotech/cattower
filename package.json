@@ -5,7 +5,20 @@
   "scripts": {
     "dev": "pnpm --filter @cattower/web dev",
     "build": "pnpm --filter @cattower/web build",
-    "typecheck": "pnpm --filter @cattower/web typecheck",
-    "cf:build": "pnpm --filter @cattower/web cf:build"
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test",
+    "cf:build": "pnpm verify && pnpm --filter @cattower/web cf:build",
+    "db:migrate": "pnpm --filter @cattower/web db:migrate",
+    "db:smoke": "pnpm --filter @cattower/web db:smoke"
+  },
+  "devDependencies": {
+    "eslint": "9.39.2",
+    "eslint-config-next": "16.2.10",
+    "prettier": "3.9.5",
+    "vitest": "4.1.10"
   }
 }
