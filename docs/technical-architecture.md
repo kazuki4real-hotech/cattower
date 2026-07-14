@@ -338,6 +338,8 @@ Cloudflare は WebSocket server 用に Hibernation API を推奨している。
 - DO WebSocket guide: https://developers.cloudflare.com/durable-objects/best-practices/websockets/
 - Hibernation example: https://developers.cloudflare.com/durable-objects/examples/websocket-hibernation-server/
 
+2026-07-15にproduction WebSocketを20秒idleにした後で`connection.ping`を送り、接続時と同じconnection IDと異なるinstance generation IDを受信した。これにより、WebSocketを切断せずDOがhibernateされ、再生成されたinstanceでserialized attachmentが復元されることを確認した。
+
 ### Protocol
 
 メッセージは versioned JSON envelope から開始する。
