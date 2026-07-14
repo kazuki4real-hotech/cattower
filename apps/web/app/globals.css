@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f7f7f7;
   --mint: #80beaf;
   --mint-strong: #2f6b5c;
   --mint-soft: #d3ece5;
@@ -222,6 +224,30 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
 .entry-sign-in p {
   margin: 0;
 }
+
+.landing-page { min-height: 100dvh; overflow: hidden; padding: clamp(20px,4vw,48px); background: var(--color-neutral-50); transition: background-color 220ms ease-out; }
+.landing-page[data-background="snow"] { background: var(--color-neutral-0); }
+.landing-header { width: min(100%,1180px); display: flex; align-items: flex-start; justify-content: space-between; gap: 28px; margin: 0 auto; }
+.landing-brand { margin: 0; }
+.background-picker { display: flex; align-items: center; gap: 12px; }
+.background-picker-label { color: var(--muted); font-size: 12px; }
+.background-options { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; background: rgb(255 255 255 / 72%); }
+.background-option { min-height: 42px; display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--ink-soft); text-align: left; transition: border-color 180ms, background 180ms, transform 180ms; }
+.background-option:hover { transform: translateY(-1px); }
+.background-option[aria-pressed="true"] { border-color: var(--line-strong); background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.background-option > span:last-child { display: grid; line-height: 1.2; }
+.background-option strong { font-size: 12px; }
+.background-option small { color: var(--muted); font-size: 10px; font-weight: 700; }
+.background-swatch { width: 24px; height: 24px; flex: none; border: 1px solid var(--line); border-radius: 50%; background: var(--color-neutral-50); }
+.background-swatch[data-swatch="snow"] { background: var(--color-neutral-0); }
+.landing-hero { width: min(100%,1120px); min-height: calc(100dvh - 130px); display: grid; grid-template-columns: minmax(0,1fr) minmax(340px,.78fr); align-items: center; gap: clamp(44px,7vw,96px); margin: 0 auto; padding: 48px 0 28px; }
+.landing-copy { padding-bottom: 5vh; }
+.landing-eyebrow { margin-bottom: 14px; color: var(--mint-strong); font-size: 12px; font-weight: 800; letter-spacing: .13em; }
+.landing-copy h1 { max-width: 10em; margin-bottom: 24px; font-size: clamp(40px,5.3vw,66px); line-height: 1.18; letter-spacing: -.045em; }
+.landing-lede { max-width: 35em; margin-bottom: 0; color: var(--ink-soft); }
+.landing-visual { width: min(100%,460px); justify-self: center; margin: 0; animation: landing-visual-in 520ms cubic-bezier(.16,1,.3,1) both; }
+.landing-visual img { width: 100%; height: auto; }
+@keyframes landing-visual-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
 .onboarding {
   display: grid;
@@ -511,6 +537,7 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
   .settings-grid { grid-template-columns: 1fr; } .settings-tabs { grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--line); }
   .settings-tab { border-left: 0; border-bottom: 3px solid transparent; } .settings-tab[data-state="active"] { border-bottom-color: var(--mint-strong); }
   .onboarding { padding: 20px 28px; }
+  .landing-hero { grid-template-columns: minmax(0,.9fr) minmax(300px,.75fr); gap: 34px; }
 }
 @media (max-width: 620px) {
   .page-head { display: block; } .page-head .button-row { margin-top: 18px; }
@@ -522,6 +549,14 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
   .cat-a { left: 12%; } .cat-b { left: 43%; } .cat-c { right: 8%; } .cat-d { right: 27%; top: 27%; }
   .notice { grid-template-columns: auto 1fr; } .notice time { grid-column: 2; }
   .entry-page { padding: 20px; } .entry-content { margin-top: 0; }
+  .landing-page { overflow: visible; padding: 18px 20px 36px; }
+  .landing-header { align-items: center; }
+  .background-picker-label, .background-option small { display: none; }
+  .background-option { padding: 6px 9px; }
+  .landing-hero { grid-template-columns: 1fr; gap: 18px; padding-top: 48px; }
+  .landing-copy { padding-bottom: 0; }
+  .landing-copy h1 { max-width: 9em; font-size: clamp(38px,12vw,52px); }
+  .landing-visual { width: min(88vw,420px); grid-row: 1; }
   .onboarding { padding: 18px 20px calc(18px + env(safe-area-inset-bottom)); }
   .onboarding-content { align-self: start; padding: 44px 0 32px; }
   .onboarding-actions { align-items: stretch; flex-direction: column-reverse; }
