@@ -71,6 +71,7 @@ export function AppShell({ children, narrow = false, wide = false }: { children:
           <div className="mobile-top-actions">
             <Link className="icon-button record-button" href="/record" aria-label="記録する"><Icon name="pets" variant="outlined" /></Link>
             <Link className="icon-button" href="/notifications" aria-label="未読のお知らせ2件"><Icon name="notifications" filled /></Link>
+            <Link className="icon-button" href="/settings" aria-label="家族と設定"><Icon name="settings" /></Link>
           </div>
         </header>
         <main className="main" id="main">
