@@ -17,7 +17,7 @@
 | Deploy command | `pnpm --filter @cattower/web exec wrangler deploy` |
 | Trigger | push to `main` |
 
-初回 production deploy は 2026-07-14 に完了した。現在の production は UI と画面遷移を確認する段階で、認証と永続データは接続していない。公開 hostname は Cloudflare 管理画面を正本とし、独自ドメイン決定前に文書へ推測値を記載しない。
+初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding とオンボーディングの永続化コードは接続済み。Google OAuth と R2 presigned upload は credentials 登録後に smoke test する。公開 hostname は Cloudflare 管理画面を正本とし、独自ドメイン決定前に文書へ推測値を記載しない。
 
 ## 2. Normal release flow
 
@@ -33,10 +33,10 @@ Cloudflare 管理画面で production branch を `main` 以外へ変更しない
 
 ## 3. Required local validation
 
-通常のフロントエンド変更ではリポジトリルートから次を実行する。
+通常の変更ではリポジトリルートから次を実行する。`pnpm cf:build` も内部で `pnpm verify` を実行する。
 
 ```bash
-pnpm typecheck
+pnpm verify
 pnpm build
 pnpm cf:build
 pnpm --filter @cattower/web exec wrangler deploy --dry-run
@@ -49,7 +49,9 @@ pnpm --filter @cattower/web exec wrangler deploy --dry-run
 最低限、次を確認する。
 
 - `/` が `/onboarding/welcome` へ redirect する
-- onboarding 4 画面を順に移動できる
+- Google login 後に owner household が一つ作られる
+- onboarding 4 画面で表示名、猫、棚候補、checkpoint が再読み込み後も保持される
+- JPEG/PNG/WebP のプロフィール画像を R2 へ直接 upload し、private media endpoint だけで表示できる
 - `/home`、`/collections`、`/add`、`/town` が表示される
 - 写真、M PLUS Rounded 1c、Material Symbols Rounded が読み込まれる
 - mobile navigation と desktop navigation が操作できる
@@ -90,9 +92,49 @@ pnpm --filter @cattower/web exec wrangler rollback <VERSION_ID>
 
 rollback 後は production smoke test を行い、原因を修正した新しい commit を `main` へ push する。published history の書き換えや force push は行わない。
 
-## 7. Future resource deployment
+## 7. D1, R2 and authentication operations
 
-D1、R2、Stream、Durable Objects を追加した後は、environment ごとの resource と migration 手順を本書へ追記する。特に production D1 migration は deploy 前に staging で適用・検証し、rollback できない schema change を単独で自動実行しない。
+初期運用は environment を分離せず、本番とローカルで次を共用する。
+
+| Resource | Name |
+| --- | --- |
+| D1 | `cattower-db-production` |
+| R2 | `cattower-media-production` (private) |
+
+schema 変更を含む push の前に migration を適用する。
+
+```bash
+pnpm db:migrate
+pnpm db:smoke
+```
+
+ローカルも `remote: true` で同じ D1/R2 に接続する。`.dev.vars` を作成して credentials を登録するが commit しない。
+
+```bash
+cp apps/web/.dev.vars.example apps/web/.dev.vars
+```
+
+Cloudflare Worker へ secret を対話入力する。値を shell history や文書へ残さない。
+
+```bash
+pnpm --filter @cattower/web exec wrangler secret put BETTER_AUTH_URL --name cattower-web
+pnpm --filter @cattower/web exec wrangler secret put GOOGLE_CLIENT_ID --name cattower-web
+pnpm --filter @cattower/web exec wrangler secret put GOOGLE_CLIENT_SECRET --name cattower-web
+pnpm --filter @cattower/web exec wrangler secret put R2_ACCESS_KEY_ID --name cattower-web
+pnpm --filter @cattower/web exec wrangler secret put R2_SECRET_ACCESS_KEY --name cattower-web
+```
+
+`BETTER_AUTH_SECRET` は 2026-07-14 に登録済み。Google Cloud Console の redirect URI は `http://localhost:3000/api/auth/callback/google` と `https://<production-host>/api/auth/callback/google`。R2 API token は Object Read & Write を `cattower-media-production` だけに限定する。
+
+`infra/r2-cors.production.json` に production origin を追加してから適用する。
+
+```bash
+pnpm --filter @cattower/web exec wrangler r2 bucket cors set cattower-media-production --file ../../infra/r2-cors.production.json --force
+```
+
+現在の CORS は localhost 2 origin、`PUT`、`Content-Type`、`x-amz-meta-asset-id` だけを許可している。本番 hostname を追加するまで本番ブラウザからの直接 upload は成功しない。
+
+Stream と Durable Objects の resource は未作成。追加時に本節を更新する。
 
 ## 8. References
 

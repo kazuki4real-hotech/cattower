@@ -1,6 +1,6 @@
 # Cattower フロントエンド実装仕様
 
-- Status: Implemented v0.1
+- Status: Implemented v0.2
 - Updated: 2026-07-14
 - Scope: Next.js 画面構成、共通 UI、オンボーディング、モーション、プロトタイプ移行
 
@@ -16,13 +16,13 @@ HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Rou
 
 ## 2. Implementation boundary
 
-今回の初期実装は UI と画面遷移を対象とする。
+主要画面は UI とサンプルデータ、オンボーディングは認証・D1・R2 を含む縦切りを対象とする。
 
 - Next.js App Router、React、TypeScript strict
 - Cloudflare Workers 向け OpenNext 設定
 - Server Component を既定とし、選択、通知、設定、猫町の反応だけを Client Component に分離
 - サンプルデータで主要画面を表示
-- D1、R2、認証、アップロードの実処理は後続フェーズで接続
+- Better Auth、D1、R2 画像 upload/private delivery はオンボーディングに接続済み。通常画面のサンプルデータは後続フェーズで置換する
 - HTML プロトタイプは比較用として `prototype/` に残す
 
 ## 3. Route map
@@ -39,7 +39,7 @@ HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Rou
 | `/town` | 猫町 | 中庭の気配、すれ違い、定型反応 |
 | `/notifications` | お知らせ | Web 内通知と既読状態 |
 | `/settings` | 家族と設定 | 猫町同意、猫の公開範囲、家族、データ |
-| `/onboarding/welcome` | はじめまして | 表示名を設定 |
+| `/onboarding/welcome` | はじめまして | Google login、表示名保存、checkpoint 再開 |
 | `/onboarding/cat` | 猫を迎える | 写真、名前、テーマ色を設定 |
 | `/onboarding/preferences` | 残したい時間 | 最初の収蔵棚と猫町の案内 |
 | `/onboarding/complete` | できあがり | 居場所の完成とホームへの接続 |
@@ -81,12 +81,12 @@ HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Rou
 
 ## 6. Onboarding state
 
-初期 UI 実装では URL による段階遷移とローカル入力を扱う。永続化接続時は次の形へ置き換える。
+現在の実装は次の順で D1 に永続化する。
 
 1. Google 登録完了時に owner household を作成
-2. 表示名を `users` に保存
+2. 表示名を Better Auth の `user` に保存
 3. 猫の基本情報を `cats` に保存
-4. 選択した棚を user preference または初期 collection 作成へ反映
+4. 選択した棚候補を `user_preferences.memory_preferences_json` に保存
 5. 各画面の入力後に onboarding checkpoint を保存
 6. 中断時は最後の checkpoint から再開
 7. 完了時に `onboarding_completed_at` を保存して `/home` へ移動
@@ -110,7 +110,7 @@ skip は画面ごとに意味を分ける。必須の猫名を未入力のまま
 - `wrangler.jsonc` は source of truth とし、`compatibility_date` は初期実装日を使用する
 - `nodejs_compat` を有効にする
 - OpenNext の生成物 `.open-next/` は commit しない
-- binding は後続フェーズで D1、R2 の順に追加し、型は `wrangler types` で生成する
+- D1、R2、Images binding は `wrangler.jsonc` で定義し、`cloudflare-env.d.ts` は `wrangler types` で生成する
 - secret は設定ファイルとリポジトリへ保存しない
 
 ## 9. Initial implementation acceptance

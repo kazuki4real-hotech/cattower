@@ -36,11 +36,11 @@ users ──< notifications
 users ──< product_events / user_activity_days
 ```
 
-Better Auth が要求する user、session、account、verification 系テーブルは auth schema として管理し、domain table からは `users.id` のみ参照する。
+Better Auth が要求する `user`、`session`、`account`、`verification` table は auth schema として管理し、domain table からは `user.id` のみ参照する。実装 schema は `packages/db/src/schema.ts`、適用順は `packages/db/migrations/` の SQL migration を正本とする。
 
 ## 3. Core entities
 
-### users
+### user
 
 Better Auth の user を正本にする。domain 側で必要な追加設定は `user_preferences` に分離する。
 
@@ -48,13 +48,16 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 
 | Column | Notes |
 | --- | --- |
-| user_id | PK/FK users |
+| user_id | PK/FK user |
 | locale | default `ja` |
 | timezone | 表示用。公開しない |
 | town_enabled | 利用者本人の参加同意。default false |
 | town_digest | `off` / `daily` |
 | reduced_motion_override | nullable; normally system setting |
 | analytics_consent | regional requirement に応じる |
+| memory_preferences_json | onboarding で選んだ棚候補。JSON string array |
+| onboarding_step | `0` profile / `1` cat / `2` preferences / `3` complete |
+| onboarding_completed_at | nullable。完了時刻 |
 
 ### households
 

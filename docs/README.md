@@ -49,6 +49,7 @@
 - **決定**: 猫町は利用者の opt-in と owner 管理の猫ごとの公開設定を両方必要とする
 - **決定**: Web 内通知と consented product event を D1 に最小限永続化する
 - **決定**: 画像は R2 に保存し、Images Binding で検査・派生生成する
+- **決定**: 初期運用では environment を分離せず、ローカルと本番 Worker で同じ production D1/R2 を使用する
 - **決定**: パステル基調のパレット（primary `#80beaf`、secondary `#b3ddd1` / `#d1dce2` / `#f5b994` / `#ee9c6a`）とニュートラル階調を採用する
 - **決定**: UI 実装前に taste-skill を適用し、slop を避ける
 - **未決定**: 正式ロゴ、独自ドメイン、料金プラン

@@ -1,6 +1,20 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { Icon } from "@/components/icon";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { OnboardingProfileForm } from "@/components/onboarding-profile-form";
 import { OnboardingShell } from "@/components/onboarding-shell";
+import { getOnboardingSnapshot } from "@/lib/onboarding";
+import { getViewer } from "@/lib/viewer";
 
-export default function WelcomePage() { return <OnboardingShell current={0}><p className="eyebrow">ようこそ</p><h1>猫との時間のための、小さな居場所を作ります。</h1><p className="lede">まずは、あなたの呼び名を教えてください。あとから変更できます。</p><form className="onboarding-form"><div className="field"><label htmlFor="display-name">あなたの呼び名</label><input id="display-name" required defaultValue="かずき" /></div><div className="onboarding-actions"><Link className="button" href="/onboarding/cat">次へ進む<Icon name="arrow_forward" /></Link></div></form></OnboardingShell>; }
+export const dynamic = "force-dynamic";
+
+export default async function WelcomePage() {
+  const viewer = await getViewer();
+  if (!viewer) return <OnboardingShell current={0}><p className="eyebrow">ようこそ</p><h1>猫との時間のための、小さな居場所を作ります。</h1><p className="lede">Googleでログインして、あなただけの私室を始めます。</p><GoogleSignInButton /></OnboardingShell>;
+  const snapshot = await getOnboardingSnapshot(viewer.db, viewer.session.user.id, viewer.household.id);
+  if (snapshot.completed) redirect("/home");
+  if (snapshot.step === 1) redirect("/onboarding/cat");
+  if (snapshot.step === 2) redirect("/onboarding/preferences");
+  if (snapshot.step >= 3) redirect("/onboarding/complete");
+  return <OnboardingShell current={0}><p className="eyebrow">ようこそ</p><h1>猫との時間のための、小さな居場所を作ります。</h1><p className="lede">まずは、あなたの呼び名を教えてください。あとから変更できます。</p><OnboardingProfileForm initialName={viewer.session.user.name} /></OnboardingShell>;
+}
