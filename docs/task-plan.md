@@ -74,7 +74,7 @@ Exit criteria: 単一の production URL 上で検証 account を使い、auth、
 - [x] P2-02 Google login/logout/session refresh を実装する
 - [x] P2-03 登録後 onboarding（利用者名、最初の猫、完了演出）と user preferences を実装する（棚選択は削除済み）
 - [x] P2-03UI onboarding 3画面のUI、画面遷移、完了演出を実装する
-- [ ] P2-03A onboarding の途中保存、再開、skip、reduced-motion を実装する（途中保存・checkpoint 再開・任意写真の skip・reduced-motion は実装済み。画面別 skip 方針の残りを決める）
+- [x] P2-03A onboarding の途中保存、再開、skip、reduced-motion を実装する
 - [ ] P2-04 初回 household 自動作成、owner 一つ・editor 複数所属、active household 切り替えを実装する（owner household の idempotent 自動作成は完了。招待・切り替えは未実装）
 - [ ] P2-04A owner/editor の閲覧・編集・soft delete・restore policy を domain package に実装する
 - [ ] P2-05 猫の作成・編集・archive を実装する
