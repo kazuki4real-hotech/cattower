@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { getProfileImageDerivativeKey, MAX_IMAGE_BYTES, validateImageUpload } from "./index";
+import {
+  getProfileImageDerivativeKey,
+  issueTownTicket,
+  MAX_IMAGE_BYTES,
+  TOWN_TICKET_TTL_SECONDS,
+  validateImageUpload,
+  verifyTownTicket,
+} from "./index";
+
+const TOWN_TICKET_SECRET = "test-only-town-ticket-secret-at-least-32-bytes";
 
 describe("validateImageUpload", () => {
   it("accepts a bounded jpeg", () => {
@@ -24,5 +33,46 @@ describe("getProfileImageDerivativeKey", () => {
     expect(() => getProfileImageDerivativeKey("households/home/cats/cat/asset")).toThrow(
       "invalid_original_image_key",
     );
+  });
+});
+
+describe("town connection tickets", () => {
+  const now = Date.UTC(2026, 6, 15, 12, 0, 0);
+  const input = {
+    userId: "user-1",
+    catId: "cat-1",
+    townCardId: "cat:cat-1",
+    roomId: "town:courtyard:shard:0",
+    blockVersion: 0,
+  };
+
+  it("issues a scoped ticket that expires after five minutes", async () => {
+    const issued = await issueTownTicket(TOWN_TICKET_SECRET, input, now);
+    const verified = await verifyTownTicket(
+      TOWN_TICKET_SECRET,
+      issued.ticket,
+      now,
+    );
+
+    expect(verified).toEqual({ ok: true, payload: issued.payload });
+    expect(issued.payload.exp - issued.payload.iat).toBe(
+      TOWN_TICKET_TTL_SECONDS,
+    );
+  });
+
+  it("rejects tampered and expired tickets", async () => {
+    const issued = await issueTownTicket(TOWN_TICKET_SECRET, input, now);
+    const [payload, signature] = issued.ticket.split(".");
+
+    await expect(
+      verifyTownTicket(TOWN_TICKET_SECRET, `${payload}x.${signature}`, now),
+    ).resolves.toEqual({ ok: false, error: "invalid_ticket" });
+    await expect(
+      verifyTownTicket(
+        TOWN_TICKET_SECRET,
+        issued.ticket,
+        now + TOWN_TICKET_TTL_SECONDS * 1000,
+      ),
+    ).resolves.toEqual({ ok: false, error: "expired_ticket" });
   });
 });

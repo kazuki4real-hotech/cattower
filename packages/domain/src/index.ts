@@ -9,6 +9,13 @@ export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const PROFILE_IMAGE_SIZE = 512;
 export const PROFILE_IMAGE_MIME_TYPE = "image/webp";
 
+export {
+  TOWN_TICKET_TTL_SECONDS,
+  issueTownTicket,
+  verifyTownTicket,
+  type TownTicketPayload,
+} from "./town-ticket";
+
 export function getProfileImageDerivativeKey(providerKey: string) {
   if (!providerKey.endsWith("/original")) throw new Error("invalid_original_image_key");
   return `${providerKey.slice(0, -"/original".length)}/profile-512.webp`;

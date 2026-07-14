@@ -8,6 +8,9 @@
     "bindings": [{ "name": "TOWN_ROOM", "class_name": "TownRoom" }],
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TownRoom"] }],
+  "vars": {
+    "ALLOWED_WEB_ORIGINS": "https://cattower-web.kazuki-kitada.workers.dev,http://localhost:3000",
+  },
   "observability": {
     "enabled": true,
     "logs": {

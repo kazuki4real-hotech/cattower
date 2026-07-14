@@ -23,6 +23,9 @@ importers:
 
   apps/realtime:
     dependencies:
+      '@cattower/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@cattower/observability':
         specifier: workspace:*
         version: link:../../packages/observability

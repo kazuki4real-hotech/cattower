@@ -36,6 +36,7 @@
   "vars": {
     "R2_ACCOUNT_ID": "54bfb2e5aa9452060620308a6f0e6e73",
     "R2_BUCKET_NAME": "cattower-media-production",
+    "REALTIME_WEBSOCKET_URL": "wss://cattower-realtime.kazuki-kitada.workers.dev/connect",
   },
   "observability": {
     "enabled": true,

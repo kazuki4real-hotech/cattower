@@ -29,7 +29,7 @@ realtime Workerも2026-07-14に初回production deployを完了した。
 | Deploy command  | `pnpm --filter @cattower/realtime exec wrangler deploy`      |
 | Durable binding | `TOWN_ROOM` → `TownRoom`                                     |
 | Migration       | `v1` / SQLite-backed `TownRoom`                              |
-| Public boundary | `GET /health`のみ。ticket/WebSocket routeは未公開            |
+| Public boundary | `GET /health`、signed ticket必須の`GET /connect`             |
 
 ## 2. Normal release flow
 
@@ -80,7 +80,9 @@ pnpm --filter @cattower/realtime build
 - Worker の error rate と logs に新規例外がない
 - secret、cookie、本文、署名 URL が logs に出ていない
 - realtimeの`/health`が`200`と`{"service":"cattower-realtime","status":"ok"}`を返す
-- realtimeの未実装routeがstructured `404`を返し、WebSocket接続を受け付けない
+- realtimeの未実装routeがstructured `404`を返す
+- realtimeの`/connect`が通常HTTPを`426`、不正ticketを`401`、許可外originを`403`で拒否する
+- Web Worker発行の5分以内ticketで`/connect`が`101`へupgradeし、`connection.ready`を返す
 
 ## 5. Logs and versions
 
@@ -150,9 +152,11 @@ pnpm --filter @cattower/web exec wrangler secret put GOOGLE_CLIENT_ID --name cat
 pnpm --filter @cattower/web exec wrangler secret put GOOGLE_CLIENT_SECRET --name cattower-web
 pnpm --filter @cattower/web exec wrangler secret put R2_ACCESS_KEY_ID --name cattower-web
 pnpm --filter @cattower/web exec wrangler secret put R2_SECRET_ACCESS_KEY --name cattower-web
+pnpm --filter @cattower/web exec wrangler secret put TOWN_TICKET_SECRET --name cattower-web
+pnpm --filter @cattower/realtime exec wrangler secret put TOWN_TICKET_SECRET --name cattower-realtime
 ```
 
-6つのruntime secretは2026-07-14に暗号化して登録済み。`BETTER_AUTH_URL` は末尾スラッシュなしの `https://cattower-web.kazuki-kitada.workers.dev` とする。Google Cloud Console の redirect URI は `http://localhost:3000/api/auth/callback/google` と `https://cattower-web.kazuki-kitada.workers.dev/api/auth/callback/google`。R2 API token は Object Read & Write を `cattower-media-production` だけに限定する。secretを画面、ログ、文書へ表示した場合は直ちに失効・再発行する。
+`TOWN_TICKET_SECRET`は32 byte以上の同一乱数値を両Workerへ登録し、repositoryやshell historyへ値を残さない。その他6つのruntime secretは2026-07-14に暗号化して登録済み。`BETTER_AUTH_URL` は末尾スラッシュなしの `https://cattower-web.kazuki-kitada.workers.dev` とする。Google Cloud Console の redirect URI は `http://localhost:3000/api/auth/callback/google` と `https://cattower-web.kazuki-kitada.workers.dev/api/auth/callback/google`。R2 API token は Object Read & Write を `cattower-media-production` だけに限定する。secretを画面、ログ、文書へ表示した場合は直ちに失効・再発行する。
 
 `infra/r2-cors.production.json` に production origin を追加してから適用する。
 
