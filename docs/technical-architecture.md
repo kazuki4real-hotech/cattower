@@ -203,8 +203,26 @@ D1 と Drizzle を使用する。詳細なテーブルは [データモデル](d
 - foreign key と主要 query の index を明示する
 - D1 binding から直接アクセスし、Worker 内から D1 REST API を呼ばない
 - 本文検索は MVP では正規化した `LIKE` と household/cat/date 絞り込みから開始する
-- 件数増加後は FTS5 の trigram tokenizer を第一候補として index size、write cost、日本語 query latency を検証する
+- 件数増加後は FTS5 の trigram tokenizer を第一候補とする
 - trigram で一致しない 1〜2 文字の検索は正規化 `LIKE` へ fallback する
+
+### P1-21 FTS5 trigram spike
+
+2026-07-15に専用のAPAC D1へ10,000件の合成日本語記録を投入して測定した。scopeを簡略化するためspike tableは`household_id + cat_id + occurred_at` indexを使用した。実装時は正規の`entries + entry_cats`構造でquery planを再確認する。
+
+| Measurement | Result |
+| --- | ---: |
+| 本文 + scope index（10,000件） | 794,624 bytes |
+| trigram FTS追加後 | 1,220,608 bytes（+425,984 / +53.6%） |
+| 3文字以上「ひなた」、20件取得 | 0.759 ms / 39 rows read |
+| 2文字「夕方」のFTS | 0件（fallback必須） |
+| 2文字LIKE、先頭20件が一致 | 0.199 ms / 20 rows read |
+| 1文字LIKE、先頭20件が一致 | 0.155 ms / 20 rows read |
+| scoped LIKE、一致なし | 0.854 ms / 501 rows read |
+| scope indexのみのinsert | 2 rows written / record |
+| scope index + FTS triggerのinsert | 3 rows written / record |
+
+MVPは既定どおり正規化`LIKE`とhousehold/cat/date scopeから開始する。3文字以上かつ候補件数が増えた段階でtrigram FTSを追加し、1〜2文字は常にscoped `LIKE`へfallbackする。D1の`meta.rows_read`、`rows_written`、`duration`、`size_after`をrelease前後で再計測する。
 
 参考:
 
