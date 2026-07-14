@@ -29,8 +29,11 @@ users ──< household_members >── households ──< cats
 entries/collections ──< share_links
 cats ──< town_encounters
 users/cats ──< town_reactions
+users ──< cat_mutes
 users ──< blocks
 users ──< reports
+users ──< notifications
+users ──< product_events / user_activity_days
 ```
 
 Better Auth が要求する user、session、account、verification 系テーブルは auth schema として管理し、domain table からは `users.id` のみ参照する。
@@ -48,7 +51,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | user_id | PK/FK users |
 | locale | default `ja` |
 | timezone | 表示用。公開しない |
-| town_enabled | default false until onboarding consent |
+| town_enabled | 利用者本人の参加同意。default false |
 | town_digest | `off` / `daily` |
 | reduced_motion_override | nullable; normally system setting |
 | analytics_consent | regional requirement に応じる |
@@ -63,6 +66,8 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | name | internal display name |
 | owner_user_id | ownership anchor |
 | deletion_requested_at | nullable |
+
+初回 onboarding で利用者が owner となる household を一つ自動作成する。一人の利用者が owner になれる household は MVP では一つとし、招待された複数の household には editor として参加できる。
 
 ### household_members
 
@@ -91,7 +96,10 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | profile_asset_id | nullable FK media_assets |
 | theme_color | approved palette token, not arbitrary CSS |
 | life_status | `living` / `memorial` |
+| town_access | `disabled` / `owners_only` / `household_members`; owner-managed |
 | archived_at | nullable |
+
+猫は必ず一つの household に所属する。猫町への接続は、接続者の `town_enabled` と猫の `town_access` の両方を評価する。
 
 ## 4. Entries
 
@@ -259,6 +267,16 @@ media row の削除と provider object の削除は状態遷移で管理し、DB
 
 保持期間は初期 90 日を候補とし、日次まとめ生成後の raw event 削除を検討する。
 
+### cat_mutes
+
+猫単位の非表示は安全上の block と分ける。mute は利用者本人の画面にだけ影響し、相手へ通知しない。
+
+| Column | Notes |
+| --- | --- |
+| muter_user_id | composite unique with muted_cat_id |
+| muted_cat_id | target cat |
+| created_at | timestamp |
+
 ### blocks
 
 | Column | Notes |
@@ -269,6 +287,8 @@ media row の削除と provider object の削除は状態遷移で管理し、DB
 | created_at | timestamp |
 
 block は非対称でも、画面上は双方を互いに表示しない。blocked user に block の存在を通知しない。
+
+block は飼い主単位とし、対象利用者が所属するすべての猫を相互に非表示にする。特定の猫だけを隠す場合は `cat_mutes` を使用する。
 
 ### reports
 
@@ -305,6 +325,51 @@ block は非対称でも、画面上は双方を互いに表示しない。block
 
 権限変更、share 作成/取消、export、delete、moderation 操作だけを記録する。通常の閲覧履歴を監査ログにしない。
 
+### notifications
+
+Web 内通知を利用者単位で永続化する。通知から参照する resource は表示時に再認可する。
+
+| Column | Notes |
+| --- | --- |
+| id | PK |
+| recipient_user_id | FK users |
+| type | fixed notification type |
+| resource_type | nullable typed reference |
+| resource_id | nullable; no share token |
+| payload_json | minimal display metadata; no post body or signed URL |
+| dedupe_key | recipient 内で unique |
+| created_at | timestamp |
+| read_at | nullable |
+| expires_at | nullable automatic cleanup |
+
+### product_events
+
+success signal の算出に必要な最小限の first-party event。`analytics_consent` が有効な利用者だけ記録する。
+
+| Column | Notes |
+| --- | --- |
+| id | PK |
+| user_id | consented user; access restricted |
+| event_type | approved fixed event name |
+| occurred_at | timestamp |
+| properties_json | coarse booleans/categories only; no content/resource IDs |
+
+初期 event は `entry_created`、`non_media_template_used`、`old_entry_revisited`、`town_entered`、`town_encountered`、`export_completed` に限定する。
+
+### user_activity_days
+
+raw event 削除後も retention を集計するための日次 rollup。
+
+| Column | Notes |
+| --- | --- |
+| user_id | composite unique with activity_date |
+| activity_date | user timezone converted day |
+| created_entry | boolean |
+| revisited_old_entry | boolean |
+| entered_town | boolean |
+
+本文、検索語、entry ID、cat ID、メディア URL は product event と rollup に保存しない。
+
 ## 10. Index plan
 
 実装時に query plan で検証する前提で、少なくとも次を設ける。
@@ -318,7 +383,13 @@ block は非対称でも、画面上は双方を互いに表示しない。block
 - `share_links(token_hash, revoked_at, expires_at)`
 - `town_encounters(cat_a_id, occurred_bucket)` / cat_b counterpart
 - `town_reactions(to_cat_id, occurred_bucket)`
+- `cat_mutes(muter_user_id, muted_cat_id)`
+- `blocks(blocker_user_id, blocked_user_id)`
 - `reports(status, created_at)`
+- `notifications(recipient_user_id, read_at, created_at)`
+- `notifications(recipient_user_id, dedupe_key)` unique
+- `product_events(user_id, occurred_at, event_type)`
+- `user_activity_days(user_id, activity_date)` unique
 
 ## 11. Data lifecycle
 
@@ -330,6 +401,9 @@ block は非対称でも、画面上は双方を互いに表示しない。block
 | presence active state | seconds/minutes | Durable Object expiry |
 | presence trace | max 6 hours | automatic expiry |
 | raw reactions | candidate 90 days | aggregate/coarse memory then purge |
+| notifications | until expiry or account deletion | read notifications may be purged on a rolling window |
+| raw product events | candidate 90 days | aggregate to activity day, then purge |
+| user activity days | policy-defined | delete with account/analytics withdrawal policy |
 | reports | policy-defined | restricted retention for safety/legal needs |
 | export archive | short expiry, candidate 7 days | automatic R2 deletion |
 | account data | grace period after request | staged irreversible purge |

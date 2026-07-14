@@ -38,4 +38,8 @@
 - **決定**: Web first、モバイル優先のレスポンシブ UI
 - **決定**: Next.js を Cloudflare Workers にデプロイする
 - **決定**: 猫町は別 Worker と Durable Objects で構築する
+- **決定**: 猫単位の mute と飼い主単位の block を分離する
+- **決定**: 猫町は利用者の opt-in と owner 管理の猫ごとの公開設定を両方必要とする
+- **決定**: Web 内通知と consented product event を D1 に最小限永続化する
+- **決定**: 画像は R2 に保存し、Images Binding で検査・派生生成する
 - **未決定**: 正式ロゴ、独自ドメイン、料金プラン
