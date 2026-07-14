@@ -51,7 +51,7 @@ Cloudflare の公式ガイドは Next.js を OpenNext adapter で Workers にデ
 - Build command: `pnpm cf:build`
 - Deploy command: `pnpm --filter @cattower/web exec wrangler deploy`
 - Trigger: Cloudflare Workers Builds receives a push to `main`
-- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、オンボーディング永続化、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。Google OAuth callback後のD1 session、オンボーディング完了状態のredirect、再読み込み後のsession継続を本番確認済み。realtime Workerはproduction deploy済みで、`TOWN_ROOM` bindingと`TownRoom` SQLite migration、health check、Workers runtime unit testを設定済み。画像upload E2E、Stream、ticket/WebSocket、通常画面のsample data置換は未完了
+- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、オンボーディング永続化、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。Google OAuth callback後のD1 session、オンボーディング完了状態のredirect、再読み込み後のsession継続、認証済みブラウザからのR2直接upload、Images Binding `.info()`、認証あり/なしのprivate配信を本番確認済み。realtime Workerはproduction deploy済みで、`TOWN_ROOM` bindingと`TownRoom` SQLite migration、health check、Workers runtime unit testを設定済み。画像derivative、Stream、ticket/WebSocket、通常画面のsample data置換は未完了
 - Public hostname: `https://cattower-web.kazuki-kitada.workers.dev/`。独自ドメインは P0-07 で決定後に追加し、Workers URL は運用確認用として維持する
 
 build、確認、ログ、rollback の操作手順は [deployment-runbook.md](deployment-runbook.md) を正本とする。
