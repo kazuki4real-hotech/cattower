@@ -17,6 +17,26 @@
   "images": {
     "binding": "IMAGES"
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cattower-db-production",
+      "database_id": "d112a257-44ac-4564-9aca-bda57db5a45c",
+      "migrations_dir": "../../packages/db/migrations",
+      "remote": true
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "cattower-media-production",
+      "remote": true
+    }
+  ],
+  "vars": {
+    "R2_ACCOUNT_ID": "54bfb2e5aa9452060620308a6f0e6e73",
+    "R2_BUCKET_NAME": "cattower-media-production"
+  },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 0.1

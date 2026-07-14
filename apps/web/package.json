@@ -11,13 +11,21 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "db:migrate": "wrangler d1 migrations apply cattower-db-production --remote",
+    "db:smoke": "wrangler d1 execute cattower-db-production --remote --command \"CREATE TABLE IF NOT EXISTS _cattower_smoke (id TEXT PRIMARY KEY); INSERT OR REPLACE INTO _cattower_smoke VALUES ('ok'); SELECT id FROM _cattower_smoke WHERE id = 'ok'; DROP TABLE _cattower_smoke;\""
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "1.6.23",
+    "@cattower/db": "workspace:*",
+    "@cattower/domain": "workspace:*",
     "@opennextjs/cloudflare": "1.20.1",
     "@radix-ui/react-dialog": "1.1.19",
     "@radix-ui/react-switch": "1.3.3",
     "@radix-ui/react-tabs": "1.1.17",
+    "aws4fetch": "1.0.20",
+    "better-auth": "1.6.23",
+    "drizzle-orm": "0.45.2",
     "next": "16.2.10",
     "react": "19.2.7",
     "react-dom": "19.2.7"
@@ -28,6 +36,7 @@
     "@types/node": "26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "drizzle-kit": "0.31.10",
     "postcss": "8.5.19",
     "tailwindcss": "4.3.2",
     "typescript": "5.9.3",
