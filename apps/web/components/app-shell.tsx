@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Icon } from "@/components/icon";
 import { images } from "@/lib/demo-data";
@@ -14,6 +14,8 @@ const primary = [
   ["/record", "記録する", "add"],
   ["/walk", "お散歩", "explore"],
 ] as const;
+
+const mobilePrimary = primary.filter(([href]) => href !== "/record");
 
 const secondary = [
   ["/search", "記録を探す", "search"],
@@ -44,6 +46,7 @@ function NavLink({ item, pathname, mobile = false }: { item: readonly [string, s
 
 export function AppShell({ children, narrow = false, wide = false }: { children: ReactNode; narrow?: boolean; wide?: boolean }) {
   const pathname = usePathname();
+  const [navCollapsed, setNavCollapsed] = useState(false);
   return (
     <>
       <a className="skip-link" href="#main">本文へ移動</a>
@@ -64,14 +67,26 @@ export function AppShell({ children, narrow = false, wide = false }: { children:
         </aside>
         <header className="mobile-top">
           <Brand />
-          <Link className="icon-button" href="/notifications" aria-label="未読のお知らせ2件"><Icon name="notifications" filled /></Link>
+          <div className="mobile-top-actions">
+            <Link className="icon-button record-button" href="/record" aria-label="記録する"><Icon name="add" filled /></Link>
+            <Link className="icon-button" href="/notifications" aria-label="未読のお知らせ2件"><Icon name="notifications" filled /></Link>
+          </div>
         </header>
         <main className="main" id="main">
           <div className={`page${narrow ? " page-narrow" : ""}${wide ? " page-wide" : ""}`}>{children}</div>
         </main>
-        <nav className="mobile-nav" aria-label="主要ナビゲーション">
-          {primary.map((item) => <NavLink key={item[0]} item={item} pathname={pathname} mobile />)}
-        </nav>
+        {navCollapsed ? (
+          <button className="mobile-nav-fab" type="button" aria-label="ナビゲーションを表示" onClick={() => setNavCollapsed(false)}>
+            <Icon name="menu" />
+          </button>
+        ) : (
+          <nav className="mobile-nav" aria-label="主要ナビゲーション">
+            {mobilePrimary.map((item) => <NavLink key={item[0]} item={item} pathname={pathname} mobile />)}
+            <button className="mobile-nav-collapse" type="button" aria-label="ナビゲーションを縮小" onClick={() => setNavCollapsed(true)}>
+              <Icon name="close_fullscreen" />
+            </button>
+          </nav>
+        )}
       </div>
     </>
   );
