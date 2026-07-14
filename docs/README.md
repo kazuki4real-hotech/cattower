@@ -12,6 +12,7 @@
 | [データモデル](data-model.md) | エンティティ、関係、公開範囲、保持方針 | 開発者 |
 | [デザインガイドライン](design-guidelines.md) | 色トークン、タイポ、コンポーネント、UI 実装プロセス | 開発者・デザイン |
 | [フロントエンド実装仕様](frontend-implementation-spec.md) | 画面 route、共通 UI、オンボーディング、プロトタイプ移行 | 開発者・デザイン |
+| [デプロイ運用手順](deployment-runbook.md) | Cloudflare Workers Builds、手動確認、ログ、rollback | 開発者・運用 |
 | [実装タスク](task-plan.md) | フェーズ、依存関係、完了条件 | 開発者・進行管理 |
 
 ## Source of truth
@@ -22,6 +23,7 @@
 - テーブルとデータライフサイクルは `data-model.md` を優先する
 - 色・UI トークンとコンポーネント方針は `design-guidelines.md` を優先する
 - 画面 route と初期 UI の実装境界は `frontend-implementation-spec.md` を参照する
+- build、deploy、確認、rollback の手順は `deployment-runbook.md` を正本とする
 - 実装順と進捗は `task-plan.md` を更新する
 - 仕様変更時は、コードより先に該当文書を更新する
 
@@ -41,6 +43,7 @@
 - **決定**: デフォルト非公開、数値的な人気指標なし
 - **決定**: Web first、モバイル優先のレスポンシブ UI
 - **決定**: Next.js を Cloudflare Workers にデプロイする
+- **決定**: Web Worker 名は `cattower-web` とし、`main` への push を Workers Builds で本番へ自動デプロイする
 - **決定**: 猫町は別 Worker と Durable Objects で構築する
 - **決定**: 猫単位の mute と飼い主単位の block を分離する
 - **決定**: 猫町は利用者の opt-in と owner 管理の猫ごとの公開設定を両方必要とする
