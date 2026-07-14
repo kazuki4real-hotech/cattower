@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.26.1",
   "scripts": {
     "dev": "pnpm --filter @cattower/web dev",
-    "build": "pnpm --filter @cattower/web build",
+    "build": "pnpm -r --if-present build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

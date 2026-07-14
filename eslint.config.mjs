@@ -17,6 +17,7 @@ export default defineConfig([
     "**/.open-next/**",
     "**/.wrangler/**",
     "**/cloudflare-env.d.ts",
+    "**/worker-configuration.d.ts",
     "prototype/**",
     "node_modules/**",
   ]),

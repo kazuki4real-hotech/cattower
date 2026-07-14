@@ -51,7 +51,7 @@ Cloudflare の公式ガイドは Next.js を OpenNext adapter で Workers にデ
 - Build command: `pnpm cf:build`
 - Deploy command: `pnpm --filter @cattower/web exec wrangler deploy`
 - Trigger: Cloudflare Workers Builds receives a push to `main`
-- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、オンボーディング永続化、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。未ログインrouteとGoogle OAuth開始は本番確認済み。認証済みE2E、Stream、Durable Objects、通常画面のsample data置換は未完了
+- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、オンボーディング永続化、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。未ログインrouteとGoogle OAuth開始は本番確認済み。realtime Worker と `TownRoom` Durable Object のコード骨格、health check、Workers runtime unit test、deploy dry-run は追加済み。認証済みE2E、Stream、Durable Object binding/migration、ticket/WebSocket、realtime production deploy、通常画面のsample data置換は未完了
 - Public hostname: `https://cattower-web.kazuki-kitada.workers.dev/`。独自ドメインは P0-07 で決定後に追加し、Workers URL は運用確認用として維持する
 
 build、確認、ログ、rollback の操作手順は [deployment-runbook.md](deployment-runbook.md) を正本とする。
@@ -79,7 +79,7 @@ Web と realtime は別 Worker にする。
 
 realtime Worker をブラウザへ直接公開するが、接続前に Web 側が発行した短命な接続 ticket を必須にする。
 
-## 4. Planned repository structure
+## 4. Repository structure
 
 ```text
 apps/
@@ -94,8 +94,7 @@ apps/
 └── realtime/
     ├── src/
     │   ├── index.ts
-    │   ├── town-room.ts
-    │   └── protocol.ts
+    │   └── town-room.ts
     └── wrangler.jsonc
 packages/
 ├── db/
@@ -108,6 +107,8 @@ packages/
 ```
 
 機能コードは `features/{feature}` に UI、server action、query adapter をまとめる。横断的なビジネスルールだけを `packages/domain` へ置き、巨大な shared package を作らない。
+
+`apps/realtime` は `GET /health` と `TownRoom` class の skeleton まで実装済み。binding と SQLite migration は P1-11、接続 ticket と WebSocket upgrade は P1-19、hibernation 復元は P1-20 で追加する。接続経路が未認証のまま露出しないよう、それまでは room route を Worker から呼び出さない。
 
 ## 5. Request boundaries
 
