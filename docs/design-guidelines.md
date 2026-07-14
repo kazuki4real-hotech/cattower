@@ -112,7 +112,7 @@ Charcoal（`#2a2a2a`）は仕様の「濃いチャコール」に対応する追
 - プライマリー／アクセント面の上のテキストは濃色（`--text-on-primary`）にする。白抜き文字は使わない
 - 状態・選択・エラーを色のみで表さない
 - フォーカスリングは常に可視。太さと色でキーボード操作を明示する
-- `prefers-reduced-motion` で猫町も含めモーションを静止させる（[product-spec.md](product-spec.md) §9）
+- `prefers-reduced-motion` でお散歩も含めモーションを静止させる（[product-spec.md](product-spec.md) §9）
 
 ## 5. Typography（決定）
 
@@ -141,7 +141,7 @@ Charcoal（`#2a2a2a`）は仕様の「濃いチャコール」に対応する追
 - 影: 1 段（`0 1px 3px rgba(0,0,0,.08)`）を基本とし、多層の影を重ねない
 - 通常操作: `160-280ms`、`cubic-bezier(.16, 1, .3, 1)` を中心に、押下、選択、展開、画面入場を伝える
 - 通常画面の入場: 見出しと主要コンテンツを `opacity` と `transform` だけで順番に表示する。全要素を常時動かさない
-- 猫町: 呼吸、まばたき、尻尾、気配の浮遊だけを低頻度で繰り返す
+- お散歩: 呼吸、まばたき、尻尾、気配の浮遊だけを低頻度で繰り返す
 - オンボーディング: `300-700ms` の段階的な入場と、猫の部屋または塔が組み上がる進行演出を許可する
 - 完了演出は紙吹雪、スコア、ランキング、streak を使わない。猫の居場所が整い、ホームへつながる変化で達成を示す
 - `prefers-reduced-motion: reduce` では自動アニメーションを停止し、状態変化を即時表示する
@@ -153,7 +153,7 @@ Charcoal（`#2a2a2a`）は仕様の「濃いチャコール」に対応する追
 UI コンポーネントの新規作成・大きなレイアウト変更・リデザインの前に、必ず [taste-skill](https://github.com/Leonxlnx/taste-skill)（`design-taste-frontend` / "Anti-Slop Frontend Framework"）を読み込んで適用する。目的は AI 生成にありがちな凡庸で反復的な UI（slop）を避けること。
 
 - 導入例: `npx skills add https://github.com/Leonxlnx/taste-skill`、または SKILL.md を会話に読み込む
-- 対象: `apps/web` の画面、共有 UI（`packages/ui`）、猫町シーンの UI
+- 対象: `apps/web` の画面、共有 UI（`packages/ui`）、お散歩シーンの UI
 - 適用しても、本書のトークンと WCAG 2.2 AA を上書きしない。taste-skill は「配置・階層・余白の質」を上げるために使い、色や制約は本書が優先する
 
 ### 7.2 推奨ダイヤル（決定）
@@ -166,7 +166,7 @@ Cattower の静かな性格に合わせ、既定を低めにする。
 | `MOTION_INTENSITY` | 4 | 通常画面は階層、操作フィードバック、状態遷移に動きを使う |
 | `VISUAL_DENSITY` | 2–3 | 余白重視。無限スクロール・ダッシュボード密度にしない |
 
-猫町の 2D シーンのみ、演出上わずかに `DESIGN_VARIANCE` を上げてよいが、静けさとアクセシビリティは保つ。オンボーディングは `MOTION_INTENSITY 6` まで許可し、物語の進行と入力完了の理解に限定する。
+お散歩の2Dシーンのみ、演出上わずかに `DESIGN_VARIANCE` を上げてよいが、静けさとアクセシビリティは保つ。オンボーディングは `MOTION_INTENSITY 6` まで許可し、物語の進行と入力完了の理解に限定する。
 
 ### 7.3 コンポーネント基盤
 
@@ -177,9 +177,9 @@ Cattower の静かな性格に合わせ、既定を低めにする。
 - `packages/ui` は意味構造と共有 props を持つ framework 非依存の React component を管理する。route、data fetch、Next.js 固有 component、design token の値は `apps/web` に残す
 - 最初の共有 component は `PageHeading` とし、eyebrow、`h1`、説明、任意 action の順序と既存の余白を全主要画面で統一する
 
-## 8. 猫町 visual note
+## 8. お散歩 visual note
 
-猫町のビジュアル方式（写真切り抜き / 抽象アイコン / 選択式アバター）は **未決定**（[product-spec.md](product-spec.md) §15、[task-plan.md](task-plan.md) P0-08）。本書ではどの方式でも次を満たすこととする。
+お散歩のビジュアル方式（写真切り抜き / 抽象アイコン / 選択式アバター）は **未決定**（[product-spec.md](product-spec.md) §15、[task-plan.md](task-plan.md) P0-08）。本書ではどの方式でも次を満たすこととする。
 
 - 余白のある 2D シーン。3D ゲーム化しない
 - 呼吸・まばたき・尻尾程度の低頻度モーション

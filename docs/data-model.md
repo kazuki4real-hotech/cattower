@@ -1,6 +1,6 @@
 # Cattower データモデル
 
-- Status: Conceptual v0.1
+- Status: Conceptual v0.2
 - Updated: 2026-07-14
 
 この文書は論理モデルを定義する。実際の Drizzle schema と migration は実装開始時に作成し、名称変更があれば本書も同時に更新する。
@@ -23,10 +23,10 @@ users ──< household_members >── households ──< cats
                                               ├──< entries ──< entry_media >── media_assets
                                               │       └──< entry_tags >── tags
                                               │
-                                              ├──< collections ──< collection_items
+                                              ├──< boards ──< board_items
                                               └──< town_cards
 
-entries/collections ──< share_links
+entries/boards ──< share_links
 cats ──< town_encounters
 users/cats ──< town_reactions
 users ──< cat_mutes
@@ -55,8 +55,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | town_digest | `off` / `daily` |
 | reduced_motion_override | nullable; normally system setting |
 | analytics_consent | regional requirement に応じる |
-| memory_preferences_json | onboarding で選んだ棚候補。JSON string array |
-| onboarding_step | `0` profile / `1` cat / `2` preferences / `3` complete |
+| onboarding_step | `0` profile / `1` cat / `2` complete preparation / `3` complete |
 | onboarding_completed_at | nullable。完了時刻 |
 
 ### households
@@ -102,7 +101,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | town_access | `disabled` / `owners_only` / `household_members`; owner-managed |
 | archived_at | nullable |
 
-猫は必ず一つの household に所属する。猫町への接続は、接続者の `town_enabled` と猫の `town_access` の両方を評価する。
+猫は必ず一つの household に所属する。お散歩への接続は、接続者の `town_enabled` と猫の `town_access` の両方を評価する。既存DB・protocolとの互換性のため、内部名は当面 `town_*` を維持する。
 
 ## 4. Entries
 
@@ -114,7 +113,6 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | household_id | denormalized authorization filter |
 | primary_cat_id | main cat; additional cats via entry_cats |
 | author_user_id | creator |
-| template | `moment` / `note` / `favorite` / `food` / `milestone` / `compare` |
 | title | nullable |
 | body | nullable plain text/limited rich text |
 | occurred_at | event time |
@@ -123,7 +121,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | version | optimistic update integer |
 | deleted_at | nullable |
 
-初期公開範囲を entries の単純な `public` flag にしない。私室の entry は常に private resource とし、家族 membership、share link、town card という別 resource が限定的な view を作る。
+初期公開範囲を entries の単純な `public` flag にしない。おうちの entry は常に private resource とし、家族 membership、share link、town card という別 resource が限定的な view を作る。
 
 ### entry_cats
 
@@ -135,20 +133,9 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | cat_id | composite PK |
 | sort_order | display order |
 
-### entry_details
-
-テンプレート固有値は、初期段階では `entries.detail_json` に押し込まず型付き table にする。
-
-- `favorite_details`: kind、rating、how_used、started_on、active_state
-- `food_details`: product_name、flavor、appetite、buy_again
-- `milestone_details`: milestone_type、anniversary recurrence
-- `compare_details`: left_asset_id、right_asset_id
-
-検索・集計しない装飾的設定だけを JSON として許可する。
-
 ### tags / entry_tags
 
-tag は household 内で一意。case/Unicode を正規化した `normalized_name` を持つ。
+tag は household 内で一意。case/Unicode を正規化した `normalized_name` を持つ。記録作成時に0件以上を指定できる。
 
 ## 5. Media
 
@@ -178,31 +165,30 @@ tag は household 内で一意。case/Unicode を正規化した `normalized_nam
 | --- | --- |
 | entry_id | composite PK |
 | media_asset_id | composite PK |
-| role | `primary` / `gallery` / `compare_left` / `compare_right` |
+| role | `primary` / `gallery` |
 | sort_order | stable manual order |
 
 media row の削除と provider object の削除は状態遷移で管理し、DB row だけ先に消して orphan を追跡不能にしない。
 
-## 6. Collections
+## 6. Boards
 
-### collections
+### boards
 
 | Column | Notes |
 | --- | --- |
 | id | PK |
 | household_id | authorization boundary |
-| cat_id | nullable for multi-cat collection |
 | name | required |
-| kind | `system` / `custom` |
-| system_key | nullable `media` / `notes` / `toys` / `food` / `milestones` |
 | sort_mode | `manual` / `newest` / `oldest` |
 | cover_asset_id | nullable |
 
-### collection_items
+標準ボードと自動分類は作らない。利用者が必要な場合だけ作成する。
+
+### board_items
 
 | Column | Notes |
 | --- | --- |
-| collection_id | composite PK |
+| board_id | composite PK |
 | entry_id | composite PK |
 | sort_key | manual order token |
 
@@ -215,7 +201,7 @@ media row の削除と provider object の削除は状態遷移で管理し、DB
 | id | PK |
 | household_id | owner boundary |
 | created_by | FK users |
-| resource_type | `entry` / `collection` |
+| resource_type | `entry` / `board` |
 | resource_id | validated application reference |
 | token_hash | unique; raw token never stored |
 | expires_at | required for MVP |
@@ -224,25 +210,25 @@ media row の削除と provider object の削除は状態遷移で管理し、DB
 
 閲覧者の IP や fingerprint を恒久保存しない。abuse rate limiting 用データは短期保持とする。
 
-## 8. 猫町
+## 8. お散歩
 
 ### town_cards
 
-私室 entry から作る限定スナップショット。
+おうちの entry から作る限定スナップショット。
 
 | Column | Notes |
 | --- | --- |
 | id | PK |
 | cat_id | displayed cat |
 | source_entry_id | nullable; deleted/revoked handling |
-| card_type | `moment` / `toy` / `food` / `note` / `empty` |
+| card_type | `entry` / `empty` |
 | title | sanitized, limited length |
 | excerpt | sanitized, limited length |
 | preview_asset_id | nullable, derivative only |
 | status | `active` / `revoked` / `expired` |
 | expires_at | automatic expiry |
 
-猫町 Worker にはこの table 全体を渡さず、接続 ticket に必要な opaque ID と safe preview payload だけを含める。
+お散歩の realtime Worker にはこの table 全体を渡さず、接続 ticket に必要な opaque ID と safe preview payload だけを含める。
 
 ### town_encounters
 
@@ -357,7 +343,7 @@ success signal の算出に必要な最小限の first-party event。`analytics_
 | occurred_at | timestamp |
 | properties_json | coarse booleans/categories only; no content/resource IDs |
 
-初期 event は `entry_created`、`non_media_template_used`、`old_entry_revisited`、`town_entered`、`town_encountered`、`export_completed` に限定する。
+初期 event は `entry_created`、`tagged_entry_created`、`old_entry_revisited`、`town_entered`、`town_encountered`、`export_completed` に限定する。
 
 ### user_activity_days
 
@@ -382,7 +368,7 @@ raw event 削除後も retention を集計するための日次 rollup。
 - `entries(household_id, occurred_at, deleted_at)`
 - `entry_cats(cat_id, entry_id)`
 - `media_assets(household_id, status)`
-- `collection_items(collection_id, sort_key)`
+- `board_items(board_id, sort_key)`
 - `share_links(token_hash, revoked_at, expires_at)`
 - `town_encounters(cat_a_id, occurred_bucket)` / cat_b counterpart
 - `town_reactions(to_cat_id, occurred_bucket)`

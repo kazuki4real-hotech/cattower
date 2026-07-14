@@ -1,16 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { MAX_IMAGE_BYTES, parseMemoryPreferences, validateImageUpload } from "./index";
-
-describe("parseMemoryPreferences", () => {
-  it("deduplicates allowed preferences", () => {
-    expect(parseMemoryPreferences(["ことば", "ことば", "ご飯"])).toEqual(["ことば", "ご飯"]);
-  });
-
-  it("rejects unknown preferences", () => {
-    expect(parseMemoryPreferences(["ランキング"])).toBeNull();
-  });
-});
+import { MAX_IMAGE_BYTES, validateImageUpload } from "./index";
 
 describe("validateImageUpload", () => {
   it("accepts a bounded jpeg", () => {

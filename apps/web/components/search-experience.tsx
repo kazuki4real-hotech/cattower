@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Icon } from "@/components/icon";
 import { images } from "@/lib/demo-data";
 
-const filters = ["すべて", "写真", "ことば", "おもちゃ", "2026年"];
+const filters = ["すべて", "#窓辺", "#夕方", "写真あり", "2026年"];
 const results = [["夕方の窓辺", "カーテンの影を目で追っていた。", "7月14日", images.window], ["網戸にした日", "外の音に耳だけが忙しい。", "2025年7月", images.window], ["窓辺に運んだ毛糸玉", "お気に入りを日向へ持ってきた。", "2024年4月", images.toy]] as const;
 
 export function SearchExperience() {

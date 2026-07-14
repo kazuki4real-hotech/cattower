@@ -3,11 +3,10 @@ import type { ReactNode } from "react";
 
 import { Icon } from "@/components/icon";
 
-const labels = ["はじめまして", "猫を迎える", "残したいこと", "できあがり"];
+const labels = ["はじめまして", "猫を登録", "できあがり"];
 const rooms = [
-  ["home", "あなたの私室", "猫との時間をしまう場所"],
-  ["pets", "猫の居場所", "名前と好きな色を覚えます"],
-  ["menu_book", "最初の収蔵棚", "残したいものから始めます"],
+  ["home", "あなたのおうち", "猫との時間を残す場所"],
+  ["pets", "猫のプロフィール", "名前と好きな色を覚えます"],
 ] as const;
 
 export function OnboardingShell({ current, children, complete = false }: { current: number; children: ReactNode; complete?: boolean }) {
@@ -27,7 +26,7 @@ export function OnboardingShell({ current, children, complete = false }: { curre
           {children}
         </div>
       </section>
-      <aside className="onboarding-stage" aria-label="猫の居場所が少しずつ完成していく様子">
+      <aside className="onboarding-stage" aria-label="猫のおうちが少しずつ完成していく様子">
         <div className="tower">
           <div className="tower-roof" />
           {rooms.map(([icon, title, text], index) => {

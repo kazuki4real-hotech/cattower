@@ -1,5 +1,5 @@
 import { cats, user, userPreferences, type CattowerDatabase } from "@cattower/db";
-import { isCatThemeColor, parseMemoryPreferences } from "@cattower/domain";
+import { isCatThemeColor } from "@cattower/domain";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 
 import { getOnboardingSnapshot } from "@/lib/onboarding";
@@ -44,16 +44,6 @@ export async function PUT(request: Request) {
     }
     await advance(viewer.db, viewer.session.user.id, 2);
     return Response.json({ ok: true, catId });
-  }
-
-  if (body.step === "preferences") {
-    const preferences = parseMemoryPreferences(body.preferences);
-    if (!preferences) return Response.json({ error: "invalid_preferences" }, { status: 400 });
-    await viewer.db
-      .update(userPreferences)
-      .set({ memoryPreferencesJson: JSON.stringify(preferences), onboardingStep: sql`max(${userPreferences.onboardingStep}, 3)`, updatedAt: new Date() })
-      .where(eq(userPreferences.userId, viewer.session.user.id));
-    return Response.json({ ok: true });
   }
 
   if (body.step === "complete") {

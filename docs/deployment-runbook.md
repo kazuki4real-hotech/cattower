@@ -52,9 +52,9 @@ CI と production build は remote D1/R2 へ接続しないため、GitHub Actio
 
 - `/` が `/onboarding/welcome` へ redirect する
 - Google login 後に owner household が一つ作られる
-- onboarding 4 画面で表示名、猫、棚候補、checkpoint が再読み込み後も保持される
+- onboarding 3画面で表示名、猫、checkpointが再読み込み後も保持される
 - JPEG/PNG/WebP のプロフィール画像を R2 へ直接 upload し、private media endpoint だけで表示できる
-- `/home`、`/collections`、`/add`、`/town` が表示される
+- `/home`、`/boards`、`/record`、`/walk` が表示される
 - 写真、M PLUS Rounded 1c、Material Symbols Rounded が読み込まれる
 - mobile navigation と desktop navigation が操作できる
 - Worker の error rate と logs に新規例外がない

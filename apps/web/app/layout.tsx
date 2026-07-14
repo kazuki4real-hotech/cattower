@@ -12,7 +12,7 @@ const rounded = M_PLUS_Rounded_1c({
 
 export const metadata: Metadata = {
   title: { default: "cattower", template: "%s | cattower" },
-  description: "猫との何気ない時間を、静かに収蔵する私室。",
+  description: "猫との何気ない時間を、自分のために記録する場所。",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

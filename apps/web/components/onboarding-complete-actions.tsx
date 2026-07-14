@@ -25,5 +25,5 @@ export function OnboardingCompleteActions() {
 
   if (error) return <p className="form-status error" role="alert">{error}</p>;
   if (!ready) return <p className="form-status" role="status">最後の仕上げを保存しています</p>;
-  return <div className="onboarding-actions"><Link className="button" href="/home">おうちへ入る<Icon name="arrow_forward" /></Link><Link className="button button-secondary" href="/add"><Icon name="add" />最初の記録を作る</Link></div>;
+  return <div className="onboarding-actions"><Link className="button" href="/home">おうちへ入る<Icon name="arrow_forward" /></Link><Link className="button button-secondary" href="/record"><Icon name="add" />最初の記録を作る</Link></div>;
 }

@@ -71,7 +71,6 @@ export const userPreferences = sqliteTable("user_preferences", {
   townDigest: text("town_digest", { enum: ["off", "daily"] }).notNull().default("off"),
   reducedMotionOverride: integer("reduced_motion_override", { mode: "boolean" }),
   analyticsConsent: integer("analytics_consent", { mode: "boolean" }).notNull().default(false),
-  memoryPreferencesJson: text("memory_preferences_json").notNull().default("[]"),
   onboardingStep: integer("onboarding_step").notNull().default(0),
   onboardingCompletedAt: integer("onboarding_completed_at", { mode: "timestamp_ms" }),
   ...timestamps,
