@@ -18,7 +18,7 @@
 | Deploy command    | `pnpm --filter @cattower/web exec wrangler deploy` |
 | Trigger           | push to `main`                                     |
 
-初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding、runtime secrets、オンボーディングの永続化コードは接続済み。2026-07-15にGoogle OAuth callback後のD1 session、オンボーディング完了状態のredirect、再読み込み後のsession継続、認証済みブラウザからのR2 presigned upload、metadata/decode検査、512×512 WebP derivative、private画像配信を本番確認した。独自ドメインを追加する場合も、このWorkers URLは運用確認用の既定URLとして維持する。
+初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding、runtime secrets、オンボーディングの永続化コードは接続済み。2026-07-15にGoogle login/logout、7日session、再読み込み後のsession継続、オンボーディング完了状態のredirect、認証済みブラウザからのR2 presigned upload、metadata/decode検査、512×512 WebP derivative、private画像配信を本番確認した。独自ドメインを追加する場合も、このWorkers URLは運用確認用の既定URLとして維持する。
 
 realtime Workerも2026-07-14に初回production deployを完了した。2026-07-15にWeb/Realtime両Workerへ同一の`TOWN_TICKET_SECRET`を登録し、5分signed ticketによるproduction WebSocket upgradeと`connection.ready`応答を確認した。同日、20秒idle後も接続IDが復元され、instance generationが変化するhibernation smoke testを完了した。
 

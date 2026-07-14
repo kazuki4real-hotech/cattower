@@ -71,7 +71,7 @@ Exit criteria: 単一の production URL 上で検証 account を使い、auth、
 ## Phase 2 — Identity, household and cat profile
 
 - [x] P2-01 Better Auth schema と migration を確定する
-- [ ] P2-02 Google login/logout/session refresh を実装する
+- [x] P2-02 Google login/logout/session refresh を実装する
 - [x] P2-03 登録後 onboarding（利用者名、最初の猫、完了演出）と user preferences を実装する（棚選択は削除済み）
 - [x] P2-03UI onboarding 3画面のUI、画面遷移、完了演出を実装する
 - [ ] P2-03A onboarding の途中保存、再開、skip、reduced-motion を実装する（途中保存・checkpoint 再開・任意写真の skip・reduced-motion は実装済み。画面別 skip 方針の残りを決める）
