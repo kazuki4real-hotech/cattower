@@ -117,7 +117,7 @@ Charcoal（`#2a2a2a`）は仕様の「濃いチャコール」に対応する追
 ## 5. Typography（決定）
 
 - UI フォントは **M PLUS Rounded 1c** を採用する。丸みのある字形で親しみを作りつつ、日本語の本文可読性を保つ
-- 太さは本文 `400`、操作・小見出し `500`、見出し `700`、ブランドやオンボーディングの要所 `800` を使う
+- 本文を含むUIの既定ウェイトは `700` とし、丸みと存在感を全画面で統一する。ブランドやオンボーディングの要所は `800`、Material Symbols Roundedは視認性を保つため `400` を使う
 - フォールバックは `"Hiragino Maru Gothic ProN"`, `"Hiragino Sans"`, `"Yu Gothic UI"`, `Meiryo`, `sans-serif` の順とする
 - プロトタイプでは Google Fonts を利用できる。本実装では `next/font` または self-host により必要な weight と日本語 subset を配信し、`font-display: swap` を設定する
 - スケール: 12 / 14 / 16（本文既定）/ 20 / 24 / 32

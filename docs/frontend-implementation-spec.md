@@ -58,6 +58,7 @@ HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Rou
 
 - UI フォントは `M PLUS Rounded 1c`
 - Next.js 実装では `next/font/google` で配信する
+- 本文を含むUIの既定ウェイトは `700`、ブランドやオンボーディングの要所は `800` とする
 - アイコンは `Material Symbols Rounded` の一系統だけを使う
 - アイコンだけの操作には `aria-label` を付ける
 - アイコンとラベルの併記ではアイコンを読み上げ対象から外す
