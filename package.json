@@ -1,0 +1,11 @@
+{
+  "name": "cattower",
+  "private": true,
+  "packageManager": "pnpm@10.26.1",
+  "scripts": {
+    "dev": "pnpm --filter @cattower/web dev",
+    "build": "pnpm --filter @cattower/web build",
+    "typecheck": "pnpm --filter @cattower/web typecheck",
+    "cf:build": "pnpm --filter @cattower/web cf:build"
+  }
+}

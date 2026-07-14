@@ -11,6 +11,7 @@
 | [技術設計書](technical-architecture.md) | 構成、技術選定、境界、セキュリティ、運用 | 開発者 |
 | [データモデル](data-model.md) | エンティティ、関係、公開範囲、保持方針 | 開発者 |
 | [デザインガイドライン](design-guidelines.md) | 色トークン、タイポ、コンポーネント、UI 実装プロセス | 開発者・デザイン |
+| [フロントエンド実装仕様](frontend-implementation-spec.md) | 画面 route、共通 UI、オンボーディング、プロトタイプ移行 | 開発者・デザイン |
 | [実装タスク](task-plan.md) | フェーズ、依存関係、完了条件 | 開発者・進行管理 |
 
 ## Source of truth
@@ -20,6 +21,7 @@
 - 技術的な実現方法は `technical-architecture.md` を優先する
 - テーブルとデータライフサイクルは `data-model.md` を優先する
 - 色・UI トークンとコンポーネント方針は `design-guidelines.md` を優先する
+- 画面 route と初期 UI の実装境界は `frontend-implementation-spec.md` を参照する
 - 実装順と進捗は `task-plan.md` を更新する
 - 仕様変更時は、コードより先に該当文書を更新する
 

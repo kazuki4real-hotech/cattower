@@ -1,0 +1,36 @@
+{
+  "name": "@cattower/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "cf:build": "opennextjs-cloudflare build",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "1.20.1",
+    "@radix-ui/react-dialog": "1.1.19",
+    "@radix-ui/react-switch": "1.3.3",
+    "@radix-ui/react-tabs": "1.1.17",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260714.1",
+    "@tailwindcss/postcss": "4.3.2",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "postcss": "8.5.19",
+    "tailwindcss": "4.3.2",
+    "typescript": "5.9.3",
+    "wrangler": "4.110.0"
+  }
+}
