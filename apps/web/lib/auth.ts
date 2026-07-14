@@ -14,6 +14,10 @@ export function getAuth() {
     appName: "Cattower",
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
+    session: {
+      expiresIn: 60 * 60 * 24 * 7,
+      updateAge: 60 * 60 * 24,
+    },
     database: drizzleAdapter(db, { provider: "sqlite", schema }),
     socialProviders: {
       google: {
