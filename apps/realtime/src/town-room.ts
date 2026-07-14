@@ -8,8 +8,8 @@ const JSON_HEADERS = {
 /**
  * Coordination boundary for one `place + cohort shard` room.
  *
- * The namespace binding, SQLite migration, ticket validation, and hibernatable
- * WebSocket lifecycle are intentionally introduced by P1-11, P1-19, and P1-20.
+ * The namespace binding and SQLite migration are configured. Ticket validation
+ * and the hibernatable WebSocket lifecycle are introduced by P1-19 and P1-20.
  */
 export class TownRoom extends DurableObject<CloudflareEnv> {
   fetch(): Response {
