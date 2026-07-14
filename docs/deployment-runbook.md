@@ -18,7 +18,7 @@
 | Deploy command    | `pnpm --filter @cattower/web exec wrangler deploy` |
 | Trigger           | push to `main`                                     |
 
-初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding とオンボーディングの永続化コードは接続済み。Google OAuth と R2 presigned upload は credentials 登録後に smoke test する。独自ドメインを追加する場合も、この Workers URL は運用確認用の既定 URL として維持する。
+初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding、runtime secrets、オンボーディングの永続化コードは接続済み。未ログイン状態のrouteとGoogle OAuth開始は本番smoke test済み。Googleログイン完了後のD1 sessionとR2 presigned uploadは認証済みブラウザでE2E確認する。独自ドメインを追加する場合も、このWorkers URLは運用確認用の既定URLとして維持する。
 
 ## 2. Normal release flow
 
@@ -126,7 +126,7 @@ pnpm --filter @cattower/web exec wrangler secret put R2_ACCESS_KEY_ID --name cat
 pnpm --filter @cattower/web exec wrangler secret put R2_SECRET_ACCESS_KEY --name cattower-web
 ```
 
-`BETTER_AUTH_SECRET` と `BETTER_AUTH_URL` は 2026-07-14 に登録済み。`BETTER_AUTH_URL` は末尾スラッシュなしの `https://cattower-web.kazuki-kitada.workers.dev` とする。Google Cloud Console の redirect URI は `http://localhost:3000/api/auth/callback/google` と `https://cattower-web.kazuki-kitada.workers.dev/api/auth/callback/google`。R2 API token は Object Read & Write を `cattower-media-production` だけに限定する。
+6つのruntime secretは2026-07-14に暗号化して登録済み。`BETTER_AUTH_URL` は末尾スラッシュなしの `https://cattower-web.kazuki-kitada.workers.dev` とする。Google Cloud Console の redirect URI は `http://localhost:3000/api/auth/callback/google` と `https://cattower-web.kazuki-kitada.workers.dev/api/auth/callback/google`。R2 API token は Object Read & Write を `cattower-media-production` だけに限定する。secretを画面、ログ、文書へ表示した場合は直ちに失効・再発行する。
 
 `infra/r2-cors.production.json` に production origin を追加してから適用する。
 
