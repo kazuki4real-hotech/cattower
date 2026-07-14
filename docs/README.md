@@ -10,6 +10,7 @@
 | [プロダクト仕様書](product-spec.md) | 目的、体験、機能、MVP、非機能要件 | 全員 |
 | [技術設計書](technical-architecture.md) | 構成、技術選定、境界、セキュリティ、運用 | 開発者 |
 | [データモデル](data-model.md) | エンティティ、関係、公開範囲、保持方針 | 開発者 |
+| [デザインガイドライン](design-guidelines.md) | 色トークン、タイポ、コンポーネント、UI 実装プロセス | 開発者・デザイン |
 | [実装タスク](task-plan.md) | フェーズ、依存関係、完了条件 | 開発者・進行管理 |
 
 ## Source of truth
@@ -18,6 +19,7 @@
 - 市場前提とポジショニングは `product-research.md` に残す
 - 技術的な実現方法は `technical-architecture.md` を優先する
 - テーブルとデータライフサイクルは `data-model.md` を優先する
+- 色・UI トークンとコンポーネント方針は `design-guidelines.md` を優先する
 - 実装順と進捗は `task-plan.md` を更新する
 - 仕様変更時は、コードより先に該当文書を更新する
 
@@ -42,4 +44,6 @@
 - **決定**: 猫町は利用者の opt-in と owner 管理の猫ごとの公開設定を両方必要とする
 - **決定**: Web 内通知と consented product event を D1 に最小限永続化する
 - **決定**: 画像は R2 に保存し、Images Binding で検査・派生生成する
+- **決定**: パステル基調のパレット（primary `#80beaf`、secondary `#b3ddd1` / `#d1dce2` / `#f5b994` / `#ee9c6a`）とニュートラル階調を採用する
+- **決定**: UI 実装前に taste-skill を適用し、slop を避ける
 - **未決定**: 正式ロゴ、独自ドメイン、料金プラン
