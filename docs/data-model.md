@@ -55,7 +55,8 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | town_digest | `off` / `daily` |
 | reduced_motion_override | nullable; normally system setting |
 | analytics_consent | regional requirement に応じる |
-| onboarding_step | `0` profile / `1` cat / `2` complete preparation / `3` complete |
+| onboarding_step | `0` profile / `1` cat / `2` photo / `3` theme / `4` complete preparation |
+| onboarding_prompted_at | nullable。新規登録 callback から自動案内した時刻。既存利用者は migration で backfill |
 | onboarding_completed_at | nullable。完了時刻 |
 
 ### households

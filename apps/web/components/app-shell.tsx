@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 import { Icon } from "@/components/icon";
+import { OnboardingResumeBanner } from "@/components/onboarding-resume-banner";
 import { images } from "@/lib/demo-data";
 
 const primary = [
@@ -73,7 +74,7 @@ export function AppShell({ children, narrow = false, wide = false }: { children:
           </div>
         </header>
         <main className="main" id="main">
-          <div className={`page${narrow ? " page-narrow" : ""}${wide ? " page-wide" : ""}`}>{children}</div>
+          <div className={`page${narrow ? " page-narrow" : ""}${wide ? " page-wide" : ""}`}><OnboardingResumeBanner />{children}</div>
         </main>
         <button
           className="mobile-nav-fab"

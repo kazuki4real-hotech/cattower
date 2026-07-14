@@ -72,6 +72,7 @@ export const userPreferences = sqliteTable("user_preferences", {
   reducedMotionOverride: integer("reduced_motion_override", { mode: "boolean" }),
   analyticsConsent: integer("analytics_consent", { mode: "boolean" }).notNull().default(false),
   onboardingStep: integer("onboarding_step").notNull().default(0),
+  onboardingPromptedAt: integer("onboarding_prompted_at", { mode: "timestamp_ms" }),
   onboardingCompletedAt: integer("onboarding_completed_at", { mode: "timestamp_ms" }),
   ...timestamps,
 });

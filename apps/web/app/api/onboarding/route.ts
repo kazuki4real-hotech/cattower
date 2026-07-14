@@ -7,8 +7,10 @@ import {
 import { isCatThemeColor } from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
 import { getOnboardingSnapshot } from "@/lib/onboarding";
+import { sanitizeReturnTo } from "@/lib/onboarding-routes";
 import { getViewer } from "@/lib/viewer";
 
 async function get(request: Request) {
@@ -48,11 +50,7 @@ async function put(request: Request) {
 
   if (body.step === "cat") {
     const name = typeof body.name === "string" ? body.name.trim() : "";
-    if (
-      name.length < 1 ||
-      name.length > 50 ||
-      !isCatThemeColor(body.themeColor)
-    ) {
+    if (name.length < 1 || name.length > 50) {
       return Response.json({ error: "invalid_cat" }, { status: 400 });
     }
     const existing = await viewer.db.query.cats.findFirst({
@@ -66,20 +64,48 @@ async function put(request: Request) {
     if (existing) {
       await viewer.db
         .update(cats)
-        .set({ name, themeColor: body.themeColor, updatedAt: new Date() })
+        .set({ name, updatedAt: new Date() })
         .where(eq(cats.id, existing.id));
     } else {
-      await viewer.db
-        .insert(cats)
-        .values({
-          id: catId,
-          householdId: viewer.household.id,
-          name,
-          themeColor: body.themeColor,
-        });
+      await viewer.db.insert(cats).values({
+        id: catId,
+        householdId: viewer.household.id,
+        name,
+        themeColor: "mint",
+      });
     }
     await advance(viewer.db, viewer.session.user.id, 2);
     return Response.json({ ok: true, catId });
+  }
+
+  if (body.step === "photo") {
+    const cat = await viewer.db.query.cats.findFirst({
+      where: and(
+        eq(cats.householdId, viewer.household.id),
+        isNull(cats.archivedAt),
+      ),
+    });
+    if (!cat) return Response.json({ error: "cat_required" }, { status: 409 });
+    await advance(viewer.db, viewer.session.user.id, 3);
+    return Response.json({ ok: true });
+  }
+
+  if (body.step === "theme") {
+    if (!isCatThemeColor(body.themeColor))
+      return Response.json({ error: "invalid_theme" }, { status: 400 });
+    const cat = await viewer.db.query.cats.findFirst({
+      where: and(
+        eq(cats.householdId, viewer.household.id),
+        isNull(cats.archivedAt),
+      ),
+    });
+    if (!cat) return Response.json({ error: "cat_required" }, { status: 409 });
+    await viewer.db
+      .update(cats)
+      .set({ themeColor: body.themeColor, updatedAt: new Date() })
+      .where(eq(cats.id, cat.id));
+    await advance(viewer.db, viewer.session.user.id, 4);
+    return Response.json({ ok: true });
   }
 
   if (body.step === "complete") {
@@ -87,15 +113,44 @@ async function put(request: Request) {
       where: eq(cats.householdId, viewer.household.id),
     });
     if (!cat) return Response.json({ error: "cat_required" }, { status: 409 });
+    const preferences = await viewer.db.query.userPreferences.findFirst({
+      where: eq(userPreferences.userId, viewer.session.user.id),
+    });
+    if (!preferences || preferences.onboardingStep < 4)
+      return Response.json({ error: "onboarding_incomplete" }, { status: 409 });
     await viewer.db
       .update(userPreferences)
       .set({
-        onboardingStep: 3,
-        onboardingCompletedAt: new Date(),
+        onboardingStep: 4,
+        onboardingCompletedAt: preferences.onboardingCompletedAt ?? new Date(),
         updatedAt: new Date(),
       })
       .where(eq(userPreferences.userId, viewer.session.user.id));
-    return Response.json({ ok: true });
+    const cookie = request.headers
+      .get("cookie")
+      ?.split(";")
+      .map((part) => part.trim())
+      .find((part) => part.startsWith("cattower_return_to="));
+    let cookieDestination: string | null = null;
+    try {
+      cookieDestination = cookie
+        ? sanitizeReturnTo(
+            decodeURIComponent(cookie.slice("cattower_return_to=".length)),
+          )
+        : null;
+    } catch {
+      cookieDestination = null;
+    }
+    const destination = cookieDestination ?? "/home";
+    const response = NextResponse.json({ ok: true, destination });
+    response.cookies.set("cattower_return_to", "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 0,
+    });
+    return response;
   }
 
   return Response.json({ error: "unknown_step" }, { status: 400 });

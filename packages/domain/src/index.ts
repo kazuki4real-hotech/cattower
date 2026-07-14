@@ -1,4 +1,4 @@
-export const ONBOARDING_STEPS = ["profile", "cat", "complete"] as const;
+export const ONBOARDING_STEPS = ["profile", "cat", "photo", "theme", "complete"] as const;
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 
 export const CAT_THEME_COLORS = ["mint", "sky", "peach", "apricot", "mint-soft"] as const;

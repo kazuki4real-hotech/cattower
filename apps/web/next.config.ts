@@ -8,7 +8,16 @@ const nextConfig: NextConfig = {
       { source: "/add", destination: "/record", permanent: true },
       { source: "/add/:path*", destination: "/record", permanent: true },
       { source: "/town", destination: "/walk", permanent: true },
-      { source: "/onboarding/preferences", destination: "/onboarding/complete", permanent: true },
+      {
+        source: "/onboarding/welcome",
+        destination: "/onboarding/profile",
+        permanent: false,
+      },
+      {
+        source: "/onboarding/preferences",
+        destination: "/onboarding/complete",
+        permanent: true,
+      },
     ];
   },
   images: {
@@ -16,7 +25,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
-      }
+      },
     ],
   },
 };

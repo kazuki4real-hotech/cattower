@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { OnboardingCatForm } from "@/components/onboarding-cat-form";
+import { OnboardingProfileForm } from "@/components/onboarding-profile-form";
 import { OnboardingShell } from "@/components/onboarding-shell";
 import { getOnboardingSnapshot } from "@/lib/onboarding";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
-export default async function CatPage() {
+export default async function ProfilePage() {
   const viewer = await getViewer();
   if (!viewer) redirect("/");
   const snapshot = await getOnboardingSnapshot(
@@ -16,12 +16,13 @@ export default async function CatPage() {
     viewer.household.id,
   );
   if (snapshot.completed) redirect("/home");
-  if (snapshot.step < 1) redirect("/onboarding/profile");
   return (
-    <OnboardingShell current={2}>
-      <h1>一緒に暮らす猫のお名前は？</h1>
-      <p className="lede">まずは一匹。ほかの猫はあとから追加できます。</p>
-      <OnboardingCatForm initialName={snapshot.cat?.name} />
+    <OnboardingShell current={1}>
+      <h1>なんとお呼びしましょう？</h1>
+      <p className="lede">
+        記録や家族への表示に使います。あとから変更できます。
+      </p>
+      <OnboardingProfileForm initialName={viewer.session.user.name} />
     </OnboardingShell>
   );
 }

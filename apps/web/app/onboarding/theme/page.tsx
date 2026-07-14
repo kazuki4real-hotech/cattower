@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { OnboardingCatForm } from "@/components/onboarding-cat-form";
 import { OnboardingShell } from "@/components/onboarding-shell";
+import { OnboardingThemeForm } from "@/components/onboarding-theme-form";
 import { getOnboardingSnapshot } from "@/lib/onboarding";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
-export default async function CatPage() {
+export default async function ThemePage() {
   const viewer = await getViewer();
   if (!viewer) redirect("/");
   const snapshot = await getOnboardingSnapshot(
@@ -16,12 +16,12 @@ export default async function CatPage() {
     viewer.household.id,
   );
   if (snapshot.completed) redirect("/home");
-  if (snapshot.step < 1) redirect("/onboarding/profile");
+  if (!snapshot.cat || snapshot.step < 3) redirect("/onboarding/photo");
   return (
-    <OnboardingShell current={2}>
-      <h1>一緒に暮らす猫のお名前は？</h1>
-      <p className="lede">まずは一匹。ほかの猫はあとから追加できます。</p>
-      <OnboardingCatForm initialName={snapshot.cat?.name} />
+    <OnboardingShell current={4}>
+      <h1>この子の色を選びましょう</h1>
+      <p className="lede">記録の目印になる色です。あとから変更できます。</p>
+      <OnboardingThemeForm initialTheme={snapshot.cat.themeColor} />
     </OnboardingShell>
   );
 }
