@@ -75,18 +75,21 @@ export function AppShell({ children, narrow = false, wide = false }: { children:
         <main className="main" id="main">
           <div className={`page${narrow ? " page-narrow" : ""}${wide ? " page-wide" : ""}`}>{children}</div>
         </main>
-        {navCollapsed ? (
-          <button className="mobile-nav-fab" type="button" aria-label="ナビゲーションを表示" onClick={() => setNavCollapsed(false)}>
-            <Icon name="menu" />
+        <button
+          className="mobile-nav-fab"
+          type="button"
+          aria-label="ナビゲーションを表示"
+          data-visible={navCollapsed ? "true" : "false"}
+          onClick={() => setNavCollapsed(false)}
+        >
+          <Icon name="menu" />
+        </button>
+        <nav className="mobile-nav" aria-label="主要ナビゲーション" data-collapsed={navCollapsed ? "true" : "false"}>
+          {mobilePrimary.map((item) => <NavLink key={item[0]} item={item} pathname={pathname} mobile />)}
+          <button className="mobile-nav-collapse" type="button" aria-label="ナビゲーションを縮小" onClick={() => setNavCollapsed(true)}>
+            <Icon name="close_fullscreen" />
           </button>
-        ) : (
-          <nav className="mobile-nav" aria-label="主要ナビゲーション">
-            {mobilePrimary.map((item) => <NavLink key={item[0]} item={item} pathname={pathname} mobile />)}
-            <button className="mobile-nav-collapse" type="button" aria-label="ナビゲーションを縮小" onClick={() => setNavCollapsed(true)}>
-              <Icon name="close_fullscreen" />
-            </button>
-          </nav>
-        )}
+        </nav>
       </div>
     </>
   );
