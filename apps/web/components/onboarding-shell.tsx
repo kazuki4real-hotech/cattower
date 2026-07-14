@@ -7,7 +7,7 @@ const labels = ["はじめまして", "猫を迎える", "残したいこと", "
 const rooms = [
   ["home", "あなたの私室", "猫との時間をしまう場所"],
   ["pets", "猫の居場所", "名前と好きな色を覚えます"],
-  ["menu_book", "最初の収蔵棚", "残したいものから始めます"],
+  ["menu_book", "最初のあしあと", "残したいものから始めます"],
 ] as const;
 
 export function OnboardingShell({ current, children, complete = false }: { current: number; children: ReactNode; complete?: boolean }) {

@@ -11,8 +11,8 @@ import { images } from "@/lib/demo-data";
 const primary = [
   ["/home", "おうち", "home"],
   ["/collections", "コレクション", "collections_bookmark"],
-  ["/add", "追加", "add"],
-  ["/town", "猫町", "explore"],
+  ["/add", "記録する", "add"],
+  ["/town", "お散歩", "explore"],
 ] as const;
 
 const secondary = [
