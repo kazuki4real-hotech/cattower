@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cattower Main Workflow"
+  short_description: "Cattowerの実装・文書・main直接push運用"
+  default_prompt: "Use $cattower-main-workflow to complete an implementation, update its documentation, commit directly to main, and push."
