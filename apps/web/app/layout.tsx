@@ -24,6 +24,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&icon_names=add,arrow_back,arrow_forward,auto_awesome,check_circle,chevron_right,close,close_fullscreen,collections_bookmark,download,edit,expand_more,explore,family_restroom,home,image,lock,login,menu,menu_book,notifications,palette,pets,photo_camera,photo_library,restaurant,search,settings,toys,upload,visibility&display=block"
           rel="stylesheet"
         />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=pets&display=block"
+          rel="stylesheet"
+        />
       </head>
       <body>{children}</body>
     </html>
