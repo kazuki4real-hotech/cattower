@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading } from "@cattower/ui";
 import { images } from "@/lib/demo-data";
 
 const collections = [["写真と動画", "48の記録・7月14日更新", images.window], ["おもちゃ", "8の記録・7月9日更新", images.toy], ["ご飯", "12の記録・7月10日更新", images.food]] as const;

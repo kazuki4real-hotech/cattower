@@ -108,6 +108,8 @@ packages/
 
 機能コードは `features/{feature}` に UI、server action、query adapter をまとめる。横断的なビジネスルールだけを `packages/domain` へ置き、巨大な shared package を作らない。
 
+`packages/ui` は route や data access に依存しない意味的な React component だけを置く。最初の共有 component は主要画面の `PageHeading` とし、Next.js 固有 component と design token の実体は `apps/web` に残す。
+
 `apps/realtime` は `GET /health` と `TownRoom` class の skeleton まで実装済み。binding と SQLite migration は P1-11、接続 ticket と WebSocket upgrade は P1-19、hibernation 復元は P1-20 で追加する。接続経路が未認証のまま露出しないよう、それまでは room route を Worker から呼び出さない。
 
 ## 5. Request boundaries

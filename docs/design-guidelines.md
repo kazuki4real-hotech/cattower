@@ -174,6 +174,8 @@ Cattower の静かな性格に合わせ、既定を低めにする。
 - Google Material Symbols Rounded を共通アイコンとして使用する
 - Tailwind テーマに本書のトークンを CSS 変数として定義し、生の hex を JSX に直書きしない
 - 猫のテーマ色は実行時に `--color-primary` を猫ごとの承認済みトークンへ差し替える形で反映する
+- `packages/ui` は意味構造と共有 props を持つ framework 非依存の React component を管理する。route、data fetch、Next.js 固有 component、design token の値は `apps/web` に残す
+- 最初の共有 component は `PageHeading` とし、eyebrow、`h1`、説明、任意 action の順序と既存の余白を全主要画面で統一する
 
 ## 8. 猫町 visual note
 

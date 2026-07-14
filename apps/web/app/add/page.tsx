@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading } from "@cattower/ui";
 import { templates } from "@/lib/demo-data";
 
 export default function AddPage() {

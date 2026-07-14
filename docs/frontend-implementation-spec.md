@@ -46,6 +46,10 @@ HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Rou
 
 ## 4. Shared components
 
+framework 非依存で画面間共有する React component は `packages/ui` に置く。route、認証、data fetch、`next/link`、`next/image` へ依存する component は `apps/web` に残し、巨大な共通 package にしない。
+
+`PageHeading` は `packages/ui` の最初の component とし、eyebrow、`h1`、説明、任意 action の意味構造を提供する。色、余白、responsive layout は `apps/web/app/globals.css` の design token と class で管理し、package 内へ生の色や route 固有 styling を持ち込まない。
+
 ### App shell
 
 - デスクトップは左ナビゲーション
