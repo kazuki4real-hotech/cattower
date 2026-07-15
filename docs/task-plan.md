@@ -81,6 +81,7 @@ Exit criteria: 単一の production URL 上で検証 account を使い、auth、
 - [x] P2-04A owner/editor の閲覧・編集・soft delete・restore policy を domain package に実装する
 - [x] P2-05 猫の作成・編集・archive を実装する
 - [x] P2-06 複数猫切り替え UI を実装する
+- [x] P2-06A 猫切り替えを初期レスポンスで描画し、設定画面のPC幅と初期表示のレイアウト移動を修正する
 - [x] P2-07 owner/editor の家族招待を実装する
 - [x] P2-08 invite expiry/revoke と abuse rate limit を実装する
 - [x] P2-09 profile image upload と private delivery を実装する

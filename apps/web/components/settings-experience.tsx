@@ -7,6 +7,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { HouseholdSwitcher } from "@/components/household-switcher";
 import { CatManager } from "@/components/cat-manager";
 import { InvitationManager } from "@/components/invitation-manager";
+import type { CatOverview } from "@/lib/cats";
 
 function SettingSwitch({
   label,
@@ -26,7 +27,11 @@ function SettingSwitch({
   );
 }
 
-export function SettingsExperience() {
+export function SettingsExperience({
+  catOverview,
+}: {
+  catOverview: NonNullable<CatOverview> | null;
+}) {
   return (
     <Tabs.Root className="settings-grid" defaultValue="cats">
       <Tabs.List className="settings-tabs" aria-label="設定の分類">
@@ -48,7 +53,11 @@ export function SettingsExperience() {
           <p className="eyebrow">猫のプロフィール</p>
           <h2>一緒に暮らす猫</h2>
           <p className="muted">プロフィールの編集、追加、保管ができます。</p>
-          <CatManager />
+          <CatManager
+            initialCats={catOverview?.cats ?? []}
+            initialActiveCatId={catOverview?.activeCatId ?? null}
+            initialCanManage={catOverview?.canManage ?? false}
+          />
         </Tabs.Content>
         <Tabs.Content className="settings-panel" value="walk">
           <p className="eyebrow">お散歩への参加</p>

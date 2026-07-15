@@ -183,6 +183,14 @@ Cattower の静かな性格に合わせ、既定を低めにする。
 - `packages/ui` は意味構造と共有 props を持つ framework 非依存の React component を管理する。route、data fetch、Next.js 固有 component、design token の値は `apps/web` に残す
 - 最初の共有 component は `PageHeading` とし、eyebrow、`h1`、説明、任意 action の順序と既存の余白を全主要画面で統一する
 
+### 7.4 設定画面のレスポンシブ構成（決定）
+
+- `/settings` は通常の本文最大幅を使い、狭い本文幅の中へ設定ナビゲーションと編集フォームを押し込まない
+- 1180pxを超える viewport では左に設定ナビゲーション、右に設定内容を置く
+- 901-1180pxでは設定ナビゲーションを横タブにし、設定内容を一列で表示する
+- 猫一覧と編集フォームは利用可能幅が小さい場合に一列へ切り替え、入力欄のラベルと値が欠けない幅を保つ
+- active cat selector と猫管理は初期レスポンスのデータで描画し、空の領域や誤った empty state を先に表示しない
+
 ## 8. お散歩 visual note
 
 お散歩のビジュアル方式（写真切り抜き / 抽象アイコン / 選択式アバター）は **未決定**（[product-spec.md](product-spec.md) §15、[task-plan.md](task-plan.md) P0-08）。本書ではどの方式でも次を満たすこととする。

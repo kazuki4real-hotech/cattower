@@ -1,47 +1,20 @@
 import { cats, userPreferences } from "@cattower/db";
 import { validateCatProfile } from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-import { serializeCat } from "@/lib/cats";
+import { getCatOverview } from "@/lib/cats";
 import { requireActiveMembership } from "@/lib/foundation";
 import { getViewer } from "@/lib/viewer";
 
 async function get(request: Request) {
   const viewer = await getViewer(request.headers);
   if (!viewer) return Response.json({ error: "unauthorized" }, { status: 401 });
-  const membership = await requireActiveMembership(
-    viewer.db,
-    viewer.session.user.id,
-    viewer.household.id,
-  );
-  if (!membership)
-    return Response.json({ error: "forbidden" }, { status: 403 });
-  const list = await viewer.db.query.cats.findMany({
-    where: eq(cats.householdId, viewer.household.id),
-    orderBy: asc(cats.createdAt),
+  const overview = await getCatOverview(viewer);
+  if (!overview) return Response.json({ error: "forbidden" }, { status: 403 });
+  return Response.json(overview, {
+    headers: { "cache-control": "no-store" },
   });
-  const preferences = await viewer.db.query.userPreferences.findFirst({
-    where: eq(userPreferences.userId, viewer.session.user.id),
-  });
-  const available = list.filter((cat) => !cat.archivedAt);
-  const active =
-    available.find((cat) => cat.id === preferences?.activeCatId) ??
-    available[0] ??
-    null;
-  if (active && preferences?.activeCatId !== active.id)
-    await viewer.db
-      .update(userPreferences)
-      .set({ activeCatId: active.id, updatedAt: new Date() })
-      .where(eq(userPreferences.userId, viewer.session.user.id));
-  return Response.json(
-    {
-      cats: list.map(serializeCat),
-      activeCatId: active?.id ?? null,
-      canManage: membership.role === "owner",
-    },
-    { headers: { "cache-control": "no-store" } },
-  );
 }
 
 async function post(request: Request) {

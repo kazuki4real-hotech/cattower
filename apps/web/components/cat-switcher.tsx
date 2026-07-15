@@ -1,29 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Icon } from "@/components/icon";
 
 type CatOption = { id: string; name: string; archivedAt: string | null };
 
-export function CatSwitcher({ compact = false }: { compact?: boolean }) {
-  const [cats, setCats] = useState<CatOption[]>([]);
-  const [activeId, setActiveId] = useState("");
-  useEffect(() => {
-    void fetch("/api/cats", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("load_failed");
-        return response.json() as Promise<{
-          cats: CatOption[];
-          activeCatId: string | null;
-        }>;
-      })
-      .then((data) => {
-        setCats(data.cats.filter((cat) => !cat.archivedAt));
-        setActiveId(data.activeCatId ?? "");
-      })
-      .catch(() => undefined);
-  }, []);
+export function CatSwitcher({
+  cats: initialCats,
+  activeCatId,
+  compact = false,
+}: {
+  cats: CatOption[];
+  activeCatId: string | null;
+  compact?: boolean;
+}) {
+  const cats = initialCats.filter((cat) => !cat.archivedAt);
+  const [activeId, setActiveId] = useState(activeCatId ?? "");
   if (!activeId || cats.length === 0) return null;
   return (
     <label className={`cat-switcher${compact ? " cat-switcher-compact" : ""}`}>

@@ -183,6 +183,8 @@ MVP の household policy:
 - 猫プロフィールの作成・編集・archive・restore は owner だけに許可し、editor は active household 内のプロフィールを閲覧できる
 - household 招待は owner だけが発行・取消できる。256-bit random token の SHA-256 hash だけをD1へ保存し、7日 expiry、一回限りの承認、所有者あたり1時間5件の発行制限をサーバーで検証する
 
+通常画面の App Shell は認証済み viewer の active household、membership、猫一覧、`active_cat_id` を Server Component で一度解決し、その結果を desktop/mobile の猫 selector と設定画面の猫管理へ初期 props として渡す。selector 用の同じ一覧を hydration 後に再取得せず、初期表示の空欄とレイアウト移動を避ける。猫の保存・保管後だけ `/api/cats` を再取得してクライアント状態を同期する。
+
 記録の操作可否は `@cattower/domain` の pure policy で判定する。`active` 以外の membership は role にかかわらず拒否する。`owner` は全記録の閲覧・作成・編集・soft delete・restore が可能で、`editor` は全記録の閲覧と作成、自分が author の記録の編集・soft delete・restore だけが可能。Route Handler は resource の household と author を DB から解決してからこの policy を呼び、クライアント入力の role や author を使用しない。
 
 ### Realtime ticket

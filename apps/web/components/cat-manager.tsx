@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 
 import { CAT_THEME_COLORS } from "@cattower/domain";
 import { Icon } from "@/components/icon";
@@ -27,11 +27,21 @@ const empty = {
   lifeStatus: "living",
 };
 
-export function CatManager() {
-  const [cats, setCats] = useState<Cat[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [canManage, setCanManage] = useState(false);
-  const [status, setStatus] = useState("読み込んでいます");
+export function CatManager({
+  initialCats,
+  initialActiveCatId,
+  initialCanManage,
+}: {
+  initialCats: Cat[];
+  initialActiveCatId: string | null;
+  initialCanManage: boolean;
+}) {
+  const [cats, setCats] = useState<Cat[]>(initialCats);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initialActiveCatId ?? initialCats[0]?.id ?? null,
+  );
+  const [canManage, setCanManage] = useState(initialCanManage);
+  const [status, setStatus] = useState("");
   const applyData = useCallback(
     (data: { cats: Cat[]; activeCatId: string | null; canManage: boolean }) => {
       setCats(data.cats);
@@ -55,24 +65,6 @@ export function CatManager() {
         canManage: boolean;
       },
     );
-  }, [applyData]);
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetch("/api/cats", { cache: "no-store", signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("load_failed");
-        return response.json() as Promise<{
-          cats: Cat[];
-          activeCatId: string | null;
-          canManage: boolean;
-        }>;
-      })
-      .then(applyData)
-      .catch((error) => {
-        if (error instanceof Error && error.name !== "AbortError")
-          setStatus("猫の情報を読み込めませんでした。");
-      });
-    return () => controller.abort();
   }, [applyData]);
   const selected = cats.find((cat) => cat.id === selectedId) ?? null;
   async function save(event: FormEvent<HTMLFormElement>) {
