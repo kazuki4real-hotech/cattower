@@ -181,6 +181,8 @@ MVP の household policy:
 - editor は全記録を閲覧できるが、作成・編集・soft delete・restore は自分の記録だけ
 - owner は household 内のすべての記録、猫、家族、お散歩設定を管理できる
 
+記録の操作可否は `@cattower/domain` の pure policy で判定する。`active` 以外の membership は role にかかわらず拒否する。`owner` は全記録の閲覧・作成・編集・soft delete・restore が可能で、`editor` は全記録の閲覧と作成、自分が author の記録の編集・soft delete・restore だけが可能。Route Handler は resource の household と author を DB から解決してからこの policy を呼び、クライアント入力の role や author を使用しない。
+
 ### Realtime ticket
 
 - Web Worker がログイン済み利用者に 5 分以内の短命 ticket を発行

@@ -16,6 +16,15 @@ export {
   type TownTicketPayload,
 } from "./town-ticket";
 
+export {
+  ENTRY_ACTIONS,
+  canPerformEntryAction,
+  type EntryAction,
+  type EntryPolicyInput,
+  type HouseholdMembershipStatus,
+  type HouseholdRole,
+} from "./household-policy";
+
 export function getProfileImageDerivativeKey(providerKey: string) {
   if (!providerKey.endsWith("/original")) throw new Error("invalid_original_image_key");
   return `${providerKey.slice(0, -"/original".length)}/profile-512.webp`;
