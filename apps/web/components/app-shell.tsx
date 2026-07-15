@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { BrandWordmark } from "@/components/brand-wordmark";
 import { CatSwitcher } from "@/components/cat-switcher";
@@ -36,10 +36,12 @@ function NavLink({
   item,
   pathname,
   mobile = false,
+  unreadCount = 0,
 }: {
   item: readonly [string, string, string];
   pathname: string;
   mobile?: boolean;
+  unreadCount?: number;
 }) {
   const [href, label, icon] = item;
   const current =
@@ -53,7 +55,9 @@ function NavLink({
       <Icon name={icon} filled={current} />
       <span>{label}</span>
       {!mobile && href === "/notifications" ? (
-        <span className="nav-count">2</span>
+        unreadCount ? (
+          <span className="nav-count">{Math.min(unreadCount, 99)}</span>
+        ) : null
       ) : null}
     </Link>
   );
@@ -70,6 +74,39 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const [navCollapsed, setNavCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const loadUnreadCount = useCallback(async () => {
+    const response = await fetch("/api/notifications?summary=1", {
+      cache: "no-store",
+    });
+    if (!response.ok) return;
+    const body = (await response.json()) as { unreadCount?: unknown };
+    if (typeof body.unreadCount === "number") setUnreadCount(body.unreadCount);
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch("/api/notifications?summary=1", {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return response.json() as Promise<{ unreadCount?: unknown }>;
+      })
+      .then((body) => {
+        if (typeof body?.unreadCount === "number")
+          setUnreadCount(body.unreadCount);
+      })
+      .catch(() => undefined);
+    window.addEventListener("cattower:notifications-changed", loadUnreadCount);
+    return () => {
+      controller.abort();
+      window.removeEventListener(
+        "cattower:notifications-changed",
+        loadUnreadCount,
+      );
+    };
+  }, [loadUnreadCount]);
   return (
     <>
       <a className="skip-link" href="#main">
@@ -86,7 +123,12 @@ export function AppShell({
           </nav>
           <nav className="sidebar-foot" aria-label="補助ナビゲーション">
             {secondary.map((item) => (
-              <NavLink key={item[0]} item={item} pathname={pathname} />
+              <NavLink
+                key={item[0]}
+                item={item}
+                pathname={pathname}
+                unreadCount={unreadCount}
+              />
             ))}
           </nav>
         </aside>
@@ -103,9 +145,11 @@ export function AppShell({
             <Link
               className="icon-button"
               href="/notifications"
-              aria-label="未読のお知らせ2件"
+              aria-label={
+                unreadCount ? `未読のお知らせ${unreadCount}件` : "お知らせ"
+              }
             >
-              <Icon name="notifications" filled />
+              <Icon name="notifications" filled={Boolean(unreadCount)} />
             </Link>
             <Link
               className="icon-button"

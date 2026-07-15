@@ -85,7 +85,7 @@ Exit criteria: 単一の production URL 上で検証 account を使い、auth、
 - [x] P2-08 invite expiry/revoke と abuse rate limit を実装する
 - [x] P2-09 profile image upload と private delivery を実装する
 - [x] P2-10 authorization integration tests を作成する
-- [ ] P2-11 notifications schema、dedupe、未読/既読、expiry cleanup を実装する
+- [x] P2-11 notifications schema、dedupe、未読/既読、expiry cleanup を実装する
 - [ ] P2-12 家族招待・承認と upload 完了・失敗の Web 内通知を実装する
 
 Exit criteria: 二つの account で同じ household を共有でき、権限外の猫・メディアへアクセスできない。

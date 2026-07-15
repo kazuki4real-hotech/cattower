@@ -268,6 +268,48 @@ export const mediaAssets = sqliteTable(
   ],
 );
 
+export const notifications = sqliteTable(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    recipientUserId: text("recipient_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: text("type", {
+      enum: [
+        "household_invite",
+        "household_joined",
+        "upload_ready",
+        "upload_failed",
+        "export_ready",
+        "share_expiring",
+        "town_digest",
+      ],
+    }).notNull(),
+    resourceType: text("resource_type", {
+      enum: ["household", "cat", "media_asset"],
+    }),
+    resourceId: text("resource_id"),
+    payloadJson: text("payload_json").notNull().default("{}"),
+    dedupeKey: text("dedupe_key").notNull(),
+    readAt: integer("read_at", { mode: "timestamp_ms" }),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("notifications_recipient_read_created_idx").on(
+      table.recipientUserId,
+      table.readAt,
+      table.createdAt,
+    ),
+    uniqueIndex("notifications_recipient_dedupe_uidx").on(
+      table.recipientUserId,
+      table.dedupeKey,
+    ),
+    index("notifications_expires_idx").on(table.expiresAt),
+  ],
+);
+
 export const schema = {
   user,
   session,
@@ -279,6 +321,7 @@ export const schema = {
   householdInvites,
   cats,
   mediaAssets,
+  notifications,
 };
 
 export type DatabaseSchema = typeof schema;
