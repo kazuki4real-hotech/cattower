@@ -7,32 +7,80 @@ import {
   TOWN_TICKET_TTL_SECONDS,
   validateImageUpload,
   verifyTownTicket,
+  validateCatProfile,
 } from "./index";
+
+describe("validateCatProfile", () => {
+  const valid = {
+    name: "こむぎ",
+    nickname: "こむちゃん",
+    birthPrecision: "day",
+    birthDate: "2022-04-03",
+    adoptionDate: "2022-06-01",
+    lifeStatus: "living",
+    themeColor: "mint",
+  };
+
+  it("normalizes a complete cat profile", () => {
+    expect(validateCatProfile(valid)).toMatchObject({
+      name: "こむぎ",
+      nickname: "こむちゃん",
+      birthPrecision: "day",
+      lifeStatus: "living",
+    });
+  });
+
+  it("rejects missing names, invalid dates, and unknown theme colors", () => {
+    expect(validateCatProfile({ ...valid, name: "" })).toBeNull();
+    expect(
+      validateCatProfile({ ...valid, birthDate: "2022-02-31" }),
+    ).toBeNull();
+    expect(validateCatProfile({ ...valid, themeColor: "purple" })).toBeNull();
+  });
+});
 
 const TOWN_TICKET_SECRET = "test-only-town-ticket-secret-at-least-32-bytes";
 
 describe("validateImageUpload", () => {
   it("accepts a bounded jpeg", () => {
-    expect(validateImageUpload({ fileName: "cat.jpg", contentType: "image/jpeg", byteSize: 1024 }).ok).toBe(true);
+    expect(
+      validateImageUpload({
+        fileName: "cat.jpg",
+        contentType: "image/jpeg",
+        byteSize: 1024,
+      }).ok,
+    ).toBe(true);
   });
 
   it("rejects oversized and svg uploads", () => {
-    expect(validateImageUpload({ fileName: "cat.jpg", contentType: "image/jpeg", byteSize: MAX_IMAGE_BYTES + 1 }).ok).toBe(false);
-    expect(validateImageUpload({ fileName: "cat.svg", contentType: "image/svg+xml", byteSize: 1024 }).ok).toBe(false);
+    expect(
+      validateImageUpload({
+        fileName: "cat.jpg",
+        contentType: "image/jpeg",
+        byteSize: MAX_IMAGE_BYTES + 1,
+      }).ok,
+    ).toBe(false);
+    expect(
+      validateImageUpload({
+        fileName: "cat.svg",
+        contentType: "image/svg+xml",
+        byteSize: 1024,
+      }).ok,
+    ).toBe(false);
   });
 });
 
 describe("getProfileImageDerivativeKey", () => {
   it("keeps the derivative beside its private original", () => {
-    expect(getProfileImageDerivativeKey("households/home/cats/cat/asset/original")).toBe(
-      "households/home/cats/cat/asset/profile-512.webp",
-    );
+    expect(
+      getProfileImageDerivativeKey("households/home/cats/cat/asset/original"),
+    ).toBe("households/home/cats/cat/asset/profile-512.webp");
   });
 
   it("rejects keys outside the original image convention", () => {
-    expect(() => getProfileImageDerivativeKey("households/home/cats/cat/asset")).toThrow(
-      "invalid_original_image_key",
-    );
+    expect(() =>
+      getProfileImageDerivativeKey("households/home/cats/cat/asset"),
+    ).toThrow("invalid_original_image_key");
   });
 });
 

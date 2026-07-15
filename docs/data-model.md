@@ -57,6 +57,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | analytics_consent | regional requirement に応じる |
 | onboarding_step | `0` profile / `1` cat / `2` photo / `3` theme / `4` complete preparation |
 | active_household_id | nullable。現在表示・保存先として選択中の active membership の household |
+| active_cat_id | nullable。active household 内で現在表示対象として選択中の未保管 cat |
 | onboarding_prompted_at | nullable。新規登録 callback から自動案内した時刻。既存利用者は migration で backfill |
 | onboarding_completed_at | nullable。完了時刻 |
 
@@ -105,6 +106,7 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | archived_at | nullable |
 
 猫は必ず一つの household に所属する。お散歩への接続は、接続者の `town_enabled` と猫の `town_access` の両方を評価する。既存DB・protocolとの互換性のため、内部名は当面 `town_*` を維持する。
+猫の保管は `archived_at` を設定する soft archive とし、記録との関係を残す。復元時は `archived_at` を `null` に戻す。
 
 ## 4. Entries
 

@@ -79,8 +79,8 @@ Exit criteria: 単一の production URL 上で検証 account を使い、auth、
 - [x] P2-03LP 透明背景のブランドビジュアル、共通ワードマーク、Snow背景を備えた公開ランディングを実装する
 - [x] P2-04 初回 household 自動作成、owner 一つ・editor 複数所属、active household 切り替えを実装する（招待フローは P2-07 で実装）
 - [x] P2-04A owner/editor の閲覧・編集・soft delete・restore policy を domain package に実装する
-- [ ] P2-05 猫の作成・編集・archive を実装する
-- [ ] P2-06 複数猫切り替え UI を実装する
+- [x] P2-05 猫の作成・編集・archive を実装する
+- [x] P2-06 複数猫切り替え UI を実装する
 - [ ] P2-07 owner/editor の家族招待を実装する
 - [ ] P2-08 invite expiry/revoke と abuse rate limit を実装する
 - [x] P2-09 profile image upload と private delivery を実装する

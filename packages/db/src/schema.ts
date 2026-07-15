@@ -107,6 +107,7 @@ export const userPreferences = sqliteTable("user_preferences", {
     .default(false),
   onboardingStep: integer("onboarding_step").notNull().default(0),
   activeHouseholdId: text("active_household_id"),
+  activeCatId: text("active_cat_id"),
   onboardingPromptedAt: integer("onboarding_prompted_at", {
     mode: "timestamp_ms",
   }),
@@ -168,6 +169,13 @@ export const cats = sqliteTable(
       .references(() => households.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     nickname: text("nickname"),
+    birthDate: integer("birth_date", { mode: "timestamp_ms" }),
+    birthPrecision: text("birth_precision", {
+      enum: ["day", "month", "year", "unknown"],
+    })
+      .notNull()
+      .default("unknown"),
+    adoptionDate: integer("adoption_date", { mode: "timestamp_ms" }),
     themeColor: text("theme_color").notNull().default("mint"),
     profileAssetId: text("profile_asset_id").references(() => mediaAssets.id, {
       onDelete: "set null",
