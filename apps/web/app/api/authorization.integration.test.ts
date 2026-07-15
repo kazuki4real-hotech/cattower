@@ -24,6 +24,11 @@ import { PUT as updateCat } from "@/app/api/cats/[catId]/route";
 import { GET as getMedia } from "@/app/api/media/[assetId]/route";
 import { POST as createEntry } from "@/app/api/entries/route";
 import {
+  DELETE as deleteEntry,
+  PUT as updateEntry,
+} from "@/app/api/entries/[entryId]/route";
+import { POST as restoreEntry } from "@/app/api/entries/[entryId]/restore/route";
+import {
   GET as getHouseholds,
   PUT as switchHousehold,
 } from "@/app/api/households/active/route";
@@ -316,6 +321,128 @@ describe("authorization integration", () => {
       }),
     );
     expect(denied.status).toBe(400);
+  });
+
+  it("reuses one autosaved draft and publishes it with optimistic versioning", async () => {
+    setViewer(editorId, homeId);
+    const first = await createEntry(
+      request("/api/entries", "POST", {
+        mode: "draft",
+        body: "",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [],
+        tags: [],
+      }),
+    );
+    expect(first.status).toBe(201);
+    const draft = (await first.json()) as { entryId: string; version: number };
+    const second = await createEntry(
+      request("/api/entries", "POST", {
+        mode: "draft",
+        body: "途中まで",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [],
+        tags: ["下書き"],
+      }),
+    );
+    expect(second.status).toBe(200);
+    await expect(second.json()).resolves.toMatchObject({
+      entryId: draft.entryId,
+      version: 2,
+    });
+    expect(await db.query.entries.findMany()).toHaveLength(1);
+
+    const published = await updateEntry(
+      request(`/api/entries/${draft.entryId}`, "PUT", {
+        mode: "ready",
+        version: 2,
+        body: "書き終えた記録",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [],
+        tags: ["完成"],
+      }),
+      { params: Promise.resolve({ entryId: draft.entryId }) },
+    );
+    expect(published.status).toBe(200);
+    expect(await db.query.entries.findFirst()).toMatchObject({
+      id: draft.entryId,
+      status: "ready",
+      version: 3,
+    });
+  });
+
+  it("lets authors delete and restore records while rejecting stale updates", async () => {
+    setViewer(editorId, homeId);
+    const created = await createEntry(
+      request("/api/entries", "POST", {
+        body: "残しておく記録",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [editorEntryAssetId],
+        tags: [],
+      }),
+    );
+    const entry = (await created.json()) as {
+      entryId: string;
+      version: number;
+    };
+    const stale = await updateEntry(
+      request(`/api/entries/${entry.entryId}`, "PUT", {
+        version: 0,
+        body: "古い画面",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [editorEntryAssetId],
+        tags: [],
+      }),
+      { params: Promise.resolve({ entryId: entry.entryId }) },
+    );
+    expect(stale.status).toBe(409);
+
+    const removed = await deleteEntry(
+      request(`/api/entries/${entry.entryId}`, "DELETE", { version: 1 }),
+      { params: Promise.resolve({ entryId: entry.entryId }) },
+    );
+    expect(removed.status).toBe(200);
+    expect((await db.query.entries.findFirst())?.deletedAt).toBeInstanceOf(
+      Date,
+    );
+
+    const restored = await restoreEntry(
+      request(`/api/entries/${entry.entryId}/restore`, "POST", { version: 2 }),
+      { params: Promise.resolve({ entryId: entry.entryId }) },
+    );
+    expect(restored.status).toBe(200);
+    expect(await db.query.entries.findFirst()).toMatchObject({
+      deletedAt: null,
+      version: 3,
+    });
+  });
+
+  it("keeps editor mutations scoped to records they authored", async () => {
+    setViewer(ownerId, homeId);
+    const created = await createEntry(
+      request("/api/entries", "POST", {
+        body: "ownerの記録",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [],
+        tags: [],
+      }),
+    );
+    const entry = (await created.json()) as { entryId: string };
+    setViewer(editorId, homeId);
+    expect(
+      (
+        await deleteEntry(
+          request(`/api/entries/${entry.entryId}`, "DELETE", { version: 1 }),
+          { params: Promise.resolve({ entryId: entry.entryId }) },
+        )
+      ).status,
+    ).toBe(403);
   });
 
   it("allows editors to prepare entry photos without profile access", async () => {

@@ -140,6 +140,8 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 
 初期公開範囲を entries の単純な `public` flag にしない。おうちの entry は常に private resource とし、家族 membership、share link、town card という別 resource が限定的な view を作る。
 
+`draft`は同じ`household_id + author_user_id`につき未削除1件だけを保持する。新規記録画面はこの行を再利用し、本文、日付、猫、タグ、選択済み画像を自動保存する。`ready`への切り替えには本文またはready状態の画像を必須とし、更新時は`version`を使って古い画面からの上書きを409で拒否する。soft deleteは`deleted_at`を設定して通常queryから即時に除外し、restore時に解除する。
+
 ### entry_cats
 
 複数猫が写る記録に対応する join table。
@@ -165,7 +167,7 @@ tag は household 内で一意。case/Unicode を正規化した `normalized_nam
 | owner_user_id     | uploader                                                                |
 | kind              | `image` / `video`                                                       |
 | provider          | `r2` / `stream`                                                         |
-| purpose           | `profile` / `entry`; upload完了処理と表示用derivativeを用途別に固定    |
+| purpose           | `profile` / `entry`; upload完了処理と表示用derivativeを用途別に固定     |
 | provider_key      | R2 object key or Stream UID; never public URL                           |
 | original_filename | sanitized display only                                                  |
 | mime_type         | server verified                                                         |

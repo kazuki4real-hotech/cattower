@@ -96,11 +96,11 @@ Exit criteria: 二つの account で同じ household を共有でき、権限外
 ### Record foundation
 
 - [x] P3-01 entry、entry_cats、tag schema/migration を作る
-- [ ] P3-02 共通 entry editor と autosaved draft を実装する
+- [x] P3-02 共通 entry editor と autosaved draft を実装する
 - [x] P3-03 本文またはメディアを保存できる共通記録フォーム
 - [x] P3-04 記録作成時の複数タグ入力・正規化
 - [x] P3-09 複数猫への紐付けを実装する
-- [ ] P3-10 edit、soft delete、restore を実装する
+- [x] P3-10 edit、soft delete、restore を実装する
 
 ### Media
 

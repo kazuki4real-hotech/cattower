@@ -43,14 +43,42 @@ export async function getRecentEntries(
   return hydrateEntries(viewer, rows);
 }
 
-export async function getEntry(viewer: Viewer, entryId: string) {
+export async function getEntry(
+  viewer: Viewer,
+  entryId: string,
+  includeDeleted = false,
+) {
   const row = await viewer.db.query.entries.findFirst({
     where: and(
       eq(entries.id, entryId),
       eq(entries.householdId, viewer.household.id),
       eq(entries.status, "ready"),
+      includeDeleted ? undefined : isNull(entries.deletedAt),
+    ),
+  });
+  return row ? ((await hydrateEntries(viewer, [row]))[0] ?? null) : null;
+}
+
+export async function getEditableEntry(viewer: Viewer, entryId: string) {
+  const row = await viewer.db.query.entries.findFirst({
+    where: and(
+      eq(entries.id, entryId),
+      eq(entries.householdId, viewer.household.id),
       isNull(entries.deletedAt),
     ),
+  });
+  return row ? ((await hydrateEntries(viewer, [row]))[0] ?? null) : null;
+}
+
+export async function getCurrentDraft(viewer: Viewer) {
+  const row = await viewer.db.query.entries.findFirst({
+    where: and(
+      eq(entries.householdId, viewer.household.id),
+      eq(entries.authorUserId, viewer.session.user.id),
+      eq(entries.status, "draft"),
+      isNull(entries.deletedAt),
+    ),
+    orderBy: desc(entries.updatedAt),
   });
   return row ? ((await hydrateEntries(viewer, [row]))[0] ?? null) : null;
 }
@@ -97,8 +125,12 @@ async function hydrateEntries(viewer: Viewer, rows: EntryRow[]) {
 
   return rows.map((entry) => ({
     id: entry.id,
+    authorUserId: entry.authorUserId,
     title: entry.title,
     body: entry.body,
+    status: entry.status,
+    version: entry.version,
+    deletedAt: entry.deletedAt?.toISOString() ?? null,
     occurredDate: entry.occurredAt.toISOString().slice(0, 10),
     createdAt: entry.createdAt.toISOString(),
     cats: catRows

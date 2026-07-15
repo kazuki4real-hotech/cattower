@@ -145,6 +145,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 同日にmigration `0010_entries_and_media.sql`をproduction D1へ適用し、記録本体、対象猫、タグ、画像の関連テーブルと`media_assets.purpose`を追加した。foreign key checkが空であることを確認後、Worker version `ca02a220-33cd-4bdc-b090-033c4e80fe65`をdeployした。初期実装は1記録につき画像1枚までで、動画は未提供とする。
 
+続けてmigration `0011_single_entry_draft.sql`を適用し、同じhousehold・作成者の未削除draftを1件に制限するpartial unique indexを追加した。重複draftが0件であることとforeign key checkを確認後、自動下書き、編集、soft delete、restoreを含むWorker version `94e5c39e-8143-4045-b651-c9249a8ab213`をdeployした。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash

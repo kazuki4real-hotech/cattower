@@ -300,6 +300,9 @@ export const entries = sqliteTable(
       table.occurredAt,
       table.deletedAt,
     ),
+    uniqueIndex("entries_author_household_draft_uidx")
+      .on(table.householdId, table.authorUserId)
+      .where(sql`${table.status} = 'draft' AND ${table.deletedAt} IS NULL`),
   ],
 );
 

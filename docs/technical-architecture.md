@@ -51,7 +51,7 @@ Cloudflare の公式ガイドは Next.js を OpenNext adapter で Workers にデ
 - Build command: `pnpm cf:build`
 - Deploy command: `pnpm --filter @cattower/web exec wrangler deploy`
 - Trigger: Cloudflare Workers Builds receives a push to `main`
-- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、登録直後だけ開始する3 step onboarding、文章・写真・日付・タグ・複数猫を保存する記録作成、おうちの最近の記録、記録詳細、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。既存利用者は`onboarding_prompted_at`のmigration backfillで自動表示対象から除外し、未完了状態は通常画面のバナーから再開する。Google login/logout、7日session、再読み込み後のsession継続、認証済みブラウザからのR2直接upload、Images Binding `.info()`とprofile derivative、認証あり/なしのprivate配信を本番確認済み。realtime Workerは短命signed ticket、origin制限、WebSocket upgrade、hibernation後のattachment復元まで本番確認済み。Streamと検索・ボード・再発見・お散歩のsample data置換は未完了
+- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、登録直後だけ開始する3 step onboarding、文章・写真・日付・タグ・複数猫を保存する共通記録editor、自動下書き、編集・soft delete・restore、おうちの最近の記録、記録詳細、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。既存利用者は`onboarding_prompted_at`のmigration backfillで自動表示対象から除外し、未完了状態は通常画面のバナーから再開する。Google login/logout、7日session、再読み込み後のsession継続、認証済みブラウザからのR2直接upload、Images Binding `.info()`とprofile derivative、認証あり/なしのprivate配信を本番確認済み。realtime Workerは短命signed ticket、origin制限、WebSocket upgrade、hibernation後のattachment復元まで本番確認済み。Streamと検索・ボード・再発見・お散歩のsample data置換は未完了
 - Public hostname: `https://cattower-web.kazuki-kitada.workers.dev/`。独自ドメインは P0-07 で決定後に追加し、Workers URL は運用確認用として維持する
 
 build、確認、ログ、rollback の操作手順は [deployment-runbook.md](deployment-runbook.md) を正本とする。
@@ -186,6 +186,8 @@ MVP の household policy:
 通常画面の App Shell は認証済み viewer の active household、membership、猫一覧、`active_cat_id` を Server Component で一度解決し、その結果を desktop/mobile の猫 selector と設定画面の猫管理へ初期 props として渡す。selector 用の同じ一覧を hydration 後に再取得せず、初期表示の空欄とレイアウト移動を避ける。猫の保存後だけ `/api/cats` を再取得してクライアント状態を同期する。
 
 記録の操作可否は `@cattower/domain` の pure policy で判定する。`active` 以外の membership は role にかかわらず拒否する。`owner` は全記録の閲覧・作成・編集・soft delete・restore が可能で、`editor` は全記録の閲覧と作成、自分が author の記録の編集・soft delete・restore だけが可能。Route Handler は resource の household と author を DB から解決してからこの policy を呼び、クライアント入力の role や author を使用しない。
+
+新規記録のautosaveは`draft` entryをserver側へupsertし、同じhousehold・authorの未削除draftをpartial unique indexで1件に制限する。ready entryの更新、soft delete、restoreはclientから送られた`version`とDBのversionを比較し、不一致を409として扱う。関連する猫・タグ・メディアはentry本体の更新後にD1 batchで置き換える。
 
 ### Realtime ticket
 

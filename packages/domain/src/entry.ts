@@ -5,6 +5,17 @@ export const MAX_ENTRY_TAG_LENGTH = 30;
 export const MAX_ENTRY_CATS = 20;
 
 export function validateEntryInput(input: Record<string, unknown>) {
+  return validateEntryValues(input, false);
+}
+
+export function validateEntryDraftInput(input: Record<string, unknown>) {
+  return validateEntryValues(input, true);
+}
+
+function validateEntryValues(
+  input: Record<string, unknown>,
+  allowEmptyContent: boolean,
+) {
   const title = typeof input.title === "string" ? input.title.trim() : "";
   const body = typeof input.body === "string" ? input.body.trim() : "";
   const occurredDate = parseDate(input.occurredDate);
@@ -31,7 +42,7 @@ export function validateEntryInput(input: Record<string, unknown>) {
     assetIds.length > 1 ||
     tags.length > MAX_ENTRY_TAGS ||
     tags.some(({ name }) => name.length > MAX_ENTRY_TAG_LENGTH) ||
-    (!body && assetIds.length === 0)
+    (!allowEmptyContent && !body && assetIds.length === 0)
   )
     return null;
 

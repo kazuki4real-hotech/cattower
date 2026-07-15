@@ -1,8 +1,18 @@
-import { cats, mediaAssets, tags } from "@cattower/db";
-import { canPerformEntryAction, validateEntryInput } from "@cattower/domain";
+import { entries } from "@cattower/db";
+import {
+  canPerformEntryAction,
+  validateEntryDraftInput,
+  validateEntryInput,
+} from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 
+import {
+  entryRelationStatements,
+  guardedEntryRelationStatements,
+  resolveEntryTagIds,
+  validateEntryRelations,
+} from "@/lib/entry-mutations";
 import { requireActiveMembership } from "@/lib/foundation";
 import { getViewer } from "@/lib/viewer";
 
@@ -28,71 +38,36 @@ async function post(request: Request) {
     string,
     unknown
   > | null;
-  const input = body ? validateEntryInput(body) : null;
+  const mode = body?.mode === "draft" ? "draft" : "ready";
+  const input = body
+    ? mode === "draft"
+      ? validateEntryDraftInput(body)
+      : validateEntryInput(body)
+    : null;
   if (!input) return Response.json({ error: "invalid_entry" }, { status: 400 });
+  if (!(await validateEntryRelations(viewer, input)))
+    return Response.json({ error: "invalid_relations" }, { status: 400 });
 
-  const catRows = await viewer.db
-    .select({ id: cats.id })
-    .from(cats)
-    .where(
-      and(
-        eq(cats.householdId, viewer.household.id),
-        inArray(cats.id, input.catIds),
+  if (mode === "draft") {
+    const existing = await viewer.db.query.entries.findFirst({
+      where: and(
+        eq(entries.householdId, viewer.household.id),
+        eq(entries.authorUserId, viewer.session.user.id),
+        eq(entries.status, "draft"),
+        isNull(entries.deletedAt),
       ),
-    );
-  if (catRows.length !== input.catIds.length)
-    return Response.json({ error: "invalid_cats" }, { status: 400 });
-
-  if (input.assetIds.length) {
-    const assetRows = await viewer.db
-      .select({ id: mediaAssets.id })
-      .from(mediaAssets)
-      .where(
-        and(
-          inArray(mediaAssets.id, input.assetIds),
-          eq(mediaAssets.householdId, viewer.household.id),
-          eq(mediaAssets.ownerUserId, viewer.session.user.id),
-          eq(mediaAssets.purpose, "entry"),
-          eq(mediaAssets.status, "ready"),
-        ),
-      );
-    if (assetRows.length !== input.assetIds.length)
-      return Response.json({ error: "invalid_media" }, { status: 400 });
+      orderBy: desc(entries.updatedAt),
+    });
+    if (existing)
+      return persistExistingDraft(viewer, existing.id, existing.version, input);
   }
 
-  for (const tag of input.tags) {
-    await viewer.db
-      .insert(tags)
-      .values({
-        id: crypto.randomUUID(),
-        householdId: viewer.household.id,
-        name: tag.name,
-        normalizedName: tag.normalizedName,
-      })
-      .onConflictDoNothing({
-        target: [tags.householdId, tags.normalizedName],
-      });
-  }
-  const tagRows = input.tags.length
-    ? await viewer.db
-        .select({ id: tags.id, normalizedName: tags.normalizedName })
-        .from(tags)
-        .where(
-          and(
-            eq(tags.householdId, viewer.household.id),
-            inArray(
-              tags.normalizedName,
-              input.tags.map((tag) => tag.normalizedName),
-            ),
-          ),
-        )
-    : [];
-
+  const tagRows = await resolveEntryTagIds(viewer, input);
   const entryId = crypto.randomUUID();
   const now = Date.now();
-  const statements: D1PreparedStatement[] = [
+  await viewer.env.DB.batch([
     viewer.env.DB.prepare(
-      "INSERT INTO entries (id, household_id, primary_cat_id, author_user_id, title, body, occurred_at, occurred_precision, status, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'day', 'ready', 1, ?, ?)",
+      "INSERT INTO entries (id, household_id, primary_cat_id, author_user_id, title, body, occurred_at, occurred_precision, status, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'day', ?, 1, ?, ?)",
     ).bind(
       entryId,
       viewer.household.id,
@@ -101,28 +76,50 @@ async function post(request: Request) {
       input.title,
       input.body,
       input.occurredAt.valueOf(),
+      mode,
       now,
       now,
     ),
-    ...input.catIds.map((catId, index) =>
-      viewer.env.DB.prepare(
-        "INSERT INTO entry_cats (entry_id, cat_id, sort_order) VALUES (?, ?, ?)",
-      ).bind(entryId, catId, index),
-    ),
-    ...input.assetIds.map((assetId, index) =>
-      viewer.env.DB.prepare(
-        "INSERT INTO entry_media (entry_id, media_asset_id, role, sort_order) VALUES (?, ?, ?, ?)",
-      ).bind(entryId, assetId, index === 0 ? "primary" : "gallery", index),
-    ),
-    ...tagRows.map((tag) =>
-      viewer.env.DB.prepare(
-        "INSERT INTO entry_tags (entry_id, tag_id) VALUES (?, ?)",
-      ).bind(entryId, tag.id),
-    ),
-  ];
-  await viewer.env.DB.batch(statements);
+    ...entryRelationStatements(viewer, entryId, input, tagRows, false),
+  ]);
 
-  return Response.json({ ok: true, entryId }, { status: 201 });
+  return Response.json({ ok: true, entryId, version: 1 }, { status: 201 });
+}
+
+async function persistExistingDraft(
+  viewer: NonNullable<Awaited<ReturnType<typeof getViewer>>>,
+  entryId: string,
+  version: number,
+  input: NonNullable<ReturnType<typeof validateEntryDraftInput>>,
+) {
+  const tagRows = await resolveEntryTagIds(viewer, input);
+  const nextVersion = version + 1;
+  const updatedAt = Date.now();
+  const results = await viewer.env.DB.batch([
+    viewer.env.DB.prepare(
+      "UPDATE entries SET primary_cat_id = ?, title = ?, body = ?, occurred_at = ?, version = ?, updated_at = ? WHERE id = ? AND version = ?",
+    ).bind(
+      input.catIds[0],
+      input.title,
+      input.body,
+      input.occurredAt.valueOf(),
+      nextVersion,
+      updatedAt,
+      entryId,
+      version,
+    ),
+    ...guardedEntryRelationStatements(
+      viewer,
+      entryId,
+      input,
+      tagRows,
+      nextVersion,
+      updatedAt,
+    ),
+  ]);
+  if (results[0]?.meta.changes !== 1)
+    return Response.json({ error: "version_conflict" }, { status: 409 });
+  return Response.json({ ok: true, entryId, version: nextVersion });
 }
 
 export const POST = instrumentRequestHandler(

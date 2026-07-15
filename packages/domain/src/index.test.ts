@@ -8,6 +8,7 @@ import {
   validateImageUpload,
   verifyTownTicket,
   validateCatProfile,
+  validateEntryDraftInput,
   validateEntryInput,
   createInviteToken,
   hashInviteToken,
@@ -85,6 +86,17 @@ describe("validateEntryInput", () => {
     expect(
       validateEntryInput({ ...base, body: "ひとこと", catIds: [] }),
     ).toBeNull();
+  });
+
+  it("allows an empty draft while keeping structural validation", () => {
+    const draft = {
+      occurredDate: "2026-07-15",
+      catIds: ["cat-1"],
+      assetIds: [],
+      tags: [],
+    };
+    expect(validateEntryDraftInput(draft)).toMatchObject({ body: null });
+    expect(validateEntryDraftInput({ ...draft, catIds: [] })).toBeNull();
   });
 });
 

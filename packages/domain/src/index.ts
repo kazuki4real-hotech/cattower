@@ -47,6 +47,7 @@ export {
   MAX_ENTRY_TAGS,
   MAX_ENTRY_TITLE_LENGTH,
   normalizeTag,
+  validateEntryDraftInput,
   validateEntryInput,
 } from "./entry";
 
