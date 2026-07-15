@@ -139,6 +139,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 | R2             | `cattower-media-production` (private) |
 | Durable Object | `TownRoom` via `TOWN_ROOM` binding    |
 
+2026-07-15にempty state確認のため、production D1の認証・利用者設定・household・猫・招待・通知・media metadataを全件削除した。`user`、`session`、`account`、`verification`、`user_preferences`、`households`、`household_members`、`household_invites`、`cats`、`media_assets`、`notifications`が0件であることを確認し、`d1_migrations` 8件とschemaは保持した。Cloudflare管理の`_cf_KV`はD1 APIからの読み書きが許可されない内部表のため操作対象外とし、R2 objectもこのD1リセットには含めていない。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash
