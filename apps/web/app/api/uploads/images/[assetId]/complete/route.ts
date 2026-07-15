@@ -1,5 +1,8 @@
 import { cats, mediaAssets } from "@cattower/db";
 import {
+  ENTRY_IMAGE_MAX_WIDTH,
+  ENTRY_IMAGE_MIME_TYPE,
+  getEntryImageDerivativeKey,
   getProfileImageDerivativeKey,
   MAX_IMAGE_BYTES,
   PROFILE_IMAGE_MIME_TYPE,
@@ -33,7 +36,10 @@ async function post(
     viewer.session.user.id,
     asset.householdId,
   );
-  if (membership?.role !== "owner")
+  if (
+    !membership ||
+    (asset.purpose === "profile" && membership.role !== "owner")
+  )
     return Response.json({ error: "forbidden" }, { status: 403 });
 
   const head = await viewer.env.MEDIA.head(asset.providerKey);
@@ -56,7 +62,10 @@ async function post(
     return failUpload(viewer.db, asset, "image_processing_not_configured", 503);
   }
 
-  const derivativeKey = getProfileImageDerivativeKey(asset.providerKey);
+  const derivativeKey =
+    asset.purpose === "entry"
+      ? getEntryImageDerivativeKey(asset.providerKey)
+      : getProfileImageDerivativeKey(asset.providerKey);
   try {
     const originalBytes = await object.arrayBuffer();
     const infoStream = new Response(originalBytes).body;
@@ -73,27 +82,40 @@ async function post(
     )
       throw new Error("invalid_image");
 
-    const derivative = await images
-      .input(transformStream)
-      .transform({
-        width: PROFILE_IMAGE_SIZE,
-        height: PROFILE_IMAGE_SIZE,
-        fit: "cover",
-        gravity: "auto",
-      })
-      .output({
-        format: PROFILE_IMAGE_MIME_TYPE,
-        quality: 82,
-        anim: false,
-      });
+    const transformer = images.input(transformStream);
+    const derivative = await (
+      asset.purpose === "entry"
+        ? transformer.transform({
+            width: ENTRY_IMAGE_MAX_WIDTH,
+            fit: "scale-down",
+          })
+        : transformer.transform({
+            width: PROFILE_IMAGE_SIZE,
+            height: PROFILE_IMAGE_SIZE,
+            fit: "cover",
+            gravity: "auto",
+          })
+    ).output({
+      format:
+        asset.purpose === "entry"
+          ? ENTRY_IMAGE_MIME_TYPE
+          : PROFILE_IMAGE_MIME_TYPE,
+      quality: 82,
+      anim: false,
+    });
     const derivativeResponse = derivative.response();
     if (!derivativeResponse.ok) throw new Error("derivative_failed");
     await viewer.env.MEDIA.put(
       derivativeKey,
       await derivativeResponse.arrayBuffer(),
       {
-        httpMetadata: { contentType: PROFILE_IMAGE_MIME_TYPE },
-        customMetadata: { "asset-id": asset.id, variant: "profile" },
+        httpMetadata: {
+          contentType:
+            asset.purpose === "entry"
+              ? ENTRY_IMAGE_MIME_TYPE
+              : PROFILE_IMAGE_MIME_TYPE,
+        },
+        customMetadata: { "asset-id": asset.id, variant: asset.purpose },
       },
     );
 
@@ -110,7 +132,7 @@ async function post(
       .where(eq(mediaAssets.id, asset.id));
 
     const catId = asset.providerKey.split("/")[3];
-    if (catId) {
+    if (asset.purpose === "profile" && catId) {
       await viewer.db
         .update(cats)
         .set({ profileAssetId: asset.id, updatedAt: new Date() })
@@ -150,11 +172,15 @@ async function createUploadNotification(
     type: outcome === "ready" ? "upload_ready" : "upload_failed",
     title:
       outcome === "ready"
-        ? "写真の準備ができました"
+        ? asset.purpose === "entry"
+          ? "記録の写真を準備できました"
+          : "写真の準備ができました"
         : "写真を設定できませんでした",
     message:
       outcome === "ready"
-        ? "猫のプロフィール写真を表示できるようになりました。"
+        ? asset.purpose === "entry"
+          ? "記録に写真を追加できるようになりました。"
+          : "猫のプロフィール写真を表示できるようになりました。"
         : "画像を確認できませんでした。別の写真でお試しください。",
     dedupeKey: `upload_${outcome}:${asset.id}`,
     resourceType: "media_asset",

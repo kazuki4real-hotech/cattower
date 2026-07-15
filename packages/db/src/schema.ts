@@ -234,6 +234,9 @@ export const mediaAssets = sqliteTable(
       .references(() => user.id, { onDelete: "restrict" }),
     kind: text("kind", { enum: ["image", "video"] }).notNull(),
     provider: text("provider", { enum: ["r2", "stream"] }).notNull(),
+    purpose: text("purpose", { enum: ["profile", "entry"] })
+      .notNull()
+      .default("profile"),
     providerKey: text("provider_key").notNull().unique(),
     originalFilename: text("original_filename").notNull(),
     mimeType: text("mime_type").notNull(),
@@ -258,6 +261,114 @@ export const mediaAssets = sqliteTable(
       table.householdId,
       table.status,
     ),
+  ],
+);
+
+export const entries = sqliteTable(
+  "entries",
+  {
+    id: text("id").primaryKey(),
+    householdId: text("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    primaryCatId: text("primary_cat_id").references(() => cats.id, {
+      onDelete: "set null",
+    }),
+    authorUserId: text("author_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    title: text("title"),
+    body: text("body"),
+    occurredAt: integer("occurred_at", { mode: "timestamp_ms" }).notNull(),
+    occurredPrecision: text("occurred_precision", {
+      enum: ["minute", "day", "month"],
+    })
+      .notNull()
+      .default("day"),
+    status: text("status", {
+      enum: ["draft", "ready", "processing", "failed"],
+    })
+      .notNull()
+      .default("ready"),
+    version: integer("version").notNull().default(1),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("entries_household_occurred_deleted_idx").on(
+      table.householdId,
+      table.occurredAt,
+      table.deletedAt,
+    ),
+  ],
+);
+
+export const entryCats = sqliteTable(
+  "entry_cats",
+  {
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    catId: text("cat_id")
+      .notNull()
+      .references(() => cats.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.entryId, table.catId] }),
+    index("entry_cats_cat_entry_idx").on(table.catId, table.entryId),
+  ],
+);
+
+export const tags = sqliteTable(
+  "tags",
+  {
+    id: text("id").primaryKey(),
+    householdId: text("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    normalizedName: text("normalized_name").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("tags_household_normalized_uidx").on(
+      table.householdId,
+      table.normalizedName,
+    ),
+  ],
+);
+
+export const entryTags = sqliteTable(
+  "entry_tags",
+  {
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.entryId, table.tagId] })],
+);
+
+export const entryMedia = sqliteTable(
+  "entry_media",
+  {
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    mediaAssetId: text("media_asset_id")
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: "restrict" }),
+    role: text("role", { enum: ["primary", "gallery"] })
+      .notNull()
+      .default("primary"),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.entryId, table.mediaAssetId] }),
+    index("entry_media_asset_idx").on(table.mediaAssetId),
   ],
 );
 
@@ -314,6 +425,11 @@ export const schema = {
   householdInvites,
   cats,
   mediaAssets,
+  entries,
+  entryCats,
+  tags,
+  entryTags,
+  entryMedia,
   notifications,
 };
 

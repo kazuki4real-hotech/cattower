@@ -1,6 +1,9 @@
 import {
   cats,
   createDatabase,
+  entryCats,
+  entryMedia,
+  entryTags,
   householdMembers,
   households,
   mediaAssets,
@@ -19,6 +22,7 @@ vi.mock("@/lib/viewer", () => ({
 import { GET as getCats, POST as createCat } from "@/app/api/cats/route";
 import { PUT as updateCat } from "@/app/api/cats/[catId]/route";
 import { GET as getMedia } from "@/app/api/media/[assetId]/route";
+import { POST as createEntry } from "@/app/api/entries/route";
 import {
   GET as getHouseholds,
   PUT as switchHousehold,
@@ -42,6 +46,7 @@ const outsiderCatId = "cat-outsider";
 const assetId = "asset-home";
 const editorAssetId = "asset-editor";
 const failedAssetId = "asset-failed";
+const editorEntryAssetId = "asset-editor-entry";
 
 beforeEach(async () => {
   viewerState.current = null;
@@ -121,7 +126,7 @@ beforeEach(async () => {
       originalFilename: "mugi-editor.jpg",
       mimeType: "image/jpeg",
       byteSize: 5,
-      status: "pending",
+      status: "ready",
     },
     {
       id: failedAssetId,
@@ -134,6 +139,19 @@ beforeEach(async () => {
       mimeType: "image/jpeg",
       byteSize: 5,
       status: "pending",
+    },
+    {
+      id: editorEntryAssetId,
+      householdId: homeId,
+      ownerUserId: editorId,
+      kind: "image",
+      provider: "r2",
+      purpose: "entry",
+      providerKey: "households/home/cats/mugi/editor-entry/original",
+      originalFilename: "entry.jpg",
+      mimeType: "image/jpeg",
+      byteSize: 5,
+      status: "ready",
     },
   ]);
 });
@@ -196,6 +214,16 @@ describe("authorization integration", () => {
     });
     expect(allowed.status).toBe(200);
     expect((await allowed.arrayBuffer()).byteLength).toBe(5);
+    const entryImage = await getMedia(
+      request(`/api/media/${editorEntryAssetId}?variant=entry`),
+      { params: Promise.resolve({ assetId: editorEntryAssetId }) },
+    );
+    expect(entryImage.status).toBe(200);
+    const wrongVariant = await getMedia(
+      request(`/api/media/${editorEntryAssetId}?variant=profile`),
+      { params: Promise.resolve({ assetId: editorEntryAssetId }) },
+    );
+    expect(wrongVariant.status).toBe(400);
 
     setViewer(outsiderId, outsiderHomeId);
     const denied = await getMedia(request(`/api/media/${assetId}`), {
@@ -251,6 +279,62 @@ describe("authorization integration", () => {
       type: "upload_failed",
       resourceId: failedAssetId,
     });
+  });
+
+  it("lets active household members create private records", async () => {
+    setViewer(editorId, homeId);
+    const created = await createEntry(
+      request("/api/entries", "POST", {
+        title: "夕方の窓辺",
+        body: "風を見ていた。",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [editorEntryAssetId],
+        tags: ["窓辺", "夕方"],
+      }),
+    );
+    expect(created.status).toBe(201);
+    const result = (await created.json()) as { entryId: string };
+    expect(await db.query.entries.findFirst()).toMatchObject({
+      id: result.entryId,
+      householdId: homeId,
+      authorUserId: editorId,
+      status: "ready",
+    });
+    expect(await db.select().from(entryCats)).toHaveLength(1);
+    expect(await db.select().from(entryMedia)).toHaveLength(1);
+    expect(await db.select().from(entryTags)).toHaveLength(2);
+
+    setViewer(outsiderId, outsiderHomeId);
+    const denied = await createEntry(
+      request("/api/entries", "POST", {
+        body: "見えない記録",
+        occurredDate: "2026-07-15",
+        catIds: [catId],
+        assetIds: [],
+        tags: [],
+      }),
+    );
+    expect(denied.status).toBe(400);
+  });
+
+  it("allows editors to prepare entry photos without profile access", async () => {
+    setViewer(editorId, homeId);
+    const presign = await presignProfileImage(
+      request("/api/uploads/images/presign", "POST", {
+        purpose: "entry",
+        catId,
+        contentType: "image/jpeg",
+        byteSize: 1024,
+        fileName: "entry.jpg",
+      }),
+    );
+    expect(presign.status).toBe(503);
+    const completion = await completeProfileImage(
+      request(`/api/uploads/images/${editorEntryAssetId}/complete`, "POST"),
+      { params: Promise.resolve({ assetId: editorEntryAssetId }) },
+    );
+    expect(completion.status).toBe(422);
   });
 
   it("allows household switching only for active memberships", async () => {
@@ -342,6 +426,11 @@ async function clearDatabase() {
   for (const table of [
     "notifications",
     "household_invites",
+    "entry_tags",
+    "tags",
+    "entry_media",
+    "entry_cats",
+    "entries",
     "media_assets",
     "cats",
     "household_members",

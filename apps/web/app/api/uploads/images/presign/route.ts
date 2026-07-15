@@ -19,6 +19,7 @@ async function post(request: Request) {
   > | null;
   if (!body || typeof body.catId !== "string")
     return Response.json({ error: "invalid_request" }, { status: 400 });
+  const purpose = body.purpose === "entry" ? "entry" : "profile";
   const validated = validateImageUpload({
     contentType: body.contentType,
     byteSize: body.byteSize,
@@ -39,7 +40,7 @@ async function post(request: Request) {
     viewer.session.user.id,
     cat.householdId,
   );
-  if (membership?.role !== "owner")
+  if (!membership || (purpose === "profile" && membership.role !== "owner"))
     return Response.json({ error: "forbidden" }, { status: 403 });
 
   if (!viewer.env.R2_ACCESS_KEY_ID || !viewer.env.R2_SECRET_ACCESS_KEY) {
@@ -78,6 +79,7 @@ async function post(request: Request) {
     ownerUserId: viewer.session.user.id,
     kind: "image",
     provider: "r2",
+    purpose,
     providerKey,
     originalFilename: validated.fileName,
     mimeType: validated.contentType,

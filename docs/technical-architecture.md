@@ -51,7 +51,7 @@ Cloudflare の公式ガイドは Next.js を OpenNext adapter で Workers にデ
 - Build command: `pnpm cf:build`
 - Deploy command: `pnpm --filter @cattower/web exec wrangler deploy`
 - Trigger: Cloudflare Workers Builds receives a push to `main`
-- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、登録直後だけ開始する3 step onboarding、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。既存利用者は`onboarding_prompted_at`のmigration backfillで自動表示対象から除外し、未完了状態は通常画面のバナーから再開する。Google login/logout、7日session、再読み込み後のsession継続、認証済みブラウザからのR2直接upload、Images Binding `.info()`とprofile derivative、認証あり/なしのprivate配信を本番確認済み。realtime Workerは短命signed ticket、origin制限、WebSocket upgrade、hibernation後のattachment復元まで本番確認済み。Streamと通常画面のsample data置換は未完了
+- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、登録直後だけ開始する3 step onboarding、文章・写真・日付・タグ・複数猫を保存する記録作成、おうちの最近の記録、記録詳細、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。既存利用者は`onboarding_prompted_at`のmigration backfillで自動表示対象から除外し、未完了状態は通常画面のバナーから再開する。Google login/logout、7日session、再読み込み後のsession継続、認証済みブラウザからのR2直接upload、Images Binding `.info()`とprofile derivative、認証あり/なしのprivate配信を本番確認済み。realtime Workerは短命signed ticket、origin制限、WebSocket upgrade、hibernation後のattachment復元まで本番確認済み。Streamと検索・ボード・再発見・お散歩のsample data置換は未完了
 - Public hostname: `https://cattower-web.kazuki-kitada.workers.dev/`。独自ドメインは P0-07 で決定後に追加し、Workers URL は運用確認用として維持する
 
 build、確認、ログ、rollback の操作手順は [deployment-runbook.md](deployment-runbook.md) を正本とする。
@@ -261,11 +261,12 @@ object key は `households/{householdId}/cats/{catId}/{assetId}/original` 形式
 - URL は bearer token として扱いログへ残さない
 - upload 完了後に R2 binding で object metadata、size、Content-Type を再確認する
 - Cloudflare Images Binding の `.info()` で decode 可否、format、width、height を確認する
+- 用途をpresign時の`media_assets.purpose`へ保存し、プロフィール用と記録用の完了処理をクライアント入力だけで切り替えない
 - thumbnail/表示用画像の生成成功後に `ready` とし、失敗 asset は隔離して削除対象にする
 - 原画像はImages Bindingの20MB入力上限より小さい10MBをアプリ上限とし、JPEG/PNG/WebPだけを受け付ける
 - profile derivative は512×512、`cover`、WebP quality 82、`anim: false`とする。EXIF orientationは変換時に画素へ適用し、位置情報を含むmetadataはWebP出力へ保持しない
 - animated WebPは先頭frameの静止画をprofile derivativeに使う。巨大画像は100MP、非WebP/AVIFの一辺12,000pxというImages上限より先に10MBのアプリ上限とdecode検査を適用する
-- 表示用サイズは原本と分離し、`{asset prefix}/profile-512.webp`の生成済み derivative を再利用する
+- 表示用サイズは原本と分離し、プロフィールは`{asset prefix}/profile-512.webp`、記録は長辺を抑えた`{asset prefix}/entry-1600.webp`の生成済みderivativeを再利用する
 
 2026-07-15のspikeでは、EXIF orientation 6のJPEGが480×640へ補正され、WebP derivativeのEXIFが0件になること、animated WebPが1 frameへ静止画化されること、幅12,001pxのPNGが422で拒否されることをremote Images Bindingで確認した。本番では5712×4284、7.4MBのPNGから512×512 WebPを生成し、認証済み配信と未認証401を確認した。
 

@@ -8,6 +8,7 @@ import {
   validateImageUpload,
   verifyTownTicket,
   validateCatProfile,
+  validateEntryInput,
   createInviteToken,
   hashInviteToken,
 } from "./index";
@@ -44,6 +45,45 @@ describe("validateCatProfile", () => {
     expect(validateCatProfile({ ...valid, name: "" })).toBeNull();
     expect(
       validateCatProfile({ ...valid, birthDate: "2022-02-31" }),
+    ).toBeNull();
+  });
+});
+
+describe("validateEntryInput", () => {
+  it("normalizes a private record with cats and tags", () => {
+    expect(
+      validateEntryInput({
+        title: " 窓辺 ",
+        body: "風を見ていた。",
+        occurredDate: "2026-07-15",
+        catIds: ["cat-1", "cat-1", "cat-2"],
+        assetIds: [],
+        tags: [" 夕方 ", "夕方", "窓辺"],
+      }),
+    ).toMatchObject({
+      title: "窓辺",
+      catIds: ["cat-1", "cat-2"],
+      tags: [
+        { name: "夕方", normalizedName: "夕方" },
+        { name: "窓辺", normalizedName: "窓辺" },
+      ],
+    });
+  });
+
+  it("requires a cat and either text or a photo", () => {
+    const base = {
+      occurredDate: "2026-07-15",
+      catIds: ["cat-1"],
+      assetIds: [],
+      tags: [],
+    };
+    expect(validateEntryInput(base)).toBeNull();
+    expect(validateEntryInput({ ...base, body: "ひとこと" })).not.toBeNull();
+    expect(
+      validateEntryInput({ ...base, assetIds: ["asset-1"] }),
+    ).not.toBeNull();
+    expect(
+      validateEntryInput({ ...base, body: "ひとこと", catIds: [] }),
     ).toBeNull();
   });
 });

@@ -1,5 +1,8 @@
 import { mediaAssets } from "@cattower/db";
-import { getProfileImageDerivativeKey } from "@cattower/domain";
+import {
+  getEntryImageDerivativeKey,
+  getProfileImageDerivativeKey,
+} from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
 import { and, eq } from "drizzle-orm";
 
@@ -27,12 +30,16 @@ async function get(
     return Response.json({ error: "forbidden" }, { status: 403 });
 
   const variant = new URL(request.url).searchParams.get("variant");
-  if (variant !== null && variant !== "profile")
+  if (variant !== null && variant !== "profile" && variant !== "entry")
+    return Response.json({ error: "invalid_variant" }, { status: 400 });
+  if (variant && variant !== asset.purpose)
     return Response.json({ error: "invalid_variant" }, { status: 400 });
   const objectKey =
     variant === "profile"
       ? getProfileImageDerivativeKey(asset.providerKey)
-      : asset.providerKey;
+      : variant === "entry"
+        ? getEntryImageDerivativeKey(asset.providerKey)
+        : asset.providerKey;
   const object = await viewer.env.MEDIA.get(objectKey);
   if (!object)
     return Response.json({ error: "object_not_found" }, { status: 404 });

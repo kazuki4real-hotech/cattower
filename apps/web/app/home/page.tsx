@@ -1,21 +1,129 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
+import { getCatOverview } from "@/lib/cats";
+import { getRecentEntries } from "@/lib/entries";
+import { getViewer } from "@/lib/viewer";
 import { PageHeading } from "@cattower/ui";
-import { boards, images } from "@/lib/demo-data";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const viewer = await getViewer();
+  if (!viewer) redirect("/");
+  const overview = await getCatOverview(viewer);
+  const activeCat = overview?.cats.find(
+    (cat) => cat.id === overview.activeCatId,
+  );
+  const records = await getRecentEntries(viewer, 12, overview?.activeCatId);
+  const latest = records[0];
+
   return (
     <AppShell>
-      <PageHeading eyebrow="こむぎのおうち" title="おかえりなさい" description="今日も、いつもの場所から。" actions={<><Link className="button button-secondary" href="/search"><Icon name="search" />記録を探す</Link><Link className="button" href="/record"><Icon name="add" />記録する</Link></>} />
-      <article className="today-card">
-        <Image src={images.window} width={920} height={760} priority alt="窓辺から外を眺めるこむぎ" />
-        <div className="today-copy"><p className="date">7月14日・今日の一枚</p><span className="pill">窓辺</span><h2>夕方の窓辺</h2><p>風が入るたび、カーテンの影を目で追っていた。</p><Link className="text-link" href="/entries/window-evening">この記録をひらく</Link></div>
-      </article>
-      <section className="section" aria-labelledby="rediscover"><div className="section-head"><h2 id="rediscover">ふと、思い出す</h2><Link className="text-link" href="/search">ほかの記録も探す</Link></div><div className="rediscover"><Link className="memory-card" href="/entries/window-evening"><span className="pill">去年の今ごろ</span><p className="year">2025</p><h3>はじめて網戸にした日</h3><p className="small muted">同じ窓辺で、耳だけが忙しく動いていた。</p></Link><Link className="memory-card" href="/entries/window-evening"><span className="pill">ランダムな一枚</span><h3>毛糸玉を隠した場所</h3><p className="small muted">探していたら、本棚の一番下から出てきた。</p></Link></div></section>
-      <section className="section" aria-labelledby="boards"><div className="section-head"><h2 id="boards">ボード</h2><Link className="text-link" href="/boards">すべてのボード</Link></div><div className="board-grid">{boards.map(([name, count, image]) => <Link className="board-card" href="/boards" key={name}><Image src={image} width={360} height={240} alt="" /><div><h3>{name}</h3><span>{count}</span></div></Link>)}</div></section>
+      <PageHeading
+        eyebrow={activeCat ? `${activeCat.name}のおうち` : "あなたのおうち"}
+        title="おかえりなさい"
+        description="今日も、いつもの場所から。"
+        actions={
+          <>
+            <Link className="button button-secondary" href="/search">
+              <Icon name="search" />
+              記録を探す
+            </Link>
+            <Link className="button" href="/record">
+              <Icon name="add" />
+              記録する
+            </Link>
+          </>
+        }
+      />
+      {latest ? (
+        <>
+          <article className="today-card">
+            {latest.media ? (
+              <Image
+                src={`/api/media/${latest.media.assetId}?variant=entry`}
+                width={latest.media.width ?? 1200}
+                height={latest.media.height ?? 900}
+                priority
+                unoptimized
+                alt={
+                  latest.title ||
+                  `${latest.cats.map((cat) => cat.name).join("、")}の記録`
+                }
+              />
+            ) : (
+              <div className="today-card-placeholder">
+                <Icon name="menu_book" />
+                <span>ことばの記録</span>
+              </div>
+            )}
+            <div className="today-copy">
+              <p className="date">
+                {formatDate(latest.occurredDate)}・最近の記録
+              </p>
+              {latest.tags[0] ? (
+                <span className="pill">{latest.tags[0]}</span>
+              ) : null}
+              <h2>{latest.title || "今日の記録"}</h2>
+              {latest.body ? <p>{latest.body}</p> : null}
+              <Link className="text-link" href={`/entries/${latest.id}`}>
+                この記録をひらく
+              </Link>
+            </div>
+          </article>
+          {records.length > 1 ? (
+            <section className="section" aria-labelledby="recent-records">
+              <div className="section-head">
+                <h2 id="recent-records">最近の記録</h2>
+              </div>
+              <div className="recent-entry-list">
+                {records.slice(1).map((entry) => (
+                  <Link href={`/entries/${entry.id}`} key={entry.id}>
+                    <span>
+                      <strong>
+                        {entry.title || entry.body || "写真の記録"}
+                      </strong>
+                      <small>
+                        {entry.cats.map((cat) => cat.name).join("、")}
+                      </small>
+                    </span>
+                    <time dateTime={entry.occurredDate}>
+                      {formatDate(entry.occurredDate)}
+                    </time>
+                    <Icon name="chevron_right" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </>
+      ) : (
+        <section className="home-empty" aria-labelledby="home-empty-title">
+          <Icon name="menu_book" />
+          <div>
+            <p className="eyebrow">最初の一ページ</p>
+            <h2 id="home-empty-title">まだ記録はありません</h2>
+            <p>写真一枚でも、ひとことだけでも。残したいときに始められます。</p>
+          </div>
+          <Link className="button" href="/record">
+            <Icon name="add" />
+            最初の記録を残す
+          </Link>
+        </section>
+      )}
     </AppShell>
   );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T00:00:00.000Z`));
 }

@@ -95,33 +95,33 @@ Exit criteria: 二つの account で同じ household を共有でき、権限外
 
 ### Record foundation
 
-- [ ] P3-01 entry、entry_cats、tag schema/migration を作る
+- [x] P3-01 entry、entry_cats、tag schema/migration を作る
 - [ ] P3-02 共通 entry editor と autosaved draft を実装する
-- [ ] P3-03 本文またはメディアを保存できる共通記録フォーム
-- [ ] P3-04 記録作成時の複数タグ入力・正規化
-- [ ] P3-09 複数猫への紐付けを実装する
+- [x] P3-03 本文またはメディアを保存できる共通記録フォーム
+- [x] P3-04 記録作成時の複数タグ入力・正規化
+- [x] P3-09 複数猫への紐付けを実装する
 - [ ] P3-10 edit、soft delete、restore を実装する
 
 ### Media
 
-- [ ] P3-11 image upload authorization と ownership check
-- [ ] P3-12 client-side preview、progress、retry
-- [ ] P3-13 server metadata verification と ready transition
-- [ ] P3-14 private image delivery と access test
+- [x] P3-11 image upload authorization と ownership check
+- [x] P3-12 client-side preview、progress、retry
+- [x] P3-13 server metadata verification と ready transition
+- [x] P3-14 private image delivery と access test
 - [ ] P3-15 Stream direct upload、processing status、signed playback
 - [ ] P3-15A 利用者ごとの最大時間、合計保存分数、月間 upload gate、動画 feature flag を実装する
 - [ ] P3-16 orphaned/failed media cleanup job
-- [ ] P3-17 upload limit と user-facing error を実装する
+- [x] P3-17 upload limit と user-facing error を実装する
 
 Exit criteria: 共通フォームが写真・動画・文章・タグを失わず保存でき、再読込後も正しく表示・編集できる。
 
 ## Phase 4 — Home and rediscovery
 
-- [ ] P4-01 おうち画面の最近の記録と任意ボード
+- [x] P4-01 おうち画面の最近の記録を実データ化する（任意ボードはP4-03後に接続）
 - [x] P4-02 標準棚・system collectionを作らない方針へ簡略化する
 - [ ] P4-03 board CRUD
 - [ ] P4-04 board item の手動並び替え
-- [ ] P4-05 entry detail レイアウト
+- [x] P4-05 entry detail レイアウト
 - [ ] P4-06 検索と tag/date/media filters
 - [ ] P4-07 去年の今ごろ
 - [ ] P4-08 3 年前と今日

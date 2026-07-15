@@ -143,6 +143,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 2026-07-15にempty state確認のため、production D1の認証・利用者設定・household・猫・招待・通知・media metadataを全件削除した。`user`、`session`、`account`、`verification`、`user_preferences`、`households`、`household_members`、`household_invites`、`cats`、`media_assets`、`notifications`が0件であることを確認し、`d1_migrations` 8件とschemaは保持した。Cloudflare管理の`_cf_KV`はD1 APIからの読み書きが許可されない内部表のため操作対象外とし、R2 objectもこのD1リセットには含めていない。
 
+同日にmigration `0010_entries_and_media.sql`をproduction D1へ適用し、記録本体、対象猫、タグ、画像の関連テーブルと`media_assets.purpose`を追加した。foreign key checkが空であることを確認後、Worker version `ca02a220-33cd-4bdc-b090-033c4e80fe65`をdeployした。初期実装は1記録につき画像1枚までで、動画は未提供とする。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash

@@ -165,6 +165,7 @@ tag は household 内で一意。case/Unicode を正規化した `normalized_nam
 | owner_user_id     | uploader                                                                |
 | kind              | `image` / `video`                                                       |
 | provider          | `r2` / `stream`                                                         |
+| purpose           | `profile` / `entry`; upload完了処理と表示用derivativeを用途別に固定    |
 | provider_key      | R2 object key or Stream UID; never public URL                           |
 | original_filename | sanitized display only                                                  |
 | mime_type         | server verified                                                         |
@@ -187,7 +188,7 @@ tag は household 内で一意。case/Unicode を正規化した `normalized_nam
 
 media row の削除と provider object の削除は状態遷移で管理し、DB row だけ先に消して orphan を追跡不能にしない。
 
-R2画像の`provider_key`は原本の`{asset prefix}/original`を指す。プロフィール表示用derivativeは同じasset prefixの`profile-512.webp`へ保存し、別の`media_assets` rowは作らない。assetを削除するときは原本と既知のderivativeを同じ削除状態遷移で消す。
+R2画像の`provider_key`は原本の`{asset prefix}/original`を指す。プロフィール表示用derivativeは同じasset prefixの`profile-512.webp`、記録表示用は`entry-1600.webp`へ保存し、別の`media_assets` rowは作らない。assetを削除するときは原本と既知のderivativeを同じ削除状態遷移で消す。
 
 ## 6. Boards
 
