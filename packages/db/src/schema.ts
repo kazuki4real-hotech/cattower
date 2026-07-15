@@ -206,7 +206,6 @@ export const cats = sqliteTable(
       .notNull()
       .default("unknown"),
     adoptionDate: integer("adoption_date", { mode: "timestamp_ms" }),
-    themeColor: text("theme_color").notNull().default("mint"),
     profileAssetId: text("profile_asset_id").references(() => mediaAssets.id, {
       onDelete: "set null",
     }),
@@ -218,15 +217,9 @@ export const cats = sqliteTable(
     })
       .notNull()
       .default("disabled"),
-    archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
     ...timestamps,
   },
-  (table) => [
-    index("cats_household_archived_idx").on(
-      table.householdId,
-      table.archivedAt,
-    ),
-  ],
+  (table) => [index("cats_household_idx").on(table.householdId)],
 );
 
 export const mediaAssets = sqliteTable(

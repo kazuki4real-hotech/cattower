@@ -29,7 +29,6 @@ describe("validateCatProfile", () => {
     birthDate: "2022-04-03",
     adoptionDate: "2022-06-01",
     lifeStatus: "living",
-    themeColor: "mint",
   };
 
   it("normalizes a complete cat profile", () => {
@@ -41,12 +40,11 @@ describe("validateCatProfile", () => {
     });
   });
 
-  it("rejects missing names, invalid dates, and unknown theme colors", () => {
+  it("rejects missing names and invalid dates", () => {
     expect(validateCatProfile({ ...valid, name: "" })).toBeNull();
     expect(
       validateCatProfile({ ...valid, birthDate: "2022-02-31" }),
     ).toBeNull();
-    expect(validateCatProfile({ ...valid, themeColor: "purple" })).toBeNull();
   });
 });
 

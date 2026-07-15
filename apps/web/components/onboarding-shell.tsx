@@ -29,17 +29,17 @@ export function OnboardingShell({
         <div className="brand">
           <BrandWordmark priority />
         </div>
-        <span className="onboarding-count">{Math.min(current, 4)} / 4</span>
+        <span className="onboarding-count">{Math.min(current, 3)} / 3</span>
       </header>
       <div
         className="onboarding-progress"
         role="progressbar"
-        aria-label={`オンボーディング ステップ${Math.min(current, 4)} / 4`}
+        aria-label={`オンボーディング ステップ${Math.min(current, 3)} / 3`}
         aria-valuemin={1}
-        aria-valuemax={4}
-        aria-valuenow={Math.min(current, 4)}
+        aria-valuemax={3}
+        aria-valuenow={Math.min(current, 3)}
       >
-        <span style={{ transform: `scaleX(${Math.min(current, 4) / 4})` }} />
+        <span style={{ transform: `scaleX(${Math.min(current, 3) / 3})` }} />
       </div>
       <section
         className="onboarding-content"

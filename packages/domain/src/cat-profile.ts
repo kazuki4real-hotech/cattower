@@ -1,5 +1,3 @@
-import { isCatThemeColor, type CatThemeColor } from "./index";
-
 export const BIRTH_PRECISIONS = ["day", "month", "year", "unknown"] as const;
 export type BirthPrecision = (typeof BIRTH_PRECISIONS)[number];
 export type CatLifeStatus = "living" | "memorial";
@@ -17,9 +15,6 @@ export function validateCatProfile(input: Record<string, unknown>) {
     input.lifeStatus === "living" || input.lifeStatus === "memorial"
       ? input.lifeStatus
       : null;
-  const themeColor = isCatThemeColor(input.themeColor)
-    ? input.themeColor
-    : null;
   const parsedBirthDate = parseDate(input.birthDate);
   const birthDate = birthPrecision === "unknown" ? null : parsedBirthDate;
   const adoptionDate = parseDate(input.adoptionDate);
@@ -28,8 +23,7 @@ export function validateCatProfile(input: Record<string, unknown>) {
     name.length > 50 ||
     nickname.length > 50 ||
     !birthPrecision ||
-    !lifeStatus ||
-    !themeColor
+    !lifeStatus
   )
     return null;
   if (birthPrecision !== "unknown" && !birthDate) return null;
@@ -43,7 +37,6 @@ export function validateCatProfile(input: Record<string, unknown>) {
     birthDate,
     adoptionDate,
     lifeStatus,
-    themeColor: themeColor as CatThemeColor,
   };
 }
 

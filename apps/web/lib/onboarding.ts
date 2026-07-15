@@ -25,7 +25,6 @@ export async function getOnboardingSnapshot(
       ? {
           id: cat.id,
           name: cat.name,
-          themeColor: cat.themeColor,
           profileAssetId: cat.profileAssetId,
         }
       : null,

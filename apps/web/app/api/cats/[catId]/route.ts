@@ -1,4 +1,4 @@
-import { cats, userPreferences } from "@cattower/db";
+import { cats } from "@cattower/db";
 import { validateCatProfile } from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
 import { and, eq } from "drizzle-orm";
@@ -54,37 +54,13 @@ async function put(
     .update(cats)
     .set({
       ...profile,
-      archivedAt: body?.archived === false ? null : access.cat.archivedAt,
       updatedAt: new Date(),
     })
     .where(eq(cats.id, catId));
   return Response.json({ ok: true });
 }
 
-async function del(
-  request: Request,
-  context: { params: Promise<{ catId: string }> },
-) {
-  const { catId } = await context.params;
-  const access = await owner(request, catId);
-  if (access.response) return access.response;
-  if (!access.cat.archivedAt)
-    await access.viewer.db
-      .update(cats)
-      .set({ archivedAt: new Date(), updatedAt: new Date() })
-      .where(eq(cats.id, catId));
-  await access.viewer.db
-    .update(userPreferences)
-    .set({ activeCatId: null, updatedAt: new Date() })
-    .where(eq(userPreferences.userId, access.viewer.session.user.id));
-  return Response.json({ ok: true });
-}
-
 export const PUT = instrumentRequestHandler(
   { service: "cattower-web", route: "/api/cats/:catId" },
   put,
-);
-export const DELETE = instrumentRequestHandler(
-  { service: "cattower-web", route: "/api/cats/:catId" },
-  del,
 );

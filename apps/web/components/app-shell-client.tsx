@@ -9,7 +9,7 @@ import { CatSwitcher } from "@/components/cat-switcher";
 import { Icon } from "@/components/icon";
 import { OnboardingResumeBanner } from "@/components/onboarding-resume-banner";
 
-type CatOption = { id: string; name: string; archivedAt: string | null };
+type CatOption = { id: string; name: string };
 
 const primary = [
   ["/home", "おうち", "home"],

@@ -1,7 +1,7 @@
 # Cattower デプロイ運用手順
 
 - Status: Active v0.1
-- Updated: 2026-07-14
+- Updated: 2026-07-15
 - Scope: `cattower-web` と `cattower-realtime` の Cloudflare Workers build、deploy、確認、rollback
 
 ## 1. Current production setup
@@ -21,6 +21,8 @@
 初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding、runtime secrets、オンボーディングの永続化コードは接続済み。2026-07-15にGoogle login/logout、7日session、再読み込み後のsession継続、オンボーディング完了状態のredirect、認証済みブラウザからのR2 presigned upload、metadata/decode検査、512×512 WebP derivative、private画像配信を本番確認した。独自ドメインを追加する場合も、このWorkers URLは運用確認用の既定URLとして維持する。
 
 2026-07-15 に `0003_remove_memory_preferences.sql` と `0004_onboarding_flow.sql` を production D1 へ適用済み。既存行の `onboarding_prompted_at` は backfill 済みで、新規利用者だけが登録直後の自動オンボーディング対象になる。
+
+同日に `0009_remove_cat_theme_and_archive.sql` を production D1 へ適用済み。猫のテーマ色と保管日時を削除し、既存のオンボーディング到達値は最大 `3` へ正規化した。適用後に既存 user・cat・preferences の保持、外部キー整合性、削除列が存在しないことを確認した。
 
 realtime Workerも2026-07-14に初回production deployを完了した。2026-07-15にWeb/Realtime両Workerへ同一の`TOWN_TICKET_SECRET`を登録し、5分signed ticketによるproduction WebSocket upgradeと`connection.ready`応答を確認した。同日、20秒idle後も接続IDが復元され、instance generationが変化するhibernation smoke testを完了した。
 
@@ -78,7 +80,7 @@ pnpm --filter @cattower/realtime build
 - 設定からログアウトするとsessionが失効してログイン画面へ戻り、Googleで再ログインできる
 - 再ログイン後の再読み込みでsessionが継続し、期限更新設定が有効である
 - 新規登録 callback 直後だけ onboarding が始まり、既存利用者の login では `/home` へ進む
-- onboarding 4 step で表示名、猫、写真、テーマ色、checkpoint が再読み込み後も保持される
+- onboarding 3 step で表示名、猫、写真、checkpoint が再読み込み後も保持される
 - 未完了状態で通常画面へ戻ると再開バナーが表示される
 - JPEG/PNG/WebP のプロフィール画像を R2 へ直接 upload し、private media endpoint だけで表示できる
 - `/home`、`/boards`、`/record`、`/walk` が表示される

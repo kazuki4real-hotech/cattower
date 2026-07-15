@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         destination: "/onboarding/complete",
         permanent: true,
       },
+      {
+        source: "/onboarding/theme",
+        destination: "/onboarding/complete",
+        permanent: true,
+      },
     ];
   },
   images: {

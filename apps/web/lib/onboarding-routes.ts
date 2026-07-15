@@ -2,7 +2,6 @@ export function getOnboardingRoute(step: number) {
   if (step < 1) return "/onboarding/profile";
   if (step < 2) return "/onboarding/cat";
   if (step < 3) return "/onboarding/photo";
-  if (step < 4) return "/onboarding/theme";
   return "/onboarding/complete";
 }
 

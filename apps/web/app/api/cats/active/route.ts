@@ -1,6 +1,6 @@
 import { cats, userPreferences } from "@cattower/db";
 import { instrumentRequestHandler } from "@cattower/observability";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { getViewer } from "@/lib/viewer";
 
@@ -16,7 +16,6 @@ async function put(request: Request) {
     where: and(
       eq(cats.id, body.catId),
       eq(cats.householdId, viewer.household.id),
-      isNull(cats.archivedAt),
     ),
   });
   if (!cat) return Response.json({ error: "cat_not_found" }, { status: 404 });

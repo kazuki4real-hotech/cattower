@@ -19,10 +19,10 @@ export default async function CompletePage() {
     viewer.household.id,
   );
   if (snapshot.completed) redirect("/home");
-  if (!snapshot.cat || snapshot.step < 4)
+  if (!snapshot.cat || snapshot.step < 3)
     redirect(getOnboardingRoute(snapshot.step));
   return (
-    <OnboardingShell current={4}>
+    <OnboardingShell current={3}>
       <div className="onboarding-complete-avatar">
         {snapshot.cat.profileAssetId ? (
           <Image

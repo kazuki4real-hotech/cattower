@@ -7,7 +7,7 @@ describe("onboarding routes", () => {
     [0, "/onboarding/profile"],
     [1, "/onboarding/cat"],
     [2, "/onboarding/photo"],
-    [3, "/onboarding/theme"],
+    [3, "/onboarding/complete"],
     [4, "/onboarding/complete"],
   ])("maps checkpoint %s to %s", (step, route) => {
     expect(getOnboardingRoute(step)).toBe(route);

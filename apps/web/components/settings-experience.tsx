@@ -52,7 +52,7 @@ export function SettingsExperience({
         <Tabs.Content className="settings-panel" value="cats">
           <p className="eyebrow">猫のプロフィール</p>
           <h2>一緒に暮らす猫</h2>
-          <p className="muted">プロフィールの編集、追加、保管ができます。</p>
+          <p className="muted">プロフィールの編集と追加ができます。</p>
           <CatManager
             initialCats={catOverview?.cats ?? []}
             initialActiveCatId={catOverview?.activeCatId ?? null}

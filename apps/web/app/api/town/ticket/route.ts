@@ -1,7 +1,7 @@
 import { cats } from "@cattower/db";
 import { issueTownTicket, TOWN_TICKET_TTL_SECONDS } from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { requireActiveMembership } from "@/lib/foundation";
 import { getViewer } from "@/lib/viewer";
@@ -35,7 +35,6 @@ async function post(request: Request) {
     where: and(
       eq(cats.id, body.catId),
       eq(cats.householdId, viewer.household.id),
-      isNull(cats.archivedAt),
     ),
   });
   if (!cat)

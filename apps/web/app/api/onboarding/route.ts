@@ -4,9 +4,8 @@ import {
   userPreferences,
   type CattowerDatabase,
 } from "@cattower/db";
-import { isCatThemeColor } from "@cattower/domain";
 import { instrumentRequestHandler } from "@cattower/observability";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 import { getOnboardingSnapshot } from "@/lib/onboarding";
@@ -54,10 +53,7 @@ async function put(request: Request) {
       return Response.json({ error: "invalid_cat" }, { status: 400 });
     }
     const existing = await viewer.db.query.cats.findFirst({
-      where: and(
-        eq(cats.householdId, viewer.household.id),
-        isNull(cats.archivedAt),
-      ),
+      where: eq(cats.householdId, viewer.household.id),
       orderBy: asc(cats.createdAt),
     });
     const catId = existing?.id ?? crypto.randomUUID();
@@ -71,7 +67,6 @@ async function put(request: Request) {
         id: catId,
         householdId: viewer.household.id,
         name,
-        themeColor: "mint",
       });
     }
     await advance(viewer.db, viewer.session.user.id, 2);
@@ -80,31 +75,10 @@ async function put(request: Request) {
 
   if (body.step === "photo") {
     const cat = await viewer.db.query.cats.findFirst({
-      where: and(
-        eq(cats.householdId, viewer.household.id),
-        isNull(cats.archivedAt),
-      ),
+      where: eq(cats.householdId, viewer.household.id),
     });
     if (!cat) return Response.json({ error: "cat_required" }, { status: 409 });
     await advance(viewer.db, viewer.session.user.id, 3);
-    return Response.json({ ok: true });
-  }
-
-  if (body.step === "theme") {
-    if (!isCatThemeColor(body.themeColor))
-      return Response.json({ error: "invalid_theme" }, { status: 400 });
-    const cat = await viewer.db.query.cats.findFirst({
-      where: and(
-        eq(cats.householdId, viewer.household.id),
-        isNull(cats.archivedAt),
-      ),
-    });
-    if (!cat) return Response.json({ error: "cat_required" }, { status: 409 });
-    await viewer.db
-      .update(cats)
-      .set({ themeColor: body.themeColor, updatedAt: new Date() })
-      .where(eq(cats.id, cat.id));
-    await advance(viewer.db, viewer.session.user.id, 4);
     return Response.json({ ok: true });
   }
 
@@ -116,12 +90,12 @@ async function put(request: Request) {
     const preferences = await viewer.db.query.userPreferences.findFirst({
       where: eq(userPreferences.userId, viewer.session.user.id),
     });
-    if (!preferences || preferences.onboardingStep < 4)
+    if (!preferences || preferences.onboardingStep < 3)
       return Response.json({ error: "onboarding_incomplete" }, { status: 409 });
     await viewer.db
       .update(userPreferences)
       .set({
-        onboardingStep: 4,
+        onboardingStep: 3,
         onboardingCompletedAt: preferences.onboardingCompletedAt ?? new Date(),
         updatedAt: new Date(),
       })

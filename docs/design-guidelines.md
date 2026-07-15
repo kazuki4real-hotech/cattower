@@ -33,13 +33,11 @@
 
 | Role | Token | Hex | 用途 |
 | --- | --- | --- | --- |
-| Primary | `--color-primary` | `#80beaf` | ブランド面、選択状態、猫のテーマ既定色 |
-| Accent / mint | `--color-accent-mint` | `#b3ddd1` | 面のティント、猫テーマ色 |
-| Accent / sky | `--color-accent-sky` | `#d1dce2` | 面のティント、猫テーマ色 |
-| Accent / peach | `--color-accent-peach` | `#f5b994` | 面のティント、猫テーマ色 |
-| Accent / apricot | `--color-accent-apricot` | `#ee9c6a` | 面のティント、注意喚起、猫テーマ色 |
-
-セカンダリー 4 色とプライマリーは、猫ごとの `theme_color`（[data-model.md](data-model.md) `cats.theme_color` の「approved palette token」）が選べる**確定パレット**でもある。任意 CSS 色は許可しない。
+| Primary | `--color-primary` | `#80beaf` | ブランド面、選択状態 |
+| Accent / mint | `--color-accent-mint` | `#b3ddd1` | 面のティント |
+| Accent / sky | `--color-accent-sky` | `#d1dce2` | 面のティント |
+| Accent / peach | `--color-accent-peach` | `#f5b994` | 面のティント |
+| Accent / apricot | `--color-accent-apricot` | `#ee9c6a` | 面のティント、注意喚起 |
 
 ### 3.2 Neutral scale（決定）
 
@@ -179,7 +177,6 @@ Cattower の静かな性格に合わせ、既定を低めにする。
 - Radix UI primitives + Tailwind CSS（[technical-architecture.md](technical-architecture.md)）
 - Google Material Symbols Rounded を共通アイコンとして使用する
 - Tailwind テーマに本書のトークンを CSS 変数として定義し、生の hex を JSX に直書きしない
-- 猫のテーマ色は実行時に `--color-primary` を猫ごとの承認済みトークンへ差し替える形で反映する
 - `packages/ui` は意味構造と共有 props を持つ framework 非依存の React component を管理する。route、data fetch、Next.js 固有 component、design token の値は `apps/web` に残す
 - 最初の共有 component は `PageHeading` とし、eyebrow、`h1`、説明、任意 action の順序と既存の余白を全主要画面で統一する
 
@@ -210,7 +207,7 @@ Cattower の静かな性格に合わせ、既定を低めにする。
   --color-primary-strong: #2f6b5c; /* 候補: 対白 4.5:1 を確認 */
   --color-primary-soft: #d3ece5;   /* 候補 */
 
-  /* accents / cat theme tokens */
+  /* accents */
   --color-accent-mint: #b3ddd1;
   --color-accent-sky: #d1dce2;
   --color-accent-peach: #f5b994;

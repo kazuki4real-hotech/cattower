@@ -17,10 +17,7 @@ vi.mock("@/lib/viewer", () => ({
 }));
 
 import { GET as getCats, POST as createCat } from "@/app/api/cats/route";
-import {
-  DELETE as archiveCat,
-  PUT as updateCat,
-} from "@/app/api/cats/[catId]/route";
+import { PUT as updateCat } from "@/app/api/cats/[catId]/route";
 import { GET as getMedia } from "@/app/api/media/[assetId]/route";
 import {
   GET as getHouseholds,
@@ -160,7 +157,6 @@ describe("authorization integration", () => {
             nickname: "",
             birthPrecision: "unknown",
             lifeStatus: "living",
-            themeColor: "mint",
           }),
         )
       ).status,
@@ -168,13 +164,6 @@ describe("authorization integration", () => {
     expect(
       (
         await updateCat(request(`/api/cats/${catId}`, "PUT", catProfile()), {
-          params: Promise.resolve({ catId }),
-        })
-      ).status,
-    ).toBe(403);
-    expect(
-      (
-        await archiveCat(request(`/api/cats/${catId}`, "DELETE"), {
           params: Promise.resolve({ catId }),
         })
       ).status,
@@ -326,7 +315,6 @@ function catProfile() {
     nickname: "",
     birthPrecision: "unknown",
     lifeStatus: "living",
-    themeColor: "mint",
   };
 }
 

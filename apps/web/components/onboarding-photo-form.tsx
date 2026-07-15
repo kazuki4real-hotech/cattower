@@ -67,7 +67,7 @@ export function OnboardingPhotoForm({
       body: JSON.stringify({ step: "photo" }),
     });
     if (!response.ok) throw new Error("photo_checkpoint_failed");
-    router.push("/onboarding/theme");
+    router.push("/onboarding/complete");
   }
 
   async function skip() {

@@ -2,19 +2,9 @@ export const ONBOARDING_STEPS = [
   "profile",
   "cat",
   "photo",
-  "theme",
   "complete",
 ] as const;
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
-
-export const CAT_THEME_COLORS = [
-  "mint",
-  "sky",
-  "peach",
-  "apricot",
-  "mint-soft",
-] as const;
-export type CatThemeColor = (typeof CAT_THEME_COLORS)[number];
 
 export const IMAGE_MIME_TYPES = [
   "image/jpeg",
@@ -59,13 +49,6 @@ export function getProfileImageDerivativeKey(providerKey: string) {
   if (!providerKey.endsWith("/original"))
     throw new Error("invalid_original_image_key");
   return `${providerKey.slice(0, -"/original".length)}/profile-512.webp`;
-}
-
-export function isCatThemeColor(value: unknown): value is CatThemeColor {
-  return (
-    typeof value === "string" &&
-    CAT_THEME_COLORS.includes(value as CatThemeColor)
-  );
 }
 
 export function validateImageUpload(input: {

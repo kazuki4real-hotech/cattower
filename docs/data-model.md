@@ -55,9 +55,9 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | town_digest             | `off` / `daily`                                                                      |
 | reduced_motion_override | nullable; normally system setting                                                    |
 | analytics_consent       | regional requirement に応じる                                                        |
-| onboarding_step         | `0` profile / `1` cat / `2` photo / `3` theme / `4` complete preparation             |
+| onboarding_step         | `0` profile / `1` cat / `2` photo / `3` complete preparation                         |
 | active_household_id     | nullable。現在表示・保存先として選択中の active membership の household              |
-| active_cat_id           | nullable。active household 内で現在表示対象として選択中の未保管 cat                  |
+| active_cat_id           | nullable。active household 内で現在表示対象として選択中の cat                        |
 | onboarding_prompted_at  | nullable。新規登録 callback から自動案内した時刻。既存利用者は migration で backfill |
 | onboarding_completed_at | nullable。完了時刻                                                                   |
 
@@ -115,13 +115,10 @@ Better Auth の user を正本にする。domain 側で必要な追加設定は 
 | birth_precision  | `day` / `month` / `year` / `unknown`                            |
 | adoption_date    | nullable                                                        |
 | profile_asset_id | nullable FK media_assets                                        |
-| theme_color      | approved palette token, not arbitrary CSS                       |
 | life_status      | `living` / `memorial`                                           |
 | town_access      | `disabled` / `owners_only` / `household_members`; owner-managed |
-| archived_at      | nullable                                                        |
 
 猫は必ず一つの household に所属する。お散歩への接続は、接続者の `town_enabled` と猫の `town_access` の両方を評価する。既存DB・protocolとの互換性のため、内部名は当面 `town_*` を維持する。
-猫の保管は `archived_at` を設定する soft archive とし、記録との関係を残す。復元時は `archived_at` を `null` に戻す。
 
 ## 4. Entries
 
@@ -386,7 +383,7 @@ raw event 削除後も retention を集計するための日次 rollup。
 実装時に query plan で検証する前提で、少なくとも次を設ける。
 
 - `household_members(user_id, status)`
-- `cats(household_id, archived_at)`
+- `cats(household_id)`
 - `entries(household_id, occurred_at, deleted_at)`
 - `entry_cats(cat_id, entry_id)`
 - 検索候補が増えた段階で`entries`の正規化本文をexternal-content FTS5 trigram indexへ同期し、1〜2文字は上記scope indexと`entry_cats`で絞って`LIKE`検索する

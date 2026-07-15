@@ -2,7 +2,6 @@
 
 import { useCallback, useState, type FormEvent } from "react";
 
-import { CAT_THEME_COLORS } from "@cattower/domain";
 import { Icon } from "@/components/icon";
 
 type Cat = {
@@ -13,9 +12,7 @@ type Cat = {
   birthPrecision: "day" | "month" | "year" | "unknown";
   adoptionDate: string | null;
   profileAssetId: string | null;
-  themeColor: string;
   lifeStatus: "living" | "memorial";
-  archivedAt: string | null;
 };
 const empty = {
   name: "",
@@ -23,7 +20,6 @@ const empty = {
   birthDate: "",
   birthPrecision: "unknown",
   adoptionDate: "",
-  themeColor: "mint",
   lifeStatus: "living",
 };
 
@@ -87,28 +83,6 @@ export function CatManager({
     setStatus("保存しました");
     await load();
   }
-  async function archive() {
-    if (!selected) return;
-    setStatus(selected.archivedAt ? "戻しています" : "保管しています");
-    const response = selected.archivedAt
-      ? await fetch(`/api/cats/${selected.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...selected,
-            birthDate: selected.birthDate ?? "",
-            adoptionDate: selected.adoptionDate ?? "",
-            archived: false,
-          }),
-        })
-      : await fetch(`/api/cats/${selected.id}`, { method: "DELETE" });
-    if (!response.ok) {
-      setStatus("操作を完了できませんでした。");
-      return;
-    }
-    await load();
-    setStatus(selected.archivedAt ? "おうちへ戻しました" : "保管しました");
-  }
   const values = selected
     ? {
         ...selected,
@@ -142,14 +116,10 @@ export function CatManager({
               onClick={() => setSelectedId(cat.id)}
               key={cat.id}
             >
-              <Icon name="pets" filled={!cat.archivedAt} />
+              <Icon name="pets" filled />
               <span>
                 <strong>{cat.name}</strong>
-                <small>
-                  {cat.archivedAt
-                    ? "保管中"
-                    : cat.nickname || "プロフィールを編集"}
-                </small>
+                <small>{cat.nickname || "プロフィールを編集"}</small>
               </span>
             </button>
           ))
@@ -227,40 +197,15 @@ export function CatManager({
               disabled={!canManage}
             >
               <option value="living">一緒に暮らしている</option>
-              <option value="memorial">思い出として保管</option>
+              <option value="memorial">思い出として残す</option>
             </select>
           </label>
         </div>
-        <fieldset disabled={!canManage}>
-          <legend>テーマ色</legend>
-          <div className="theme-options">
-            {CAT_THEME_COLORS.map((color) => (
-              <label className={`theme-swatch theme-${color}`} key={color}>
-                <input
-                  type="radio"
-                  name="themeColor"
-                  value={color}
-                  defaultChecked={values.themeColor === color}
-                />
-                <span>{color}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
         {canManage ? (
           <div className="button-row">
             <button className="button" type="submit">
               保存
             </button>
-            {selected ? (
-              <button
-                className="button button-quiet"
-                type="button"
-                onClick={() => void archive()}
-              >
-                {selected.archivedAt ? "おうちへ戻す" : "保管する"}
-              </button>
-            ) : null}
           </div>
         ) : (
           <p className="muted">猫のプロフィール変更は所有者だけが行えます。</p>

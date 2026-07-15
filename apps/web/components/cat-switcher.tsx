@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Icon } from "@/components/icon";
 
-type CatOption = { id: string; name: string; archivedAt: string | null };
+type CatOption = { id: string; name: string };
 
 export function CatSwitcher({
   cats: initialCats,
@@ -15,7 +15,7 @@ export function CatSwitcher({
   activeCatId: string | null;
   compact?: boolean;
 }) {
-  const cats = initialCats.filter((cat) => !cat.archivedAt);
+  const cats = initialCats;
   const [activeId, setActiveId] = useState(activeCatId ?? "");
   if (!activeId || cats.length === 0) return null;
   return (

@@ -16,15 +16,12 @@ export function serializeCat(cat: {
   birthPrecision: "day" | "month" | "year" | "unknown";
   adoptionDate: Date | null;
   profileAssetId: string | null;
-  themeColor: string;
   lifeStatus: "living" | "memorial";
-  archivedAt: Date | null;
 }) {
   return {
     ...cat,
     birthDate: cat.birthDate?.toISOString().slice(0, 10) ?? null,
     adoptionDate: cat.adoptionDate?.toISOString().slice(0, 10) ?? null,
-    archivedAt: cat.archivedAt?.toISOString() ?? null,
   };
 }
 
@@ -47,11 +44,8 @@ export async function getCatOverview(viewer: Viewer) {
       where: eq(userPreferences.userId, viewer.session.user.id),
     }),
   ]);
-  const available = list.filter((cat) => !cat.archivedAt);
   const active =
-    available.find((cat) => cat.id === preferences?.activeCatId) ??
-    available[0] ??
-    null;
+    list.find((cat) => cat.id === preferences?.activeCatId) ?? list[0] ?? null;
 
   if (active && preferences?.activeCatId !== active.id)
     await viewer.db
