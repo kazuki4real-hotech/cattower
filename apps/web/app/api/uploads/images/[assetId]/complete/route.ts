@@ -32,7 +32,7 @@ async function post(
     viewer.session.user.id,
     asset.householdId,
   );
-  if (!membership)
+  if (membership?.role !== "owner")
     return Response.json({ error: "forbidden" }, { status: 403 });
 
   const head = await viewer.env.MEDIA.head(asset.providerKey);
@@ -74,7 +74,8 @@ async function post(
     const originalBytes = await object.arrayBuffer();
     const infoStream = new Response(originalBytes).body;
     const transformStream = new Response(originalBytes).body;
-    if (!infoStream || !transformStream) throw new Error("invalid_image_stream");
+    if (!infoStream || !transformStream)
+      throw new Error("invalid_image_stream");
 
     const info = await images.info(infoStream);
     if (

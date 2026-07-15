@@ -2,6 +2,7 @@
   "name": "@cattower/web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -34,6 +35,7 @@
     "react-dom": "19.2.7"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.18.4",
     "@cloudflare/workers-types": "5.20260714.1",
     "@tailwindcss/postcss": "4.3.2",
     "@types/node": "26.1.1",

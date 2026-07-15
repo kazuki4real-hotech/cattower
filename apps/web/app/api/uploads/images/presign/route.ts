@@ -39,7 +39,7 @@ async function post(request: Request) {
     viewer.session.user.id,
     cat.householdId,
   );
-  if (!membership)
+  if (membership?.role !== "owner")
     return Response.json({ error: "forbidden" }, { status: 403 });
 
   if (!viewer.env.R2_ACCESS_KEY_ID || !viewer.env.R2_SECRET_ACCESS_KEY) {
