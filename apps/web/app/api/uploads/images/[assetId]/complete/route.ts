@@ -9,6 +9,7 @@ import { instrumentRequestHandler } from "@cattower/observability";
 import { and, eq } from "drizzle-orm";
 
 import { requireActiveMembership } from "@/lib/foundation";
+import { createNotification } from "@/lib/notifications";
 import { getViewer } from "@/lib/viewer";
 
 async function post(
@@ -44,29 +45,15 @@ async function post(
     contentType === asset.mimeType &&
     head.customMetadata?.["asset-id"] === asset.id;
   if (!validMetadata) {
-    await viewer.db
-      .update(mediaAssets)
-      .set({ status: "failed", updatedAt: new Date() })
-      .where(eq(mediaAssets.id, asset.id));
-    return Response.json(
-      { error: "uploaded_object_mismatch" },
-      { status: 422 },
-    );
+    return failUpload(viewer.db, asset, "uploaded_object_mismatch", 422);
   }
 
   const object = await viewer.env.MEDIA.get(asset.providerKey);
   if (!object)
-    return Response.json({ error: "uploaded_object_missing" }, { status: 404 });
+    return failUpload(viewer.db, asset, "uploaded_object_missing", 404);
   const images = viewer.env.IMAGES;
   if (!images) {
-    await viewer.db
-      .update(mediaAssets)
-      .set({ status: "failed", updatedAt: new Date() })
-      .where(eq(mediaAssets.id, asset.id));
-    return Response.json(
-      { error: "image_processing_not_configured" },
-      { status: 503 },
-    );
+    return failUpload(viewer.db, asset, "image_processing_not_configured", 503);
   }
 
   const derivativeKey = getProfileImageDerivativeKey(asset.providerKey);
@@ -131,15 +118,48 @@ async function post(
           and(eq(cats.id, catId), eq(cats.householdId, asset.householdId)),
         );
     }
+    await createUploadNotification(viewer.db, asset, "ready");
     return Response.json({ ok: true, width: info.width, height: info.height });
   } catch {
     await viewer.env.MEDIA.delete(derivativeKey).catch(() => undefined);
-    await viewer.db
-      .update(mediaAssets)
-      .set({ status: "failed", updatedAt: new Date() })
-      .where(eq(mediaAssets.id, asset.id));
-    return Response.json({ error: "image_processing_failed" }, { status: 422 });
+    return failUpload(viewer.db, asset, "image_processing_failed", 422);
   }
+}
+
+async function failUpload(
+  db: Parameters<typeof createNotification>[0],
+  asset: typeof mediaAssets.$inferSelect,
+  error: string,
+  status: number,
+) {
+  await db
+    .update(mediaAssets)
+    .set({ status: "failed", updatedAt: new Date() })
+    .where(eq(mediaAssets.id, asset.id));
+  await createUploadNotification(db, asset, "failed");
+  return Response.json({ error }, { status });
+}
+
+async function createUploadNotification(
+  db: Parameters<typeof createNotification>[0],
+  asset: typeof mediaAssets.$inferSelect,
+  outcome: "ready" | "failed",
+) {
+  await createNotification(db, {
+    recipientUserId: asset.ownerUserId,
+    type: outcome === "ready" ? "upload_ready" : "upload_failed",
+    title:
+      outcome === "ready"
+        ? "写真の準備ができました"
+        : "写真を設定できませんでした",
+    message:
+      outcome === "ready"
+        ? "猫のプロフィール写真を表示できるようになりました。"
+        : "画像を確認できませんでした。別の写真でお試しください。",
+    dedupeKey: `upload_${outcome}:${asset.id}`,
+    resourceType: "media_asset",
+    resourceId: asset.id,
+  }).catch(() => null);
 }
 
 export const POST = instrumentRequestHandler(

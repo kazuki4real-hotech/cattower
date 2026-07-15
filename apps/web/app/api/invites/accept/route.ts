@@ -7,6 +7,7 @@ import { instrumentRequestHandler } from "@cattower/observability";
 import { and, eq, gt, isNull } from "drizzle-orm";
 
 import { getInvite } from "@/lib/invites";
+import { createNotification } from "@/lib/notifications";
 import { getViewer } from "@/lib/viewer";
 
 async function post(request: Request) {
@@ -76,6 +77,26 @@ async function post(request: Request) {
       updatedAt: now,
     })
     .where(eq(userPreferences.userId, viewer.session.user.id));
+  await Promise.all([
+    createNotification(viewer.db, {
+      recipientUserId: viewer.session.user.id,
+      type: "household_invite",
+      title: `${found.householdName}に参加しました`,
+      message: "家族として、猫の記録を一緒に残せます。",
+      dedupeKey: `household_invite:${found.invite.id}:accepted:${viewer.session.user.id}`,
+      resourceType: "household",
+      resourceId: found.invite.householdId,
+    }).catch(() => null),
+    createNotification(viewer.db, {
+      recipientUserId: found.invite.createdBy,
+      type: "household_joined",
+      title: "家族が参加しました",
+      message: `${viewer.session.user.name}さんが、${found.householdName}に参加しました。`,
+      dedupeKey: `household_joined:${found.invite.id}:${viewer.session.user.id}`,
+      resourceType: "household",
+      resourceId: found.invite.householdId,
+    }).catch(() => null),
+  ]);
   return Response.json({ ok: true, destination: "/home" });
 }
 

@@ -1,11 +1,13 @@
 import {
   createDatabase,
+  householdInvites,
   householdMembers,
   households,
   notifications,
   user,
   userPreferences,
 } from "@cattower/db";
+import { createInviteToken, hashInviteToken } from "@cattower/domain";
 import { env } from "cloudflare:test";
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -19,6 +21,7 @@ vi.mock("@/lib/viewer", () => ({
 }));
 
 import { GET, PATCH } from "@/app/api/notifications/route";
+import { POST as acceptInvite } from "@/app/api/invites/accept/route";
 
 const db = createDatabase(env.DB);
 const ownerId = "notification-owner";
@@ -176,12 +179,41 @@ describe("notifications API", () => {
     });
     expect(await db.$count(notifications)).toBe(0);
   });
+
+  it("notifies both people after an invitation is accepted", async () => {
+    const token = createInviteToken();
+    const tokenHash = await hashInviteToken(token);
+    if (!tokenHash) throw new Error("token_fixture_failed");
+    await db.insert(householdInvites).values({
+      id: "invite-for-notification",
+      householdId: homeId,
+      tokenHash,
+      createdBy: ownerId,
+      role: "editor",
+      expiresAt: new Date(Date.now() + 60_000),
+    });
+    setViewer(otherId, otherHomeId);
+
+    const response = await acceptInvite(request("/accept", "POST", { token }));
+    expect(response.status).toBe(200);
+    const rows = await db.query.notifications.findMany();
+    expect(
+      rows.map((item) => [item.recipientUserId, item.type]).sort(),
+    ).toEqual(
+      [
+        [otherId, "household_invite"],
+        [ownerId, "household_joined"],
+      ].sort(),
+    );
+  });
 });
 
 function setViewer(userId: string, householdId: string) {
   viewerState.current = {
     db,
-    session: { user: { id: userId } },
+    session: {
+      user: { id: userId, name: userId === ownerId ? "Owner" : "Other" },
+    },
     household: { id: householdId },
     env: { DB: env.DB },
   };
@@ -198,6 +230,7 @@ function request(path = "", method = "GET", body?: object) {
 async function clearDatabase() {
   for (const table of [
     "notifications",
+    "household_invites",
     "household_members",
     "households",
     "user_preferences",

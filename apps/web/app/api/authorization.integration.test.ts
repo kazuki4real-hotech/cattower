@@ -44,6 +44,7 @@ const catId = "cat-home";
 const outsiderCatId = "cat-outsider";
 const assetId = "asset-home";
 const editorAssetId = "asset-editor";
+const failedAssetId = "asset-failed";
 
 beforeEach(async () => {
   viewerState.current = null;
@@ -121,6 +122,18 @@ beforeEach(async () => {
       provider: "r2",
       providerKey: "households/home/cats/mugi/editor-asset/original",
       originalFilename: "mugi-editor.jpg",
+      mimeType: "image/jpeg",
+      byteSize: 5,
+      status: "pending",
+    },
+    {
+      id: failedAssetId,
+      householdId: homeId,
+      ownerUserId: ownerId,
+      kind: "image",
+      provider: "r2",
+      providerKey: "households/home/cats/mugi/failed-asset/original",
+      originalFilename: "mugi-failed.jpg",
       mimeType: "image/jpeg",
       byteSize: 5,
       status: "pending",
@@ -238,6 +251,17 @@ describe("authorization integration", () => {
       }),
     );
     expect(ownerPassedAuthorization.status).toBe(503);
+    const failed = await completeProfileImage(
+      request(`/api/uploads/images/${failedAssetId}/complete`, "POST"),
+      { params: Promise.resolve({ assetId: failedAssetId }) },
+    );
+    expect(failed.status).toBe(422);
+    const notification = await db.query.notifications.findFirst();
+    expect(notification).toMatchObject({
+      recipientUserId: ownerId,
+      type: "upload_failed",
+      resourceId: failedAssetId,
+    });
   });
 
   it("allows household switching only for active memberships", async () => {
@@ -314,11 +338,13 @@ function setViewer(userId: string, householdId: string) {
     env: {
       DB: env.DB,
       MEDIA: {
+        head: async () => null,
         get: async () => ({
           body: new Response("image").body,
           writeHttpMetadata: (headers: Headers) =>
             headers.set("content-type", "image/jpeg"),
         }),
+        delete: async () => undefined,
       },
     },
   };
@@ -326,6 +352,7 @@ function setViewer(userId: string, householdId: string) {
 
 async function clearDatabase() {
   for (const table of [
+    "notifications",
     "household_invites",
     "media_assets",
     "cats",
