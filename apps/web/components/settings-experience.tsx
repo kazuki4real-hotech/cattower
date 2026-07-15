@@ -6,6 +6,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { SignOutButton } from "@/components/sign-out-button";
 import { HouseholdSwitcher } from "@/components/household-switcher";
 import { CatManager } from "@/components/cat-manager";
+import { InvitationManager } from "@/components/invitation-manager";
 
 function SettingSwitch({
   label,
@@ -91,15 +92,7 @@ export function SettingsExperience() {
             </div>
             <HouseholdSwitcher />
           </div>
-          <div className="setting-row">
-            <div>
-              <h3>家族を招待</h3>
-              <p>招待リンクから、一緒に記録を残せます。</p>
-            </div>
-            <button className="button button-secondary" type="button">
-              招待する
-            </button>
-          </div>
+          <InvitationManager />
         </Tabs.Content>
         <Tabs.Content className="settings-panel" value="data">
           <p className="eyebrow">所有する記録</p>

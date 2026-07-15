@@ -181,6 +181,7 @@ MVP の household policy:
 - editor は全記録を閲覧できるが、作成・編集・soft delete・restore は自分の記録だけ
 - owner は household 内のすべての記録、猫、家族、お散歩設定を管理できる
 - 猫プロフィールの作成・編集・archive・restore は owner だけに許可し、editor は active household 内のプロフィールを閲覧できる
+- household 招待は owner だけが発行・取消できる。256-bit random token の SHA-256 hash だけをD1へ保存し、7日 expiry、一回限りの承認、所有者あたり1時間5件の発行制限をサーバーで検証する
 
 記録の操作可否は `@cattower/domain` の pure policy で判定する。`active` 以外の membership は role にかかわらず拒否する。`owner` は全記録の閲覧・作成・編集・soft delete・restore が可能で、`editor` は全記録の閲覧と作成、自分が author の記録の編集・soft delete・restore だけが可能。Route Handler は resource の household と author を DB から解決してからこの policy を呼び、クライアント入力の role や author を使用しない。
 
@@ -218,17 +219,17 @@ D1 と Drizzle を使用する。詳細なテーブルは [データモデル](d
 
 2026-07-15に専用のAPAC D1へ10,000件の合成日本語記録を投入して測定した。scopeを簡略化するためspike tableは`household_id + cat_id + occurred_at` indexを使用した。実装時は正規の`entries + entry_cats`構造でquery planを再確認する。
 
-| Measurement | Result |
-| --- | ---: |
-| 本文 + scope index（10,000件） | 794,624 bytes |
-| trigram FTS追加後 | 1,220,608 bytes（+425,984 / +53.6%） |
-| 3文字以上「ひなた」、20件取得 | 0.759 ms / 39 rows read |
-| 2文字「夕方」のFTS | 0件（fallback必須） |
-| 2文字LIKE、先頭20件が一致 | 0.199 ms / 20 rows read |
-| 1文字LIKE、先頭20件が一致 | 0.155 ms / 20 rows read |
-| scoped LIKE、一致なし | 0.854 ms / 501 rows read |
-| scope indexのみのinsert | 2 rows written / record |
-| scope index + FTS triggerのinsert | 3 rows written / record |
+| Measurement                       |                               Result |
+| --------------------------------- | -----------------------------------: |
+| 本文 + scope index（10,000件）    |                        794,624 bytes |
+| trigram FTS追加後                 | 1,220,608 bytes（+425,984 / +53.6%） |
+| 3文字以上「ひなた」、20件取得     |              0.759 ms / 39 rows read |
+| 2文字「夕方」のFTS                |                  0件（fallback必須） |
+| 2文字LIKE、先頭20件が一致         |              0.199 ms / 20 rows read |
+| 1文字LIKE、先頭20件が一致         |              0.155 ms / 20 rows read |
+| scoped LIKE、一致なし             |             0.854 ms / 501 rows read |
+| scope indexのみのinsert           |              2 rows written / record |
+| scope index + FTS triggerのinsert |              3 rows written / record |
 
 MVPは既定どおり正規化`LIKE`とhousehold/cat/date scopeから開始する。3文字以上かつ候補件数が増えた段階でtrigram FTSを追加し、1〜2文字は常にscoped `LIKE`へfallbackする。D1の`meta.rows_read`、`rows_written`、`duration`、`size_after`をrelease前後で再計測する。
 

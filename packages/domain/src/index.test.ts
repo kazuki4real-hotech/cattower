@@ -8,7 +8,18 @@ import {
   validateImageUpload,
   verifyTownTicket,
   validateCatProfile,
+  createInviteToken,
+  hashInviteToken,
 } from "./index";
+
+describe("household invite tokens", () => {
+  it("creates opaque single-use-token material and hashes deterministically", async () => {
+    const token = createInviteToken();
+    expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(await hashInviteToken(token)).toBe(await hashInviteToken(token));
+    expect(await hashInviteToken("invalid token")).toBeNull();
+  });
+});
 
 describe("validateCatProfile", () => {
   const valid = {

@@ -5,7 +5,11 @@ import { useState } from "react";
 import { Icon } from "@/components/icon";
 import { authClient } from "@/lib/auth-client";
 
-export function GoogleSignInButton() {
+export function GoogleSignInButton({
+  callbackURL = "/auth/continue",
+}: {
+  callbackURL?: string;
+}) {
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -14,7 +18,7 @@ export function GoogleSignInButton() {
     setError("");
     const result = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/auth/continue",
+      callbackURL,
     });
     if (result.error) {
       setError(

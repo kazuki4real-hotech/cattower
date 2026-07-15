@@ -160,6 +160,36 @@ export const householdMembers = sqliteTable(
   ],
 );
 
+export const householdInvites = sqliteTable(
+  "household_invites",
+  {
+    id: text("id").primaryKey(),
+    householdId: text("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["editor"] })
+      .notNull()
+      .default("editor"),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    acceptedAt: integer("accepted_at", { mode: "timestamp_ms" }),
+    acceptedBy: text("accepted_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("household_invites_household_created_idx").on(
+      table.householdId,
+      table.createdAt,
+    ),
+  ],
+);
+
 export const cats = sqliteTable(
   "cats",
   {
@@ -246,6 +276,7 @@ export const schema = {
   userPreferences,
   households,
   householdMembers,
+  householdInvites,
   cats,
   mediaAssets,
 };
