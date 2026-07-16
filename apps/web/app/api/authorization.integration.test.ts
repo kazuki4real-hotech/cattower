@@ -553,6 +553,8 @@ async function clearDatabase() {
   for (const table of [
     "notifications",
     "household_invites",
+    "board_items",
+    "boards",
     "entry_tags",
     "tags",
     "entry_media",

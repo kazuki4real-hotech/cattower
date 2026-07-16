@@ -375,6 +375,60 @@ export const entryMedia = sqliteTable(
   ],
 );
 
+export const boards = sqliteTable(
+  "boards",
+  {
+    id: text("id").primaryKey(),
+    householdId: text("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    name: text("name").notNull(),
+    normalizedName: text("normalized_name").notNull(),
+    sortMode: text("sort_mode", { enum: ["manual", "newest", "oldest"] })
+      .notNull()
+      .default("manual"),
+    coverAssetId: text("cover_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
+    version: integer("version").notNull().default(1),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("boards_household_normalized_uidx").on(
+      table.householdId,
+      table.normalizedName,
+    ),
+    index("boards_household_updated_idx").on(
+      table.householdId,
+      table.updatedAt,
+    ),
+  ],
+);
+
+export const boardItems = sqliteTable(
+  "board_items",
+  {
+    boardId: text("board_id")
+      .notNull()
+      .references(() => boards.id, { onDelete: "cascade" }),
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    sortKey: text("sort_key").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (table) => [
+    primaryKey({ columns: [table.boardId, table.entryId] }),
+    index("board_items_board_sort_idx").on(table.boardId, table.sortKey),
+    index("board_items_entry_idx").on(table.entryId),
+  ],
+);
+
 export const notifications = sqliteTable(
   "notifications",
   {
@@ -433,6 +487,8 @@ export const schema = {
   tags,
   entryTags,
   entryMedia,
+  boards,
+  boardItems,
   notifications,
 };
 

@@ -52,6 +52,22 @@ export {
 } from "./entry";
 
 export {
+  BOARD_SORT_MODES,
+  MAX_BOARD_NAME_LENGTH,
+  MAX_BOARDS_PER_HOUSEHOLD,
+  normalizeBoardName,
+  validateBoardInput,
+  type BoardSortMode,
+} from "./board";
+
+export {
+  BOARD_ACTIONS,
+  canPerformBoardAction,
+  type BoardAction,
+  type BoardPolicyInput,
+} from "./board-policy";
+
+export {
   HOUSEHOLD_INVITE_HOURLY_LIMIT,
   HOUSEHOLD_INVITE_TTL_MS,
   createInviteToken,

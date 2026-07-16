@@ -196,15 +196,20 @@ R2画像の`provider_key`は原本の`{asset prefix}/original`を指す。プロ
 
 ### boards
 
-| Column         | Notes                          |
-| -------------- | ------------------------------ |
-| id             | PK                             |
-| household_id   | authorization boundary         |
-| name           | required                       |
-| sort_mode      | `manual` / `newest` / `oldest` |
-| cover_asset_id | nullable                       |
+| Column          | Notes                                        |
+| --------------- | -------------------------------------------- |
+| id              | PK                                           |
+| household_id    | authorization boundary                       |
+| created_by      | creator user。editorの変更・削除判定に使う   |
+| name            | required、60文字以内                         |
+| normalized_name | NFKC、空白圧縮、lowercase。household内unique |
+| sort_mode       | `manual` / `newest` / `oldest`               |
+| cover_asset_id  | nullable                                     |
+| version         | optimistic concurrency                       |
+| created_at      | created time                                 |
+| updated_at      | updated time                                 |
 
-標準ボードと自動分類は作らない。利用者が必要な場合だけ作成する。
+標準ボードと自動分類は作らない。利用者が必要な場合だけ作成し、1 householdあたり最大50件とする。activeなownerとeditorは作成・閲覧できる。ownerはすべて、editorは`created_by`が自分のボードだけ名称・並び方・削除を変更できる。ボード削除は`board_items`をcascadeで削除するhard deleteとし、P5の共有リンクはboard削除時に即時失効させる。
 
 ### board_items
 
@@ -213,6 +218,8 @@ R2画像の`provider_key`は原本の`{asset prefix}/original`を指す。プロ
 | board_id | composite PK       |
 | entry_id | composite PK       |
 | sort_key | manual order token |
+
+`board_items`はP4-03でschemaを作成し、記録の追加・削除・手動並び替えはP4-04で有効化する。
 
 ## 7. Sharing
 

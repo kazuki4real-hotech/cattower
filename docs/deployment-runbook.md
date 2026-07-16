@@ -1,7 +1,7 @@
 # Cattower デプロイ運用手順
 
 - Status: Active v0.1
-- Updated: 2026-07-15
+- Updated: 2026-07-17
 - Scope: `cattower-web` と `cattower-realtime` の Cloudflare Workers build、deploy、確認、rollback
 
 ## 1. Current production setup
@@ -148,6 +148,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 続けてmigration `0011_single_entry_draft.sql`を適用し、同じhousehold・作成者の未削除draftを1件に制限するpartial unique indexを追加した。重複draftが0件であることとforeign key checkを確認後、自動下書き、編集、soft delete、restoreを含むWorker version `94e5c39e-8143-4045-b651-c9249a8ab213`をdeployした。
 
 2026-07-17に孤立・失敗R2メディアのcleanupを追加し、Worker version `fa93d7de-eb7a-488c-ac08-74e312c7950e`をdeployした。Cronは毎日`03:17 UTC`（`12:17 JST`）に1回最大50件を処理する。deploy前のproduction D1確認では削除候補は0件だった。初回実行後はWorkers Logsの`media_cleanup_completed`で件数だけを確認し、asset IDやobject keyをログへ追加しない。
+
+同日にmigration `0012_boards.sql`を適用し、任意ボードとボード内の記録配置テーブルを追加した。ボード0件、foreign key checkが空であることを確認後、ボードの作成・名称変更・並び方変更・削除を含むWorker version `c5cc94a1-d944-4355-9960-a3d7ab6c4f90`をdeployした。記録の追加・削除・手動並び替えはP4-04で有効化する。
 
 schema 変更を含む push の前に migration を適用する。
 
