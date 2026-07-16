@@ -16,9 +16,10 @@ export default defineConfig(async () => {
     plugins: [
       cloudflareTest({
         miniflare: {
-          compatibilityDate: "2026-07-14",
+          compatibilityDate: "2026-07-15",
           compatibilityFlags: ["nodejs_compat"],
           d1Databases: ["DB"],
+          r2Buckets: ["MEDIA"],
           bindings: { TEST_MIGRATIONS: migrations },
         },
       }),

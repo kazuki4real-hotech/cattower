@@ -398,6 +398,13 @@ export function EntryEditor({
             </div>
           ) : null}
         </div>
+        <div className="video-plan-preview" aria-label="動画機能の提供予定">
+          <Icon name="lock" className="video-plan-icon" />
+          <span>
+            <strong>動画</strong>
+            <small>有料プランで提供予定です。現在は準備中です。</small>
+          </span>
+        </div>
         <div className="field">
           <label htmlFor="entry-title">タイトル（任意）</label>
           <input

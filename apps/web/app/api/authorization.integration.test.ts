@@ -461,7 +461,7 @@ describe("authorization integration", () => {
       request(`/api/uploads/images/${editorEntryAssetId}/complete`, "POST"),
       { params: Promise.resolve({ assetId: editorEntryAssetId }) },
     );
-    expect(completion.status).toBe(422);
+    expect(completion.status).toBe(409);
   });
 
   it("allows household switching only for active memberships", async () => {

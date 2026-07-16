@@ -282,6 +282,8 @@ object key は `households/{householdId}/cats/{catId}/{assetId}/original` 形式
 
 動画は Cloudflare Stream の Direct Creator Upload を使う。
 
+動画は household 単位の有料 entitlement とする。owner が契約を管理し、upload URL 発行と playback token 発行の両方でサーバー側 entitlement を検証する。未契約者にも記録フォーム内で「有料プランで提供予定」と存在を知らせるが、課金開始前は操作できない予告表示にする。
+
 - ブラウザへ Cloudflare API token を渡さない
 - 直接 upload 用の一回限り URL をサーバーで発行する
 - 動画は private とし signed playback token を必須にする
@@ -296,7 +298,18 @@ Stream は MOV 等を受け付けて配信用に encode できるため、スマ
 
 Pricing snapshot（2026-07-14）では、保存は 1,000 分あたり 5 USD の前払い、配信は 1,000 分あたり 1 USD の従量課金で、Stream の無料利用枠は案内されていない。価格は変更される可能性があるため、P1-10/P1-18 と P3-15 の開始前に公式 pricing を再確認する。
 
-2026-07-14の初期方針として、課金を抑えるためStream resourceとbindingは作成せず、動画機能は「準備中」とする。この期間のStream費用は0 USDとし、写真・文章とお散歩の実装を先行する。P0-09で提供上限と予算を決定してからP1-10/P1-18を再開する。
+2026-07-17の方針として、動画は有料プランで提供する。価格、保存・upload上限、支払手段、解約後の猶予期間が未決定のため、Stream resourceとbindingはまだ作成しない。この期間のStream費用は0 USDとし、P0-09を決定してからP1-10/P1-18を再開する。
+
+### Media cleanup
+
+- Cron Trigger を毎日1回実行し、1回最大50件を処理する
+- `pending` / `uploaded` / `processing` / `failed` のまま24時間以上更新されず、猫プロフィールにも記録にも参照されないR2 assetを対象にする
+- `ready` でも7日以上参照されないR2 assetは、写真の差し替え・記録からの取り外しで残った孤立データとして対象にする
+- `deleting` のまま1時間以上経過したassetは再試行する
+- 対象確定時にも参照の不存在とstatusを条件に含め、upload完了や紐付けと競合した場合は削除しない
+- 原本と既知のprofile/entry derivativeをまとめて削除し、成功後だけ`deleted_at`を設定する。失敗時は`failed`へ戻し、翌日以降に再試行する
+- Stream assetの削除はP3-15でbindingを追加した時点で同じjobへ統合する
+- structured logは件数と結果だけを記録し、asset ID、object key、filenameを含めない
 
 - Direct Creator Uploads: https://developers.cloudflare.com/stream/uploading-videos/direct-creator-uploads/
 - Secure Stream: https://developers.cloudflare.com/stream/viewing-videos/securing-your-stream/

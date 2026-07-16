@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "cattower-web",
-  "main": ".open-next/worker.js",
-  "compatibility_date": "2026-07-14",
+  "main": "custom-worker.ts",
+  "compatibility_date": "2026-07-15",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
@@ -33,6 +33,9 @@
       "remote": true,
     },
   ],
+  "triggers": {
+    "crons": ["17 3 * * *"],
+  },
   "vars": {
     "R2_ACCOUNT_ID": "54bfb2e5aa9452060620308a6f0e6e73",
     "R2_BUCKET_NAME": "cattower-media-production",

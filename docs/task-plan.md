@@ -1,7 +1,7 @@
 # Cattower 実装タスク
 
 - Status: In progress v0.2
-- Updated: 2026-07-15
+- Updated: 2026-07-17
 - Progress rule: 実装と同じ commit series で checkbox と判断を更新し、文書を含めて `main` へ push する
 
 ## 0. Definition of done
@@ -27,7 +27,7 @@
 - [x] P0-06 MVP acceptance と実装フェーズを作成する
 - [ ] P0-07 正式名称と独自ドメインを決定する
 - [ ] P0-08 お散歩のビジュアル方式を決定する
-- [ ] P0-09 提供プランの画像容量・動画分数と Stream の開発・運用予算を決定する（初期は動画を準備中としてStreamを有効化せず、費用0 USDで進行）
+- [ ] P0-09 household 単位の有料動画プランについて、価格、1本の長さ、合計保存分数、月間 upload 分数、支払手段、解約後の猶予期間と Stream の開発・運用予算を決定する（有料化方針は決定済み。決定まではStreamを有効化せず、費用0 USDで進行）
 
 Exit criteria: P0-07〜08 は実装開始を妨げないが public beta 前に決定する。P0-09 のうち開発中を含む production Stream 支出上限は P1-10/P1-18 より前、利用者向け動画上限は P3-15 より前に決定する。
 
@@ -109,8 +109,8 @@ Exit criteria: 二つの account で同じ household を共有でき、権限外
 - [x] P3-13 server metadata verification と ready transition
 - [x] P3-14 private image delivery と access test
 - [ ] P3-15 Stream direct upload、processing status、signed playback
-- [ ] P3-15A 利用者ごとの最大時間、合計保存分数、月間 upload gate、動画 feature flag を実装する
-- [ ] P3-16 orphaned/failed media cleanup job
+- [ ] P3-15A household entitlement、1本の最大時間、合計保存分数、月間 upload gate、動画 feature flag を実装する
+- [x] P3-16 orphaned/failed R2 media cleanup job（Stream削除はP3-15で統合）
 - [x] P3-17 upload limit と user-facing error を実装する
 
 Exit criteria: 共通フォームが写真・動画・文章・タグを失わず保存でき、再読込後も正しく表示・編集できる。

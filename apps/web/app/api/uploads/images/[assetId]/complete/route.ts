@@ -41,6 +41,17 @@ async function post(
     (asset.purpose === "profile" && membership.role !== "owner")
   )
     return Response.json({ error: "forbidden" }, { status: 403 });
+  if (asset.status !== "pending")
+    return Response.json({ error: "upload_not_pending" }, { status: 409 });
+
+  const claimed = await viewer.db
+    .update(mediaAssets)
+    .set({ status: "processing", updatedAt: new Date() })
+    .where(
+      and(eq(mediaAssets.id, asset.id), eq(mediaAssets.status, "pending")),
+    );
+  if (claimed.meta.changes !== 1)
+    return Response.json({ error: "upload_state_changed" }, { status: 409 });
 
   const head = await viewer.env.MEDIA.head(asset.providerKey);
   const contentType = head?.httpMetadata?.contentType;

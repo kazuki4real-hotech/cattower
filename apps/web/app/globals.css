@@ -125,6 +125,10 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
 .entry-upload img { width: 100%; max-height: 420px; object-fit: contain; border-radius: var(--radius-sm); }
 .entry-file-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .entry-file-row small { min-width: 0; overflow-wrap: anywhere; }
+.video-plan-preview { display: flex; align-items: center; gap: 12px; margin: -6px 0 24px; padding: 14px 0; border-block: 1px solid var(--line); color: var(--ink-soft); }
+.video-plan-icon { flex: 0 0 auto; }
+.video-plan-preview span, .video-plan-preview small { display: block; }
+.video-plan-preview strong { color: var(--ink); font-size: 14px; }
 .entry-cat-fieldset { margin: 0 0 24px; padding: 0; border: 0; }
 .entry-cat-fieldset legend { margin-bottom: 8px; font-size: 14px; font-weight: 700; }
 .entry-cat-options { display: flex; flex-wrap: wrap; gap: 8px; }
