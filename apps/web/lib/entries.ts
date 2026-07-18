@@ -83,7 +83,7 @@ export async function getCurrentDraft(viewer: Viewer) {
   return row ? ((await hydrateEntries(viewer, [row]))[0] ?? null) : null;
 }
 
-async function hydrateEntries(viewer: Viewer, rows: EntryRow[]) {
+export async function hydrateEntries(viewer: Viewer, rows: EntryRow[]) {
   if (!rows.length) return [];
   const ids = rows.map((entry) => entry.id);
   const [catRows, mediaRows, tagRows, authorRows] = await Promise.all([

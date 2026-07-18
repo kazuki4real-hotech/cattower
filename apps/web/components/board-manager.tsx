@@ -2,6 +2,7 @@
 
 import { MAX_BOARD_NAME_LENGTH, type BoardSortMode } from "@cattower/domain";
 import { PageHeading } from "@cattower/ui";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import { Icon } from "@/components/icon";
@@ -158,22 +159,31 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
                       {board.itemCount}件の記録・{SORT_LABELS[board.sortMode]}
                     </p>
                   </div>
-                  {board.canManage ? (
-                    <button
-                      className="button button-quiet"
-                      type="button"
-                      onClick={() => {
-                        setCreating(false);
-                        setDeletingId(null);
-                        setEditingId(board.id);
-                        setError(null);
-                      }}
-                      disabled={pendingId !== null}
+                  <div className="board-item-actions">
+                    <Link
+                      className="button button-secondary"
+                      href={`/boards/${board.id}`}
                     >
-                      <Icon name="edit" />
-                      編集
-                    </button>
-                  ) : null}
+                      ボードをひらく
+                      <Icon name="chevron_right" />
+                    </Link>
+                    {board.canManage ? (
+                      <button
+                        className="button button-quiet"
+                        type="button"
+                        onClick={() => {
+                          setCreating(false);
+                          setDeletingId(null);
+                          setEditingId(board.id);
+                          setError(null);
+                        }}
+                        disabled={pendingId !== null}
+                      >
+                        <Icon name="edit" />
+                        編集
+                      </button>
+                    ) : null}
+                  </div>
                 </>
               )}
 

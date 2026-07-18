@@ -15,13 +15,15 @@ export const metadata: Metadata = {
   description: "猫との何気ない時間を、自分のために記録する場所。",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ja" className={rounded.variable}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&icon_names=add,arrow_back,arrow_forward,auto_awesome,check_circle,chevron_right,close,close_fullscreen,collections_bookmark,download,edit,expand_more,explore,family_restroom,home,image,lock,login,menu,menu_book,notifications,palette,pets,photo_camera,photo_library,restaurant,search,settings,toys,upload,visibility&display=block"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&icon_names=add,arrow_back,arrow_downward,arrow_forward,arrow_upward,auto_awesome,check_circle,chevron_right,close,close_fullscreen,collections_bookmark,delete,download,edit,expand_more,explore,family_restroom,home,image,lock,login,menu,menu_book,notifications,palette,pets,photo_camera,photo_library,restaurant,search,settings,toys,upload,visibility&display=block"
           rel="stylesheet"
         />
         <link

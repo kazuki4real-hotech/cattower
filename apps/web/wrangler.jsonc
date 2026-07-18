@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "cattower-web",
   "main": "custom-worker.ts",
+  "minify": true,
   "compatibility_date": "2026-07-15",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {

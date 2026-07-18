@@ -53,10 +53,15 @@ export {
 
 export {
   BOARD_SORT_MODES,
+  BOARD_ENTRY_PICKER_LIMIT,
   MAX_BOARD_NAME_LENGTH,
   MAX_BOARDS_PER_HOUSEHOLD,
+  MAX_BOARD_ITEMS,
+  boardSortKeyAt,
+  nextBoardSortKey,
   normalizeBoardName,
   validateBoardInput,
+  validateBoardItemOrder,
   type BoardSortMode,
 } from "./board";
 

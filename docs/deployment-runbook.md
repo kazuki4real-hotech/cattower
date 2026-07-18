@@ -59,6 +59,7 @@ pnpm --filter @cattower/web exec wrangler deploy --dry-run
 ```
 
 `pnpm cf:build` は `.open-next/worker.js` と `.open-next/assets` を生成する。生成物は commit しない。
+`cattower-web`は`wrangler.jsonc`の`minify: true`を使用する。dry-runのgzip sizeが契約中planのWorker上限を超えた場合はdeployせず、不要な依存・重複bundleを減らす。上限回避だけを理由にplanを変更しない。
 CI と production build は remote D1/R2 へ接続しないため、GitHub Actions に Cloudflare API token を登録しない。binding はデプロイ後の Worker runtime で解決する。
 
 realtime Workerを変更した場合は、production deploy前に追加で次を実行する。
@@ -150,6 +151,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 2026-07-17に孤立・失敗R2メディアのcleanupを追加し、Worker version `fa93d7de-eb7a-488c-ac08-74e312c7950e`をdeployした。Cronは毎日`03:17 UTC`（`12:17 JST`）に1回最大50件を処理する。deploy前のproduction D1確認では削除候補は0件だった。初回実行後はWorkers Logsの`media_cleanup_completed`で件数だけを確認し、asset IDやobject keyをログへ追加しない。
 
 同日にmigration `0012_boards.sql`を適用し、任意ボードとボード内の記録配置テーブルを追加した。ボード0件、foreign key checkが空であることを確認後、ボードの作成・名称変更・並び方変更・削除を含むWorker version `c5cc94a1-d944-4355-9960-a3d7ab6c4f90`をdeployした。記録の追加・削除・手動並び替えはP4-04で有効化する。
+
+2026-07-18にボードへの記録追加・削除・手動並び替えを含むWorker version `3a63c788-4c42-4351-a13f-036a2cfd53b3`をdeployした。schema変更はない。通常bundleが3 MiB上限をわずかに超えたため`minify: true`を正本設定へ追加し、gzip size `2654.53 KiB`、startup `28 ms`を確認して反映した。
 
 schema 変更を含む push の前に migration を適用する。
 

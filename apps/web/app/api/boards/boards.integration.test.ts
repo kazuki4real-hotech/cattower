@@ -19,7 +19,13 @@ vi.mock("@/lib/viewer", () => ({
 }));
 
 import { DELETE, PUT } from "@/app/api/boards/[boardId]/route";
+import { DELETE as removeBoardItem } from "@/app/api/boards/[boardId]/items/[entryId]/route";
+import {
+  POST as addBoardItem,
+  PUT as reorderBoardItems,
+} from "@/app/api/boards/[boardId]/items/route";
 import { GET, POST } from "@/app/api/boards/route";
+import { getBoardDetail } from "@/lib/boards";
 
 const db = createDatabase(env.DB);
 const ownerId = "board-owner";
@@ -180,6 +186,204 @@ describe("boards API", () => {
     expect(stale.status).toBe(409);
   });
 
+  it("adds household records once and rejects records from another home", async () => {
+    await seedBoard("owner-board", ownerId, "窓辺");
+    await seedEntry("home-entry", homeId, ownerId, "2026-07-17");
+    await seedEntry("outsider-entry", outsiderHomeId, outsiderId, "2026-07-16");
+    setViewer(ownerId, homeId);
+
+    const added = await addBoardItem(
+      request("/owner-board/items", "POST", {
+        entryId: "home-entry",
+        version: 1,
+      }),
+      context("owner-board"),
+    );
+    expect(added.status).toBe(200);
+    await expect(added.json()).resolves.toMatchObject({ version: 2 });
+    expect(await db.query.boardItems.findFirst()).toMatchObject({
+      boardId: "owner-board",
+      entryId: "home-entry",
+      sortKey: "000000001000",
+    });
+
+    const duplicate = await addBoardItem(
+      request("/owner-board/items", "POST", {
+        entryId: "home-entry",
+        version: 2,
+      }),
+      context("owner-board"),
+    );
+    expect(duplicate.status).toBe(409);
+
+    const outsider = await addBoardItem(
+      request("/owner-board/items", "POST", {
+        entryId: "outsider-entry",
+        version: 2,
+      }),
+      context("owner-board"),
+    );
+    expect(outsider.status).toBe(404);
+  });
+
+  it("reserves item changes on an owner board from editors", async () => {
+    await seedBoard("owner-board", ownerId, "家族の一冊");
+    await seedEntry("home-entry", homeId, editorId, "2026-07-17");
+    setViewer(editorId, homeId);
+
+    const added = await addBoardItem(
+      request("/owner-board/items", "POST", {
+        entryId: "home-entry",
+        version: 1,
+      }),
+      context("owner-board"),
+    );
+    expect(added.status).toBe(403);
+  });
+
+  it("reorders every manual item and rejects stale or automatic ordering", async () => {
+    await seedBoard("manual-board", ownerId, "手動");
+    await seedEntry("entry-a", homeId, ownerId, "2026-07-15");
+    await seedEntry("entry-b", homeId, ownerId, "2026-07-16");
+    await db.insert(boardItems).values([
+      {
+        boardId: "manual-board",
+        entryId: "entry-a",
+        sortKey: "000000001000",
+      },
+      {
+        boardId: "manual-board",
+        entryId: "entry-b",
+        sortKey: "000000002000",
+      },
+    ]);
+    setViewer(ownerId, homeId);
+
+    const reordered = await reorderBoardItems(
+      request("/manual-board/items", "PUT", {
+        entryIds: ["entry-b", "entry-a"],
+        version: 1,
+      }),
+      context("manual-board"),
+    );
+    expect(reordered.status).toBe(200);
+    await expect(reordered.json()).resolves.toMatchObject({ version: 2 });
+    const rows = await db.query.boardItems.findMany({
+      orderBy: (item, { asc }) => asc(item.sortKey),
+    });
+    expect(rows.map((row) => row.entryId)).toEqual(["entry-b", "entry-a"]);
+
+    const stale = await reorderBoardItems(
+      request("/manual-board/items", "PUT", {
+        entryIds: ["entry-a", "entry-b"],
+        version: 1,
+      }),
+      context("manual-board"),
+    );
+    expect(stale.status).toBe(409);
+
+    await seedBoard("automatic-board", ownerId, "自動", "newest");
+    const automatic = await reorderBoardItems(
+      request("/automatic-board/items", "PUT", {
+        entryIds: [],
+        version: 1,
+      }),
+      context("automatic-board"),
+    );
+    expect(automatic.status).toBe(409);
+  });
+
+  it("shows automatic order to members without exposing edit candidates", async () => {
+    await seedBoard("owner-board", ownerId, "新しい順", "newest");
+    await seedEntry("older-entry", homeId, ownerId, "2026-07-15");
+    await seedEntry("newer-entry", homeId, editorId, "2026-07-17");
+    await seedEntry("candidate-entry", homeId, ownerId, "2026-07-16");
+    await db.insert(boardItems).values([
+      {
+        boardId: "owner-board",
+        entryId: "older-entry",
+        sortKey: "000000001000",
+      },
+      {
+        boardId: "owner-board",
+        entryId: "newer-entry",
+        sortKey: "000000002000",
+      },
+    ]);
+    setViewer(editorId, homeId);
+
+    const detail = await getBoardDetail(
+      viewerState.current as Parameters<typeof getBoardDetail>[0],
+      "owner-board",
+    );
+    expect(detail?.items.map((entry) => entry.id)).toEqual([
+      "newer-entry",
+      "older-entry",
+    ]);
+    expect(detail?.board.canManage).toBe(false);
+    expect(detail?.candidates).toEqual([]);
+  });
+
+  it("reorders more than one D1 parameter chunk", async () => {
+    await seedBoard("large-board", ownerId, "たくさんの記録");
+    const entryIds = Array.from({ length: 65 }, (_, index) => `entry-${index}`);
+    for (let index = 0; index < entryIds.length; index += 10) {
+      const entryChunk = entryIds.slice(index, index + 10);
+      await db.insert(entries).values(
+        entryChunk.map((id) => ({
+          id,
+          householdId: homeId,
+          authorUserId: ownerId,
+          body: id,
+          occurredAt: new Date("2026-07-17T00:00:00.000Z"),
+        })),
+      );
+      await db.insert(boardItems).values(
+        entryChunk.map((entryId, chunkIndex) => ({
+          boardId: "large-board",
+          entryId,
+          sortKey: String((index + chunkIndex + 1) * 1_000).padStart(12, "0"),
+        })),
+      );
+    }
+    setViewer(ownerId, homeId);
+
+    const reordered = await reorderBoardItems(
+      request("/large-board/items", "PUT", {
+        entryIds: [...entryIds].reverse(),
+        version: 1,
+      }),
+      context("large-board"),
+    );
+    expect(reordered.status).toBe(200);
+    const rows = await db.query.boardItems.findMany({
+      where: eq(boardItems.boardId, "large-board"),
+      orderBy: (item, { asc }) => asc(item.sortKey),
+    });
+    expect(rows.map((row) => row.entryId)).toEqual([...entryIds].reverse());
+  });
+
+  it("removes a placement while preserving the record", async () => {
+    await seedBoard("owner-board", ownerId, "残したい記録");
+    await seedEntry("kept-entry", homeId, ownerId, "2026-07-17");
+    await db.insert(boardItems).values({
+      boardId: "owner-board",
+      entryId: "kept-entry",
+      sortKey: "000000001000",
+    });
+    setViewer(ownerId, homeId);
+
+    const removed = await removeBoardItem(
+      request("/owner-board/items/kept-entry", "DELETE", { version: 1 }),
+      itemContext("owner-board", "kept-entry"),
+    );
+    expect(removed.status).toBe(200);
+    expect(await db.query.boardItems.findFirst()).toBeUndefined();
+    expect(
+      await db.query.entries.findFirst({ where: eq(entries.id, "kept-entry") }),
+    ).toBeTruthy();
+  });
+
   it("deletes the board and its placement without deleting the record", async () => {
     await seedBoard("owner-board", ownerId, "残したい記録");
     await db.insert(entries).values({
@@ -213,6 +417,10 @@ function context(boardId: string) {
   return { params: Promise.resolve({ boardId }) };
 }
 
+function itemContext(boardId: string, entryId: string) {
+  return { params: Promise.resolve({ boardId, entryId }) };
+}
+
 function request(path = "", method = "GET", body?: object) {
   return new Request(`https://example.test/api/boards${path}`, {
     method,
@@ -230,13 +438,34 @@ function setViewer(userId: string, householdId: string) {
   };
 }
 
-async function seedBoard(id: string, createdBy: string, name: string) {
+async function seedBoard(
+  id: string,
+  createdBy: string,
+  name: string,
+  sortMode: "manual" | "newest" | "oldest" = "manual",
+) {
   await db.insert(boards).values({
     id,
     householdId: homeId,
     createdBy,
     name,
     normalizedName: name,
+    sortMode,
+  });
+}
+
+async function seedEntry(
+  id: string,
+  householdId: string,
+  authorUserId: string,
+  occurredDate: string,
+) {
+  await db.insert(entries).values({
+    id,
+    householdId,
+    authorUserId,
+    body: id,
+    occurredAt: new Date(`${occurredDate}T00:00:00.000Z`),
   });
 }
 

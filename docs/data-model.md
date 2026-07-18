@@ -219,7 +219,7 @@ R2画像の`provider_key`は原本の`{asset prefix}/original`を指す。プロ
 | entry_id | composite PK       |
 | sort_key | manual order token |
 
-`board_items`はP4-03でschemaを作成し、記録の追加・削除・手動並び替えはP4-04で有効化する。
+同じ記録は一つのボードへ1回だけ配置し、1ボード最大500件とする。`sort_key`は12桁の0埋め10進数を1000刻みで保存し、追加時は末尾、手動並び替え時は全件を再採番する。`newest` / `oldest`では記録の`occurred_at`を正本とし、`sort_key`を表示順に使わない。itemの追加・削除・再採番時は親boardの`version`と`updated_at`も更新する。
 
 ## 7. Sharing
 
