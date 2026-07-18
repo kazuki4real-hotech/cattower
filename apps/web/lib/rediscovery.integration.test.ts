@@ -10,7 +10,7 @@ import {
 import { env } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { getLastYearMemory } from "@/lib/rediscovery";
+import { getAnniversaryMemories } from "@/lib/rediscovery";
 
 const db = createDatabase(env.DB);
 const ownerId = "rediscovery-owner";
@@ -39,8 +39,8 @@ beforeEach(async () => {
   });
 });
 
-describe("last year rediscovery", () => {
-  it("returns the closest ready record for the selected cat", async () => {
+describe("anniversary rediscovery", () => {
+  it("returns the closest ready records for both anniversaries", async () => {
     await db.insert(entries).values([
       entry("three-days-before", "2025-07-15"),
       entry("one-day-after", "2025-07-19"),
@@ -50,6 +50,8 @@ describe("last year rediscovery", () => {
         deletedAt: new Date("2026-01-01T00:00:00.000Z"),
       }),
       entry("outside-window", "2025-07-22"),
+      entry("three-years-before", "2023-07-16"),
+      entry("three-years-after", "2023-07-19"),
     ]);
     await db.insert(entryCats).values([
       { entryId: "three-days-before", catId },
@@ -58,25 +60,32 @@ describe("last year rediscovery", () => {
       { entryId: "draft", catId },
       { entryId: "deleted", catId },
       { entryId: "outside-window", catId },
+      { entryId: "three-years-before", catId },
+      { entryId: "three-years-after", catId },
     ]);
 
-    const result = await getLastYearMemory(
+    const result = await getAnniversaryMemories(
       viewer(),
       catId,
       new Date("2026-07-18T03:00:00.000Z"),
     );
 
-    expect(result?.id).toBe("one-day-after");
-    expect(result?.cats).toEqual([{ id: catId, name: "むぎ" }]);
+    expect(result.lastYear?.id).toBe("one-day-after");
+    expect(result.threeYearsAgo?.id).toBe("three-years-after");
+    expect(result.threeYearsAgo?.cats).toEqual([{ id: catId, name: "むぎ" }]);
   });
 
-  it("returns null when the seven-day window has no eligible record", async () => {
+  it("returns null for each seven-day window without an eligible record", async () => {
     await db.insert(entries).values(entry("too-old", "2025-07-10"));
     await db.insert(entryCats).values({ entryId: "too-old", catId });
 
     await expect(
-      getLastYearMemory(viewer(), catId, new Date("2026-07-18T03:00:00.000Z")),
-    ).resolves.toBeNull();
+      getAnniversaryMemories(
+        viewer(),
+        catId,
+        new Date("2026-07-18T03:00:00.000Z"),
+      ),
+    ).resolves.toEqual({ lastYear: null, threeYearsAgo: null });
   });
 });
 
@@ -86,7 +95,7 @@ function viewer() {
     session: { user: { id: ownerId } },
     household: { id: homeId },
     env: { DB: env.DB },
-  } as Parameters<typeof getLastYearMemory>[0];
+  } as Parameters<typeof getAnniversaryMemories>[0];
 }
 
 function entry(

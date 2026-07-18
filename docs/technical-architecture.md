@@ -52,7 +52,7 @@ Cloudflare の公式ガイドは Next.js を OpenNext adapter で Workers にデ
 - Deploy command: `pnpm --filter @cattower/web exec wrangler deploy`
 - Worker bundleは`wrangler.jsonc`の`minify: true`で圧縮し、deploy前のdry-runでgzip sizeが現在のplan上限内であることを確認する
 - Trigger: Cloudflare Workers Builds receives a push to `main`
-- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、登録直後だけ開始する3 step onboarding、文章・写真・日付・タグ・複数猫を保存する共通記録editor、自動下書き、編集・soft delete・restore、おうちの最近の記録、「去年の今ごろ」の実データ再発見、記録詳細、任意ボードのCRUDとitem追加・削除・手動並び替え、active household内のkeyword・日付・tag・猫・media検索、検索結果からのボード追加、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。既存利用者は`onboarding_prompted_at`のmigration backfillで自動表示対象から除外し、未完了状態は通常画面のバナーから再開する。Google login/logout、7日session、再読み込み後のsession継続、認証済みブラウザからのR2直接upload、Images Binding `.info()`とprofile derivative、認証あり/なしのprivate配信を本番確認済み。realtime Workerは短命signed ticket、origin制限、WebSocket upgrade、hibernation後のattachment復元まで本番確認済み。Stream、「3年前と今日」・ランダム再発見・お散歩のsample data置換は未完了
+- Current boundary: Better Auth endpoint、Google/R2 runtime secrets、D1 schema、owner household 自動作成、登録直後だけ開始する3 step onboarding、文章・写真・日付・タグ・複数猫を保存する共通記録editor、自動下書き、編集・soft delete・restore、おうちの最近の記録、「去年の今ごろ」と「3年前と今日」の実データ再発見、記録詳細、任意ボードのCRUDとitem追加・削除・手動並び替え、active household内のkeyword・日付・tag・猫・media検索、検索結果からのボード追加、R2 presigned PUT/検査/private delivery はproduction bindingへ接続済み。既存利用者は`onboarding_prompted_at`のmigration backfillで自動表示対象から除外し、未完了状態は通常画面のバナーから再開する。Google login/logout、7日session、再読み込み後のsession継続、認証済みブラウザからのR2直接upload、Images Binding `.info()`とprofile derivative、認証あり/なしのprivate配信を本番確認済み。realtime Workerは短命signed ticket、origin制限、WebSocket upgrade、hibernation後のattachment復元まで本番確認済み。Stream、ランダム再発見・お散歩のsample data置換は未完了
 - Public hostname: `https://cattower-web.kazuki-kitada.workers.dev/`。独自ドメインは P0-07 で決定後に追加し、Workers URL は運用確認用として維持する
 
 build、確認、ログ、rollback の操作手順は [deployment-runbook.md](deployment-runbook.md) を正本とする。
@@ -222,6 +222,7 @@ D1 と Drizzle を使用する。詳細なテーブルは [データモデル](d
 - 本文検索は MVP では正規化した `LIKE` と household/cat/date 絞り込みから開始する
 - P4-06の検索はServer ComponentでURL queryを検証し、`entries`をactive household、`ready`、未削除へ先に絞る。キーワードはtitle/bodyと同じhouseholdのtagにescaped `LIKE`を適用し、cat/tag/mediaは相関`EXISTS`、メディアなしは`NOT EXISTS`で判定する。結果と件数は最大50件の新しい順で取得し、関連猫・tag・ready mediaは既存のbounded hydration queryで解決する
 - P4-07の「去年の今ごろ」は`user_preferences.timezone`（不正値は`Asia/Tokyo`へfallback）で今日の日付を決め、前年同日を中心とする前後3日の半開区間を作る。active household、`ready`、未削除、選択中の猫へ絞った候補を日付距離・新しい日付・作成日時の順に並べ、1件だけ既存のentry hydrationへ渡す。日付範囲は既存の`entries(household_id, occurred_at, deleted_at)`と`entry_cats(cat_id, entry_id)`を利用し、schema追加は行わない
+- P4-08の「3年前と今日」も同じ年数指定の計算・queryを使い、3年前同日の前後3日から1件を取得する。1年・3年の候補queryは並列実行し、利用者タイムゾーンは1回だけ取得し、見つかったentryの関連データは一つのbounded hydrationへまとめる
 - 件数増加後は FTS5 の trigram tokenizer を第一候補とする
 - trigram で一致しない 1〜2 文字の検索は正規化 `LIKE` へ fallback する
 

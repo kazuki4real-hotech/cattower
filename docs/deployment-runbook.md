@@ -158,6 +158,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 同日に選択中の猫と利用者タイムゾーンに連動する「去年の今ごろ」を実データ化し、Worker version `c273fc5a-8bfb-418e-8b83-c54f29369ca0`をdeployした。schema変更はない。gzip size `2661.28 KiB`、startup `34 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
 
+同日に「3年前と今日」を実データ化し、1年・3年の再発見を共通queryと一つの表示領域へ統合したWorker version `e6ee6787-44a5-4246-8638-35e25669d6a4`をdeployした。schema変更はない。gzip size `2661.52 KiB`、startup `31 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash

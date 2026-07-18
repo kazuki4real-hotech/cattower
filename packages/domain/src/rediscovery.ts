@@ -7,13 +7,16 @@ export type RediscoveryDateWindow = {
   timeZone: string;
 };
 
-export function getLastYearDateWindow(
+export function getAnniversaryDateWindow(
   now: Date,
+  yearsAgo: number,
   requestedTimeZone = DEFAULT_TIME_ZONE,
 ): RediscoveryDateWindow {
+  if (!Number.isInteger(yearsAgo) || yearsAgo < 1)
+    throw new Error("invalid_anniversary_years");
   const timeZone = normalizeTimeZone(requestedTimeZone);
   const parts = getCalendarParts(now, timeZone);
-  const targetYear = parts.year - 1;
+  const targetYear = parts.year - yearsAgo;
   const targetDay = Math.min(parts.day, daysInMonth(targetYear, parts.month));
   const anchor = new Date(Date.UTC(targetYear, parts.month - 1, targetDay));
 

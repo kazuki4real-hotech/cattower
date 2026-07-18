@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { getLastYearDateWindow } from "./rediscovery";
+import { getAnniversaryDateWindow } from "./rediscovery";
 
-describe("getLastYearDateWindow", () => {
+describe("getAnniversaryDateWindow", () => {
   it("uses the calendar day in the requested time zone", () => {
     expect(
-      getLastYearDateWindow(
+      getAnniversaryDateWindow(
         new Date("2026-01-01T00:30:00.000Z"),
+        1,
         "America/Los_Angeles",
       ),
     ).toEqual({
@@ -19,7 +20,7 @@ describe("getLastYearDateWindow", () => {
 
   it("clamps February 29 to February 28 in a non-leap target year", () => {
     expect(
-      getLastYearDateWindow(new Date("2024-02-29T03:00:00.000Z")),
+      getAnniversaryDateWindow(new Date("2024-02-29T03:00:00.000Z"), 1),
     ).toMatchObject({
       anchorDate: "2023-02-28",
       startDate: "2023-02-25",
@@ -29,7 +30,27 @@ describe("getLastYearDateWindow", () => {
 
   it("falls back to Asia/Tokyo for an invalid time zone", () => {
     expect(
-      getLastYearDateWindow(new Date("2026-07-18T15:30:00.000Z"), "not/a-zone"),
+      getAnniversaryDateWindow(
+        new Date("2026-07-18T15:30:00.000Z"),
+        1,
+        "not/a-zone",
+      ),
     ).toMatchObject({ anchorDate: "2025-07-19", timeZone: "Asia/Tokyo" });
+  });
+
+  it("calculates the three-year anniversary with the same window", () => {
+    expect(
+      getAnniversaryDateWindow(new Date("2026-07-18T03:00:00.000Z"), 3),
+    ).toMatchObject({
+      anchorDate: "2023-07-18",
+      startDate: "2023-07-15",
+      endDate: "2023-07-22",
+    });
+  });
+
+  it("rejects a non-positive anniversary", () => {
+    expect(() =>
+      getAnniversaryDateWindow(new Date("2026-07-18T03:00:00.000Z"), 0),
+    ).toThrow("invalid_anniversary_years");
   });
 });

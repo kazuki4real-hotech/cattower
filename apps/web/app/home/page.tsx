@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { getCatOverview } from "@/lib/cats";
-import { getRecentEntries } from "@/lib/entries";
-import { getLastYearMemory } from "@/lib/rediscovery";
+import { getRecentEntries, type EntryView } from "@/lib/entries";
+import { getAnniversaryMemories } from "@/lib/rediscovery";
 import { getViewer } from "@/lib/viewer";
 import { PageHeading } from "@cattower/ui";
 
@@ -19,9 +19,9 @@ export default async function HomePage() {
   const activeCat = overview?.cats.find(
     (cat) => cat.id === overview.activeCatId,
   );
-  const [records, lastYearMemory] = await Promise.all([
+  const [records, memories] = await Promise.all([
     getRecentEntries(viewer, 12, overview?.activeCatId),
-    getLastYearMemory(viewer, overview?.activeCatId),
+    getAnniversaryMemories(viewer, overview?.activeCatId),
   ]);
   const latest = records[0];
 
@@ -104,62 +104,26 @@ export default async function HomePage() {
               </div>
             </section>
           ) : null}
-          <section className="section" aria-labelledby="last-year-memory">
+          <section className="section" aria-labelledby="anniversary-memories">
             <div className="section-head rediscovery-heading">
               <div>
                 <p className="eyebrow">思い出をひらく</p>
-                <h2 id="last-year-memory">去年の今ごろ</h2>
+                <h2 id="anniversary-memories">あの頃の記録</h2>
               </div>
-              <span>前後3日から</span>
+              <span>それぞれ前後3日から</span>
             </div>
-            {lastYearMemory ? (
-              <Link
-                className="last-year-memory"
-                href={`/entries/${lastYearMemory.id}`}
-              >
-                {lastYearMemory.media?.kind === "image" ? (
-                  <Image
-                    src={`/api/media/${lastYearMemory.media.assetId}?variant=entry`}
-                    width={lastYearMemory.media.width ?? 480}
-                    height={lastYearMemory.media.height ?? 360}
-                    unoptimized
-                    alt={
-                      lastYearMemory.title ||
-                      `${lastYearMemory.cats.map((cat) => cat.name).join("、")}の記録`
-                    }
-                  />
-                ) : (
-                  <span className="last-year-placeholder">
-                    <Icon
-                      name={
-                        lastYearMemory.media?.kind === "video"
-                          ? "movie"
-                          : "menu_book"
-                      }
-                    />
-                  </span>
-                )}
-                <span className="last-year-copy">
-                  <time dateTime={lastYearMemory.occurredDate}>
-                    {formatDate(lastYearMemory.occurredDate)}
-                  </time>
-                  <strong>
-                    {lastYearMemory.title ||
-                      lastYearMemory.body ||
-                      "写真の記録"}
-                  </strong>
-                  <small>
-                    {lastYearMemory.cats.map((cat) => cat.name).join("、")}
-                  </small>
-                </span>
-                <Icon name="chevron_right" />
-              </Link>
-            ) : (
-              <div className="last-year-empty">
-                <Icon name="calendar_today" />
-                <p>去年のこの時期の記録はありません</p>
-              </div>
-            )}
+            <div className="rediscovery-list">
+              <RediscoveryRow
+                label="去年の今ごろ"
+                memory={memories.lastYear}
+                emptyText="去年のこの時期の記録はありません"
+              />
+              <RediscoveryRow
+                label="3年前と今日"
+                memory={memories.threeYearsAgo}
+                emptyText="3年前のこの時期の記録はありません"
+              />
+            </div>
           </section>
         </>
       ) : (
@@ -177,6 +141,55 @@ export default async function HomePage() {
         </section>
       )}
     </AppShell>
+  );
+}
+
+function RediscoveryRow({
+  label,
+  memory,
+  emptyText,
+}: {
+  label: string;
+  memory: NonNullable<EntryView> | null;
+  emptyText: string;
+}) {
+  if (!memory)
+    return (
+      <div className="rediscovery-row rediscovery-row-empty">
+        <strong className="rediscovery-period">{label}</strong>
+        <span className="rediscovery-empty">
+          <Icon name="calendar_today" />
+          <span>{emptyText}</span>
+        </span>
+      </div>
+    );
+
+  const catNames = memory.cats.map((cat) => cat.name).join("、");
+  return (
+    <Link className="rediscovery-row" href={`/entries/${memory.id}`}>
+      <strong className="rediscovery-period">{label}</strong>
+      {memory.media?.kind === "image" ? (
+        <Image
+          src={`/api/media/${memory.media.assetId}?variant=entry`}
+          width={memory.media.width ?? 360}
+          height={memory.media.height ?? 270}
+          unoptimized
+          alt={memory.title || `${catNames || "猫"}の記録`}
+        />
+      ) : (
+        <span className="rediscovery-placeholder">
+          <Icon name={memory.media?.kind === "video" ? "movie" : "menu_book"} />
+        </span>
+      )}
+      <span className="rediscovery-copy">
+        <time dateTime={memory.occurredDate}>
+          {formatDate(memory.occurredDate)}
+        </time>
+        <strong>{memory.title || memory.body || "写真の記録"}</strong>
+        {catNames ? <small>{catNames}</small> : null}
+      </span>
+      <Icon name="chevron_right" />
+    </Link>
   );
 }
 

@@ -83,7 +83,7 @@ export {
 } from "./search";
 
 export {
-  getLastYearDateWindow,
+  getAnniversaryDateWindow,
   type RediscoveryDateWindow,
 } from "./rediscovery";
 
