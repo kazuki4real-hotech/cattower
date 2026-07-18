@@ -4,6 +4,8 @@
 - Updated: 2026-07-15
 - Scope: Next.js 画面構成、共通 UI、オンボーディング、モーション、Web 流入設計
 
+> Release scope decision 2026-07-18: お散歩は初期リリースから除外する。`/walk` は `/home` へ転送し、ナビゲーションと設定には表示しない。
+
 ## 1. Purpose
 
 HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Router へ移すための実装仕様である。
@@ -49,10 +51,10 @@ HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Rou
 | `/entries/:entryId`      | 記録詳細       | 閲覧、soft delete、restore                           |
 | `/entries/:entryId/edit` | 記録編集       | 共通editorで内容を編集                               |
 | `/search`                | 記録検索       | おうちの記録を日付・タグ等で検索                     |
-| `/walk`                  | お散歩         | 中庭の気配、すれ違い、定型反応                       |
+| `/walk`                  | 初期リリース対象外 | `/home` へ一時 redirect。中庭 UI はリリース後に再評価 |
 | `/notifications`         | お知らせ       | Web 内通知と既読状態                                 |
 | `/share/:token`          | 期限付き共有   | 選択された記録またはボードだけを未ログインで閲覧     |
-| `/settings`              | 家族と設定     | お散歩同意、猫の参加範囲、家族、データ               |
+| `/settings`              | 家族と設定     | 猫、家族、データ                                     |
 | `/onboarding/profile`    | あなたについて | 表示名を保存                                         |
 | `/onboarding/cat`        | 猫の名前       | 最初の猫を作成                                       |
 | `/onboarding/photo`      | 猫の写真       | 任意のプロフィール写真を設定                         |
@@ -86,7 +88,7 @@ Material Symbols Rounded の使用名とGoogle Fontsのsubset指定は`apps/web/
 
 - デスクトップは左ナビゲーション
 - 900px 未満は上部ブランドバーと下部 4 ナビゲーション
-- 主要ナビゲーションは、おうち、ボード、記録する、お散歩
+- 初期リリースの主要ナビゲーションは、おうち、ボード、記録する
 - 検索、お知らせ、家族と設定は補助導線
 - 選択中の項目は背景、Material Symbols の fill、`aria-current` で示す
 - デスクトップ sidebar と mobile 本文上部に active cat selector を置き、猫を一操作で切り替える

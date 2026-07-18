@@ -31,7 +31,8 @@ const nextConfig: NextConfig = {
       { source: "/collections", destination: "/boards", permanent: true },
       { source: "/add", destination: "/record", permanent: true },
       { source: "/add/:path*", destination: "/record", permanent: true },
-      { source: "/town", destination: "/walk", permanent: true },
+      { source: "/walk", destination: "/home", permanent: false },
+      { source: "/town", destination: "/home", permanent: false },
       {
         source: "/onboarding/welcome",
         destination: "/onboarding/profile",

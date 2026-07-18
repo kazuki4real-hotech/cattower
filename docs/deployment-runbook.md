@@ -84,7 +84,7 @@ pnpm --filter @cattower/realtime build
 - onboarding 3 step で表示名、猫、写真、checkpoint が再読み込み後も保持される
 - 未完了状態で通常画面へ戻ると再開バナーが表示される
 - JPEG/PNG/WebP のプロフィール画像を R2 へ直接 upload し、private media endpoint だけで表示できる
-- `/home`、`/boards`、`/record`、`/walk` が表示される
+- `/home`、`/boards`、`/record` が表示され、`/walk` は `/home` へ転送される
 - 写真、M PLUS Rounded 1c、Material Symbols Rounded が読み込まれる
 - mobile navigation と desktop navigation が操作できる
 - Worker の error rate と logs に新規例外がない

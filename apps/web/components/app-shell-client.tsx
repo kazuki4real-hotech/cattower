@@ -22,7 +22,6 @@ const primary = [
   ["/home", "おうち", "home"],
   ["/boards", "ボード", "collections_bookmark"],
   ["/record", "記録する", "add"],
-  ["/walk", "お散歩", "explore"],
 ] as const;
 
 const mobilePrimary = primary.filter(([href]) => href !== "/record");

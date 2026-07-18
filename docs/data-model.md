@@ -1,5 +1,7 @@
 # Cattower データモデル
 
+> Release scope decision 2026-07-18: `town_*` の既存互換フィールドと将来設計は保持するが、お散歩は初期リリースでは利用しない。初期値の `town_enabled = false` と `town_access = disabled` を維持する。
+
 - Status: Conceptual v0.2
 - Updated: 2026-07-14
 

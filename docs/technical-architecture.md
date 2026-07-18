@@ -4,6 +4,8 @@
 - Updated: 2026-07-14
 - Target: Cloudflare production deployment
 
+> Release scope decision 2026-07-18: realtime 基盤は将来用として保持するが、お散歩は初期リリースの対象外とする。Web アプリは画面、設定、接続券発行 API を公開しない。
+
 ## 1. Architecture goals
 
 - モバイル Web で軽快に動く

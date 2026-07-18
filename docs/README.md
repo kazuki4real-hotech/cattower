@@ -44,7 +44,8 @@
 - **決定**: Web first、モバイル優先のレスポンシブ UI
 - **決定**: Next.js を Cloudflare Workers にデプロイする
 - **決定**: Web Worker 名は `cattower-web` とし、`main` への push を Workers Builds で本番へ自動デプロイする
-- **決定**: お散歩は別 Worker と Durable Objects で構築する（内部名 `town_*`）
+- **将来**: お散歩は初期リリースから外し、Phase 6 全体をリリース後に再検討する。初期リリースでは画面、設定、接続券発行 API を公開しない
+- **決定**: 将来お散歩を実装する場合は別 Worker と Durable Objects を使う（内部名 `town_*`）
 - **決定**: 猫単位の mute と飼い主単位の block を分離する
 - **決定**: お散歩は利用者の opt-in と owner 管理の猫ごとの参加設定を両方必要とする
 - **決定**: Web 内通知と consented product event を D1 に最小限永続化する

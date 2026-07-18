@@ -345,7 +345,7 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
 
 @media (max-width: 1180px) and (min-width: 901px) {
   .settings-grid { grid-template-columns: 1fr; }
-  .settings-tabs { grid-template-columns: repeat(4,1fr); border-bottom: 1px solid var(--line); }
+  .settings-tabs { grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--line); }
   .settings-tab { border-left: 0; border-bottom: 3px solid transparent; }
   .settings-tab[data-state="active"] { border-bottom-color: var(--mint-strong); }
 }
@@ -698,7 +698,7 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
   .today-card { grid-template-columns: 1fr; } .today-card img { height: 350px; } .today-copy { min-height: 250px; }
   .today-card-placeholder { min-height: 300px; }
   .entry-layout { grid-template-columns: 1fr; } .entry-aside { position: static; }
-  .settings-grid { grid-template-columns: 1fr; } .settings-tabs { grid-template-columns: repeat(4,1fr); border-bottom: 1px solid var(--line); }
+  .settings-grid { grid-template-columns: 1fr; } .settings-tabs { grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--line); }
   .settings-tab { border-left: 0; border-bottom: 3px solid transparent; } .settings-tab[data-state="active"] { border-bottom-color: var(--mint-strong); }
   .mobile-cat-select { display: block; margin-bottom: 12px; }
   .cat-switcher-compact { width: auto; max-width: 240px; }
