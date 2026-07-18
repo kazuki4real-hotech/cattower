@@ -3,12 +3,14 @@ import {
   householdMembers,
   mediaAssets,
   notifications,
+  shareLinks,
   type CattowerDatabase,
 } from "@cattower/db";
 import {
   and,
   desc,
   eq,
+  gt,
   inArray,
   isNotNull,
   isNull,
@@ -18,6 +20,7 @@ import {
 
 export const NOTIFICATION_UNREAD_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
 export const NOTIFICATION_READ_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+export const SHARE_EXPIRY_NOTICE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 type NotificationType = typeof notifications.$inferInsert.type;
 type NotificationResourceType = NonNullable<
@@ -108,6 +111,48 @@ export async function cleanupExpiredNotifications(
     )
     .returning({ id: notifications.id });
   return removed.length;
+}
+
+export async function createShareExpiryNotifications(
+  db: CattowerDatabase,
+  userId: string,
+  now = new Date(),
+) {
+  const expiring = await db.query.shareLinks.findMany({
+    where: and(
+      eq(shareLinks.createdBy, userId),
+      isNull(shareLinks.revokedAt),
+      gt(shareLinks.expiresAt, now),
+      lte(
+        shareLinks.expiresAt,
+        new Date(now.valueOf() + SHARE_EXPIRY_NOTICE_WINDOW_MS),
+      ),
+    ),
+    orderBy: shareLinks.expiresAt,
+    limit: 20,
+  });
+  const created = await Promise.all(
+    expiring.map((share) =>
+      createNotification(
+        db,
+        {
+          recipientUserId: userId,
+          type: "share_expiring",
+          title: "共有リンクの期限が近づいています",
+          message:
+            share.resourceType === "entry"
+              ? "記録の共有リンクが24時間以内に期限切れになります。"
+              : "ボードの共有リンクが24時間以内に期限切れになります。",
+          resourceType: "household",
+          resourceId: share.householdId,
+          dedupeKey: `share_expiring:${share.id}`,
+          expiresAt: share.expiresAt,
+        },
+        now,
+      ),
+    ),
+  );
+  return created.filter(Boolean).length;
 }
 
 export async function getVisibleNotifications(

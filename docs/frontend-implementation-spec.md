@@ -51,6 +51,7 @@ HTML プロトタイプで確認した体験を、`apps/web` の Next.js App Rou
 | `/search`                | 記録検索       | おうちの記録を日付・タグ等で検索                     |
 | `/walk`                  | お散歩         | 中庭の気配、すれ違い、定型反応                       |
 | `/notifications`         | お知らせ       | Web 内通知と既読状態                                 |
+| `/share/:token`          | 期限付き共有   | 選択された記録またはボードだけを未ログインで閲覧     |
 | `/settings`              | 家族と設定     | お散歩同意、猫の参加範囲、家族、データ               |
 | `/onboarding/profile`    | あなたについて | 表示名を保存                                         |
 | `/onboarding/cat`        | 猫の名前       | 最初の猫を作成                                       |
@@ -95,6 +96,9 @@ Material Symbols Rounded の使用名とGoogle Fontsのsubset指定は`apps/web/
 - `/settings` の「家族」タブで owner は一回だけ表示される招待リンクを発行し、承認待ち招待を取り消せる。editor は参加メンバーを閲覧できる
 - `/invite/:token` は招待先のおうち、期限・取消・承認済み状態を表示し、未ログインなら Google login 後に同じURLへ戻す
 - `/notifications` はD1の通知を新しい順に最大50件表示し、個別または一括で既読にする。loading、empty、errorを罫線リスト内で明示し、補助ナビの件数は未読数と同期する
+- 記録詳細とボード詳細の変更権限がある利用者は、1日・7日・30日の期限を選んで共有URLを作れる。URLは作成直後だけreadonly inputとcopy操作で表示し、既存URLは状態・期限・取消操作だけを表示する
+- `/share/:token` はApp Shell、account導線、お散歩導線、記録詳細linkを持たない独立surfaceとする。記録共有は一件だけ、ボード共有は現在も有効なボード項目だけを並べ、画像はtoken scope media endpointから配信する
+- 共有surfaceはloadingに相当するserver render、空のボード、失効時404、rate limit時の再試行案内を持ち、mobileではボード行を一列へ畳む。`noindex` metadataとresponse security headerを二重に設定する
 
 ### Record and home
 

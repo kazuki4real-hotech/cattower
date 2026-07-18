@@ -11,7 +11,11 @@ import {
   validateEntryDraftInput,
   validateEntryInput,
   createInviteToken,
+  createShareRateLimitKey,
+  createShareToken,
   hashInviteToken,
+  hashShareToken,
+  parseShareExpiryDays,
 } from "./index";
 
 describe("household invite tokens", () => {
@@ -20,6 +24,34 @@ describe("household invite tokens", () => {
     expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(await hashInviteToken(token)).toBe(await hashInviteToken(token));
     expect(await hashInviteToken("invalid token")).toBeNull();
+  });
+});
+
+describe("limited share tokens", () => {
+  it("creates 256-bit opaque token material and stores deterministic hashes", async () => {
+    const token = createShareToken();
+    expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(await hashShareToken(token)).toBe(await hashShareToken(token));
+    expect(await hashShareToken("invalid token")).toBeNull();
+  });
+
+  it("accepts only supported expiry choices", () => {
+    expect(parseShareExpiryDays(1)).toBe(1);
+    expect(parseShareExpiryDays(7)).toBe(7);
+    expect(parseShareExpiryDays(30)).toBe(30);
+    expect(parseShareExpiryDays(2)).toBeNull();
+  });
+
+  it("derives rate-limit keys without retaining the address", async () => {
+    const input = {
+      tokenHash: "a".repeat(64),
+      address: "203.0.113.1",
+      windowStartedAt: 1_000,
+    };
+    const key = await createShareRateLimitKey(input);
+    expect(key).toMatch(/^[a-f0-9]{64}$/);
+    expect(key).toBe(await createShareRateLimitKey(input));
+    expect(key).not.toContain(input.address);
   });
 });
 

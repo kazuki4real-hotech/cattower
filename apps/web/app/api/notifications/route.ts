@@ -2,6 +2,7 @@ import { instrumentRequestHandler } from "@cattower/observability";
 
 import {
   cleanupExpiredNotifications,
+  createShareExpiryNotifications,
   getVisibleNotifications,
   markNotificationsRead,
   notificationPayload,
@@ -12,6 +13,7 @@ async function get(request: Request) {
   const viewer = await getViewer(request.headers);
   if (!viewer) return Response.json({ error: "unauthorized" }, { status: 401 });
   await cleanupExpiredNotifications(viewer.db);
+  await createShareExpiryNotifications(viewer.db, viewer.session.user.id);
   const visible = await getVisibleNotifications(
     viewer.db,
     viewer.session.user.id,

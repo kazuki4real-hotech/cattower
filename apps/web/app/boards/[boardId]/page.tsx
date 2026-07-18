@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { BoardDetailManager } from "@/components/board-detail-manager";
 import { Icon } from "@/components/icon";
+import { ShareManager } from "@/components/share-manager";
 import { getBoardDetail } from "@/lib/boards";
 import { getViewer } from "@/lib/viewer";
 import { PageHeading } from "@cattower/ui";
@@ -35,6 +36,9 @@ export default async function BoardDetailPage({
         }
       />
       <BoardDetailManager initialDetail={detail} />
+      {detail.board.canManage ? (
+        <ShareManager resourceType="board" resourceId={detail.board.id} />
+      ) : null}
     </AppShell>
   );
 }

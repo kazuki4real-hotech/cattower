@@ -9,7 +9,7 @@ describe("Material Symbols font subset", () => {
   it("loads the calendar icon used by rediscovery empty states", () => {
     expect(materialSymbolsRoundedNames).toContain("calendar_today");
     expect(materialSymbolsRoundedHref).toContain(
-      "icon_names=add,arrow_back,arrow_downward,arrow_forward,arrow_upward,auto_awesome,bookmarks,calendar_today",
+      "icon_names=add,arrow_back,arrow_downward,arrow_forward,arrow_upward,auto_awesome,block,bookmarks,calendar_today",
     );
   });
 

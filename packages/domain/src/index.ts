@@ -96,6 +96,18 @@ export {
   hashInviteToken,
 } from "./invite-token";
 
+export {
+  SHARE_ACCESS_WINDOW_LIMIT,
+  SHARE_ACCESS_WINDOW_MS,
+  SHARE_CREATION_HOURLY_LIMIT,
+  SHARE_EXPIRY_DAYS,
+  createShareRateLimitKey,
+  createShareToken,
+  hashShareToken,
+  parseShareExpiryDays,
+  type ShareExpiryDays,
+} from "./share-token";
+
 export function getProfileImageDerivativeKey(providerKey: string) {
   if (!providerKey.endsWith("/original"))
     throw new Error("invalid_original_image_key");

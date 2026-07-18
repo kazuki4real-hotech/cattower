@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { EntryActions } from "@/components/entry-actions";
 import { Icon } from "@/components/icon";
+import { ShareManager } from "@/components/share-manager";
 import { getEntry } from "@/lib/entries";
 import { requireActiveMembership } from "@/lib/foundation";
 import { getViewer } from "@/lib/viewer";
@@ -111,11 +112,14 @@ export default async function EntryPage({
               </>
             ) : null}
             {canManage ? (
-              <EntryActions
-                entryId={entry.id}
-                initialVersion={entry.version}
-                deleted={false}
-              />
+              <>
+                <EntryActions
+                  entryId={entry.id}
+                  initialVersion={entry.version}
+                  deleted={false}
+                />
+                <ShareManager resourceType="entry" resourceId={entry.id} />
+              </>
             ) : null}
           </aside>
         </div>

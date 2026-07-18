@@ -429,6 +429,59 @@ export const boardItems = sqliteTable(
   ],
 );
 
+export const shareLinks = sqliteTable(
+  "share_links",
+  {
+    id: text("id").primaryKey(),
+    householdId: text("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    resourceType: text("resource_type", { enum: ["entry", "board"] }).notNull(),
+    resourceId: text("resource_id").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
+    lastAccessedAt: integer("last_accessed_at", { mode: "timestamp_ms" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("share_links_household_resource_idx").on(
+      table.householdId,
+      table.resourceType,
+      table.resourceId,
+      table.createdAt,
+    ),
+    index("share_links_creator_created_idx").on(
+      table.createdBy,
+      table.createdAt,
+    ),
+    index("share_links_token_state_idx").on(
+      table.tokenHash,
+      table.revokedAt,
+      table.expiresAt,
+    ),
+  ],
+);
+
+export const shareRateLimits = sqliteTable(
+  "share_rate_limits",
+  {
+    keyHash: text("key_hash").primaryKey(),
+    windowStartedAt: integer("window_started_at", {
+      mode: "timestamp_ms",
+    }).notNull(),
+    requestCount: integer("request_count").notNull().default(1),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (table) => [index("share_rate_limits_expires_idx").on(table.expiresAt)],
+);
+
 export const notifications = sqliteTable(
   "notifications",
   {
@@ -489,6 +542,8 @@ export const schema = {
   entryMedia,
   boards,
   boardItems,
+  shareLinks,
+  shareRateLimits,
   notifications,
 };
 

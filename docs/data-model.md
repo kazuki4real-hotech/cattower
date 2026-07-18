@@ -237,7 +237,19 @@ R2画像の`provider_key`は原本の`{asset prefix}/original`を指す。プロ
 | revoked_at       | nullable                             |
 | last_accessed_at | coarse operational value; not public |
 
-閲覧者の IP や fingerprint を恒久保存しない。abuse rate limiting 用データは短期保持とする。
+`created_by`はuser削除時にcascadeし、household削除時も共有行をcascadeする。polymorphicな`resource_id`は閲覧時に現在のentry/board、削除状態、householdの`deletion_requested_at`を再確認する。`last_accessed_at`は1時間bucketへ丸める。
+
+### share_rate_limits
+
+| Column            | Notes                                           |
+| ----------------- | ----------------------------------------------- |
+| key_hash          | PK; token hash、接続元、時間窓を合わせたSHA-256 |
+| window_started_at | 1分単位のwindow                                 |
+| request_count     | window内request数                               |
+| expires_at        | window開始から最大2分                           |
+| updated_at        | bounded cleanup用                               |
+
+閲覧者の IP や fingerprint を恒久保存しない。raw IPはrequest内だけで使い、D1には不可逆なwindow keyだけを最大2分保持する。cleanupは共有requestごとに期限切れ最大100件を削除する。
 
 ## 8. お散歩
 
@@ -404,6 +416,8 @@ raw event 削除後も retention を集計するための日次 rollup。
 - `media_assets(household_id, status)`
 - `board_items(board_id, sort_key)`
 - `share_links(token_hash, revoked_at, expires_at)`
+- `share_links(household_id, resource_type, resource_id, created_at)`
+- `share_rate_limits(expires_at)`
 - `town_encounters(cat_a_id, occurred_bucket)` / cat_b counterpart
 - `town_reactions(to_cat_id, occurred_bucket)`
 - `cat_mutes(muter_user_id, muted_cat_id)`
@@ -421,6 +435,7 @@ raw event 削除後も retention を集計するための日次 rollup。
 | entries               | until user deletes                    | hidden immediately, physical purge after grace period  |
 | images/videos         | while referenced                      | provider deletion job, orphan reconciliation           |
 | share links           | until expiry/revoke                   | access denied immediately; metadata later purge        |
+| share rate limits     | max 2 minutes                         | bounded cleanup; no raw IP                             |
 | presence active state | seconds/minutes                       | Durable Object expiry                                  |
 | presence trace        | max 6 hours                           | automatic expiry                                       |
 | raw reactions         | candidate 90 days                     | aggregate/coarse memory then purge                     |
