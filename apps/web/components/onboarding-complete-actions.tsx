@@ -62,7 +62,7 @@ export function OnboardingCompleteActions() {
     <div className="onboarding-actions onboarding-complete-actions">
       <Link className="button button-secondary" href="/record">
         <Icon name="add" />
-        最初の記録を作る
+        記録を残す
       </Link>
       <Link className="button" href={destination}>
         {destination === "/home" ? "おうちへ" : "元のページへ"}

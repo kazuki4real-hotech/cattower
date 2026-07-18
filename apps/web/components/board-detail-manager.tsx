@@ -284,7 +284,11 @@ export function BoardDetailManager({
           <Icon name="menu_book" />
           <div>
             <h2 id="board-record-empty-title">このボードはまだ空です</h2>
-            <p>記録はここへ移動せず、元の場所に残ったまままとめられます。</p>
+            <p>
+              {candidates.length
+                ? "まとめたい記録ができたときに追加できます。記録は元の場所にも残ります。"
+                : "記録が増えたら、必要なものだけここへまとめられます。空のままでも問題ありません。"}
+            </p>
           </div>
         </section>
       )}

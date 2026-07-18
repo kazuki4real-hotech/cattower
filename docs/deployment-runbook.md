@@ -1,22 +1,22 @@
 # Cattower デプロイ運用手順
 
 - Status: Active v0.1
-- Updated: 2026-07-17
+- Updated: 2026-07-18
 - Scope: `cattower-web` と `cattower-realtime` の Cloudflare Workers build、deploy、確認、rollback
 
 ## 1. Current production setup
 
-| Item              | Value                                              |
-| ----------------- | -------------------------------------------------- |
-| Platform          | Cloudflare Workers                                 |
-| Worker            | `cattower-web`                                     |
-| Production URL    | `https://cattower-web.kazuki-kitada.workers.dev/`  |
-| Repository        | `kazuki4real-hotech/cattower`                      |
-| Production branch | `main`                                             |
-| Root directory    | `/`                                                |
-| Build command     | `pnpm cf:build`                                    |
-| Deploy command    | `pnpm --filter @cattower/web exec wrangler deploy` |
-| Trigger           | push to `main`                                     |
+| Item              | Value                                             |
+| ----------------- | ------------------------------------------------- |
+| Platform          | Cloudflare Workers                                |
+| Worker            | `cattower-web`                                    |
+| Production URL    | `https://cattower-web.kazuki-kitada.workers.dev/` |
+| Repository        | `kazuki4real-hotech/cattower`                     |
+| Production branch | `main`                                            |
+| Root directory    | `/`                                               |
+| Build command     | `pnpm cf:build`                                   |
+| Deploy command    | `pnpm --filter @cattower/web run deploy`          |
+| Trigger           | push to `main`                                    |
 
 初回 production deploy は 2026-07-14 に完了した。D1/R2/Images binding、runtime secrets、オンボーディングの永続化コードは接続済み。2026-07-15にGoogle login/logout、7日session、再読み込み後のsession継続、オンボーディング完了状態のredirect、認証済みブラウザからのR2 presigned upload、metadata/decode検査、512×512 WebP derivative、private画像配信を本番確認した。独自ドメインを追加する場合も、このWorkers URLは運用確認用の既定URLとして維持する。
 
@@ -163,6 +163,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 同日に日付・household・選択中の猫から日単位で安定選択する「今日の一枚」を実データ化し、Worker version `62a03c81-d007-4fa3-bbfb-e39899a9e0d3`をdeployした。schema変更はない。gzip size `2661.93 KiB`、startup `31 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
 
 同日に検索結果の50件単位pagination、明確な見終わり、おうちの最近の記録から検索への「続きを見る」を追加し、Worker version `3708c78a-9fe3-4eae-bb25-05be984d8ee5`をdeployした。schema変更はない。gzip size `2662.58 KiB`、startup `34 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search?page=2`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
+
+同日におうち・検索・ボード・オンボーディング完了のempty stateを投稿を急かさない文言と補助導線へ統一し、Worker version `2fccfdfc-e2d3-4a0c-9d7f-b349562284ec`をdeployした。schema変更はない。gzip size `2662.69 KiB`、startup `29 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search?page=2`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
 
 schema 変更を含む push の前に migration を適用する。
 

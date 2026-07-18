@@ -167,8 +167,8 @@ function SearchResultList({
           </h2>
           <p>
             {hasFilters
-              ? "条件を少し減らすか、日付の範囲を広げてみてください。"
-              : "記録を残すと、文章や日付からここで探せます。"}
+              ? "別の条件で探す場合は、条件を減らすか日付の範囲を広げられます。"
+              : "記録が増えたら、文章や日付からここで探せます。今はこのままで大丈夫です。"}
           </p>
         </div>
         <Link
@@ -178,10 +178,10 @@ function SearchResultList({
               ? boardContext
                 ? `/search?boardId=${boardContext.id}`
                 : "/search"
-              : "/record"
+              : "/home"
           }
         >
-          {hasFilters ? "条件をクリア" : "最初の記録を残す"}
+          {hasFilters ? "条件をクリア" : "おうちへ戻る"}
         </Link>
       </section>
     );

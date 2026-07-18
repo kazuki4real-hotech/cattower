@@ -37,16 +37,18 @@ export default async function HomePage() {
         title="おかえりなさい"
         description="今日も、いつもの場所から。"
         actions={
-          <>
-            <Link className="button button-secondary" href="/search">
-              <Icon name="search" />
-              記録を探す
-            </Link>
-            <Link className="button" href="/record">
-              <Icon name="add" />
-              記録する
-            </Link>
-          </>
+          latest ? (
+            <>
+              <Link className="button button-secondary" href="/search">
+                <Icon name="search" />
+                記録を探す
+              </Link>
+              <Link className="button" href="/record">
+                <Icon name="add" />
+                記録する
+              </Link>
+            </>
+          ) : undefined
         }
       />
       {latest ? (
@@ -149,13 +151,14 @@ export default async function HomePage() {
         <section className="home-empty" aria-labelledby="home-empty-title">
           <Icon name="menu_book" />
           <div>
-            <p className="eyebrow">最初の一ページ</p>
-            <h2 id="home-empty-title">まだ記録はありません</h2>
-            <p>写真一枚でも、ひとことだけでも。残したいときに始められます。</p>
+            <h2 id="home-empty-title">記録はまだありません</h2>
+            <p>
+              残しておきたい日が来たら、写真や言葉をここに置けます。今はこのままで大丈夫です。
+            </p>
           </div>
-          <Link className="button" href="/record">
+          <Link className="button button-secondary" href="/record">
             <Icon name="add" />
-            最初の記録を残す
+            記録を残す
           </Link>
         </section>
       )}

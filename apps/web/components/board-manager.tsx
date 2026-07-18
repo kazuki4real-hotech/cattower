@@ -234,10 +234,9 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
         <section className="board-empty" aria-labelledby="board-empty-title">
           <Icon name="collections_bookmark" />
           <div>
-            <p className="eyebrow">まだ空っぽです</p>
             <h2 id="board-empty-title">ボードはまだありません</h2>
             <p>
-              気に入った記録をまとめる場所です。作らなくても、すべての記録は日付やタグから探せます。
+              まとめたい記録ができたときだけ使えます。作らなくても、すべての記録は日付やタグから探せます。
             </p>
           </div>
         </section>
