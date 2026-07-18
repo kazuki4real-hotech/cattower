@@ -1,0 +1,52 @@
+export const materialSymbolsRoundedNames = [
+  "add",
+  "arrow_back",
+  "arrow_downward",
+  "arrow_forward",
+  "arrow_upward",
+  "auto_awesome",
+  "bookmarks",
+  "calendar_today",
+  "check",
+  "check_circle",
+  "chevron_left",
+  "chevron_right",
+  "close",
+  "close_fullscreen",
+  "collections_bookmark",
+  "delete",
+  "download",
+  "edit",
+  "error",
+  "expand_more",
+  "explore",
+  "family_restroom",
+  "home",
+  "image",
+  "lock",
+  "login",
+  "menu",
+  "menu_book",
+  "movie",
+  "notifications",
+  "palette",
+  "pets",
+  "photo_camera",
+  "photo_library",
+  "restaurant",
+  "restore",
+  "search",
+  "search_off",
+  "settings",
+  "toys",
+  "upload",
+  "videocam",
+  "visibility",
+] as const;
+
+export type MaterialSymbolRoundedName =
+  (typeof materialSymbolsRoundedNames)[number];
+
+export const materialSymbolsRoundedHref =
+  "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1" +
+  `&icon_names=${materialSymbolsRoundedNames.join(",")}&display=block`;

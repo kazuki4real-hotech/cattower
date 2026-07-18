@@ -13,6 +13,7 @@ import {
 import { BrandWordmark } from "@/components/brand-wordmark";
 import { CatSwitcher } from "@/components/cat-switcher";
 import { Icon } from "@/components/icon";
+import type { MaterialSymbolRoundedName } from "@/components/material-symbols";
 import { OnboardingResumeBanner } from "@/components/onboarding-resume-banner";
 
 type CatOption = { id: string; name: string };
@@ -46,7 +47,7 @@ function NavLink({
   mobile = false,
   unreadCount = 0,
 }: {
-  item: readonly [string, string, string];
+  item: readonly [string, string, MaterialSymbolRoundedName];
   pathname: string;
   mobile?: boolean;
   unreadCount?: number;

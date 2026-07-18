@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 
+import { materialSymbolsRoundedHref } from "@/components/material-symbols";
+
 import "./globals.css";
 
 const rounded = M_PLUS_Rounded_1c({
@@ -22,10 +24,7 @@ export default function RootLayout({
     <html lang="ja" className={rounded.variable}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&icon_names=add,arrow_back,arrow_downward,arrow_forward,arrow_upward,auto_awesome,check_circle,chevron_right,close,close_fullscreen,collections_bookmark,delete,download,edit,expand_more,explore,family_restroom,home,image,lock,login,menu,menu_book,notifications,palette,pets,photo_camera,photo_library,restaurant,search,settings,toys,upload,visibility&display=block"
-          rel="stylesheet"
-        />
+        <link href={materialSymbolsRoundedHref} rel="stylesheet" />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=pets&display=block"
           rel="stylesheet"
