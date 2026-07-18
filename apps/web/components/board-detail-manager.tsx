@@ -135,36 +135,45 @@ export function BoardDetailManager({
   return (
     <>
       {canManage ? (
-        <form className="board-add-form" onSubmit={addEntry}>
-          <div>
-            <label htmlFor="board-entry">記録を追加</label>
-            <p>最近の記録から、このボードへ入れる一件を選びます。</p>
-          </div>
-          <select
-            id="board-entry"
-            value={selectedEntryId}
-            onChange={(event) => setSelectedEntryId(event.target.value)}
-            disabled={!candidates.length || pending !== null}
-            required
-          >
-            <option value="">
-              {candidates.length ? "記録を選ぶ" : "追加できる記録はありません"}
-            </option>
-            {candidates.map((entry) => (
-              <option value={entry.id} key={entry.id}>
-                {formatShortDate(entry.occurredDate)}　{entryLabel(entry)}
+        <>
+          <form className="board-add-form" onSubmit={addEntry}>
+            <div>
+              <label htmlFor="board-entry">記録を追加</label>
+              <p>最近の記録から、このボードへ入れる一件を選びます。</p>
+            </div>
+            <select
+              id="board-entry"
+              value={selectedEntryId}
+              onChange={(event) => setSelectedEntryId(event.target.value)}
+              disabled={!candidates.length || pending !== null}
+              required
+            >
+              <option value="">
+                {candidates.length
+                  ? "記録を選ぶ"
+                  : "追加できる記録はありません"}
               </option>
-            ))}
-          </select>
-          <button
-            className="button"
-            type="submit"
-            disabled={!selectedEntryId || pending !== null}
-          >
-            <Icon name="add" />
-            {pending === "add" ? "追加中…" : "追加する"}
-          </button>
-        </form>
+              {candidates.map((entry) => (
+                <option value={entry.id} key={entry.id}>
+                  {formatShortDate(entry.occurredDate)}　{entryLabel(entry)}
+                </option>
+              ))}
+            </select>
+            <button
+              className="button"
+              type="submit"
+              disabled={!selectedEntryId || pending !== null}
+            >
+              <Icon name="add" />
+              {pending === "add" ? "追加中…" : "追加する"}
+            </button>
+          </form>
+          <p className="board-search-link">
+            <Link href={`/search?boardId=${initialDetail.board.id}`}>
+              一覧にない記録を検索して追加する
+            </Link>
+          </p>
+        </>
       ) : null}
 
       {error ? (

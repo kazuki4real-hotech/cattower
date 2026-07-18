@@ -73,6 +73,16 @@ export {
 } from "./board-policy";
 
 export {
+  MAX_SEARCH_QUERY_LENGTH,
+  SEARCH_MEDIA_FILTERS,
+  SEARCH_RESULT_LIMIT,
+  parseEntrySearchInput,
+  type EntrySearchError,
+  type EntrySearchInput,
+  type SearchMediaFilter,
+} from "./search";
+
+export {
   HOUSEHOLD_INVITE_HOURLY_LIMIT,
   HOUSEHOLD_INVITE_TTL_MS,
   createInviteToken,

@@ -154,6 +154,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 2026-07-18にボードへの記録追加・削除・手動並び替えを含むWorker version `3a63c788-4c42-4351-a13f-036a2cfd53b3`をdeployした。schema変更はない。通常bundleが3 MiB上限をわずかに超えたため`minify: true`を正本設定へ追加し、gzip size `2654.53 KiB`、startup `28 ms`を確認して反映した。
 
+同日にキーワード・日付・tag・猫・mediaによる実データ検索と、検索結果からのボード追加を含むWorker version `3add05a5-7202-43f8-9b4e-f5ce70152108`をdeployした。schema変更はない。gzip size `2659.65 KiB`、startup `32 ms`を確認し、未認証の`/search`と`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash

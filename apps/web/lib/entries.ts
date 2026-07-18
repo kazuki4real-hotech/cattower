@@ -97,6 +97,7 @@ export async function hydrateEntries(viewer: Viewer, rows: EntryRow[]) {
       .select({
         entryId: entryMedia.entryId,
         assetId: mediaAssets.id,
+        kind: mediaAssets.kind,
         width: mediaAssets.width,
         height: mediaAssets.height,
       })
