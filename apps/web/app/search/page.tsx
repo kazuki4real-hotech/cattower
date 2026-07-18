@@ -8,6 +8,7 @@ import { AppShell } from "@/components/app-shell";
 import { SearchExperience } from "@/components/search-experience";
 import { getBoardAccess } from "@/lib/boards";
 import { getSearchFacets, searchEntries } from "@/lib/search";
+import { searchUrl } from "@/lib/search-url";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -24,10 +25,25 @@ export default async function SearchPage({
   const [facets, results, boardContext] = await Promise.all([
     getSearchFacets(viewer),
     errors.length
-      ? Promise.resolve({ items: [], total: 0, hasMore: false })
+      ? Promise.resolve({
+          items: [],
+          total: 0,
+          page: 1,
+          pageCount: 1,
+          hasPrevious: false,
+          hasNext: false,
+        })
       : searchEntries(viewer, filters),
     getSearchBoardContext(viewer, first(params.boardId)),
   ]);
+
+  if (!errors.length && filters.page > results.pageCount)
+    redirect(
+      searchUrl(filters, {
+        page: results.pageCount,
+        boardId: boardContext?.id,
+      }),
+    );
 
   return (
     <AppShell narrow>

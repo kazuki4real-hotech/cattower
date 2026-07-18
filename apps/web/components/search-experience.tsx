@@ -9,6 +9,7 @@ import {
   type EntrySearchInput,
 } from "@cattower/domain";
 import type { SearchFacets, SearchResults } from "@/lib/search";
+import { searchUrl } from "@/lib/search-url";
 
 export function SearchExperience({
   filters,
@@ -138,6 +139,7 @@ export function SearchExperience({
           results={results}
           hasFilters={hasFilters}
           boardContext={boardContext}
+          filters={filters}
         />
       )}
     </>
@@ -148,10 +150,12 @@ function SearchResultList({
   results,
   hasFilters,
   boardContext,
+  filters,
 }: {
   results: SearchResults;
   hasFilters: boolean;
   boardContext?: SearchBoardContext;
+  filters: EntrySearchInput;
 }) {
   if (!results.items.length)
     return (
@@ -186,7 +190,11 @@ function SearchResultList({
     <>
       <div className="section-head search-result-head">
         <h2>{resultCountLabel(results)}</h2>
-        <span className="small muted">新しい順</span>
+        <span className="small muted">
+          {results.pageCount > 1
+            ? `${results.page} / ${results.pageCount}ページ`
+            : "新しい順"}
+        </span>
       </div>
       <div className="result-list">
         {results.items.map((entry) => (
@@ -232,14 +240,44 @@ function SearchResultList({
           </article>
         ))}
       </div>
-      {results.hasMore ? (
+      {results.pageCount > 1 ? (
+        <nav className="search-pagination" aria-label="検索結果のページ送り">
+          <span className="small muted">新しい順</span>
+          <span className="search-pagination-actions">
+            {results.hasPrevious ? (
+              <Link
+                className="button button-quiet"
+                rel="prev"
+                href={searchUrl(filters, {
+                  page: results.page - 1,
+                  boardId: boardContext?.id,
+                })}
+              >
+                <Icon name="chevron_left" />
+                前の50件
+              </Link>
+            ) : null}
+            {results.hasNext ? (
+              <Link
+                className="button button-secondary"
+                rel="next"
+                href={searchUrl(filters, {
+                  page: results.page + 1,
+                  boardId: boardContext?.id,
+                })}
+              >
+                次の50件
+                <Icon name="chevron_right" />
+              </Link>
+            ) : null}
+          </span>
+        </nav>
+      ) : null}
+      {!results.hasNext ? (
         <p className="small muted search-limit-note">
-          新しい{SEARCH_RESULT_LIMIT}
-          件を表示しています。さらに古い記録は、条件を絞って探せます。
+          検索結果はここまでです。
         </p>
-      ) : (
-        <p className="small muted search-limit-note">ここまでです。</p>
-      )}
+      ) : null}
     </>
   );
 }
@@ -257,8 +295,10 @@ function entryLabel(entry: SearchResults["items"][number]) {
 }
 
 function resultCountLabel(results: SearchResults) {
-  return results.hasMore
-    ? `${results.total}件のうち${SEARCH_RESULT_LIMIT}件`
+  const first = (results.page - 1) * SEARCH_RESULT_LIMIT + 1;
+  const last = first + results.items.length - 1;
+  return results.total > SEARCH_RESULT_LIMIT
+    ? `${first}〜${last}件目 / 全${results.total}件`
     : `${results.total}件の記録`;
 }
 

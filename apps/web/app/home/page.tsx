@@ -20,10 +20,15 @@ export default async function HomePage() {
     (cat) => cat.id === overview.activeCatId,
   );
   const [records, memories] = await Promise.all([
-    getRecentEntries(viewer, 12, overview?.activeCatId),
+    getRecentEntries(viewer, 13, overview?.activeCatId),
     getRediscoveryMemories(viewer, overview?.activeCatId),
   ]);
   const latest = records[0];
+  const recentRecords = records.slice(1, 12);
+  const hasMoreRecords = records.length > 12;
+  const allRecordsHref = overview?.activeCatId
+    ? `/search?catId=${encodeURIComponent(overview.activeCatId)}`
+    : "/search";
 
   return (
     <AppShell>
@@ -79,13 +84,13 @@ export default async function HomePage() {
               </Link>
             </div>
           </article>
-          {records.length > 1 ? (
+          {recentRecords.length ? (
             <section className="section" aria-labelledby="recent-records">
               <div className="section-head">
                 <h2 id="recent-records">最近の記録</h2>
               </div>
               <div className="recent-entry-list">
-                {records.slice(1).map((entry) => (
+                {recentRecords.map((entry) => (
                   <Link href={`/entries/${entry.id}`} key={entry.id}>
                     <span>
                       <strong>
@@ -101,6 +106,16 @@ export default async function HomePage() {
                     <Icon name="chevron_right" />
                   </Link>
                 ))}
+              </div>
+              <div className="recent-entry-footer">
+                {hasMoreRecords ? (
+                  <Link className="text-link" href={allRecordsHref}>
+                    続きを見る
+                    <Icon name="chevron_right" />
+                  </Link>
+                ) : (
+                  <p className="small muted">最近の記録はここまでです。</p>
+                )}
               </div>
             </section>
           ) : null}

@@ -162,6 +162,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 同日に日付・household・選択中の猫から日単位で安定選択する「今日の一枚」を実データ化し、Worker version `62a03c81-d007-4fa3-bbfb-e39899a9e0d3`をdeployした。schema変更はない。gzip size `2661.93 KiB`、startup `31 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
 
+同日に検索結果の50件単位pagination、明確な見終わり、おうちの最近の記録から検索への「続きを見る」を追加し、Worker version `3708c78a-9fe3-4eae-bb25-05be984d8ee5`をdeployした。schema変更はない。gzip size `2662.58 KiB`、startup `34 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search?page=2`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash

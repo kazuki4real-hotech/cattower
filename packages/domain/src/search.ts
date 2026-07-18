@@ -1,6 +1,7 @@
 export const SEARCH_MEDIA_FILTERS = ["all", "image", "video", "none"] as const;
 export const MAX_SEARCH_QUERY_LENGTH = 100;
 export const SEARCH_RESULT_LIMIT = 50;
+export const MAX_SEARCH_PAGE = 1_000;
 
 export type SearchMediaFilter = (typeof SEARCH_MEDIA_FILTERS)[number];
 export type EntrySearchInput = {
@@ -10,6 +11,7 @@ export type EntrySearchInput = {
   tagId: string;
   catId: string;
   media: SearchMediaFilter;
+  page: number;
 };
 
 export type EntrySearchError =
@@ -27,6 +29,7 @@ export function parseEntrySearchInput(
   const media = SEARCH_MEDIA_FILTERS.includes(rawMedia as SearchMediaFilter)
     ? (rawMedia as SearchMediaFilter)
     : "all";
+  const page = parsePage(first(input.page));
   const errors: EntrySearchError[] = [];
 
   if (q.length > MAX_SEARCH_QUERY_LENGTH) errors.push("query_too_long");
@@ -42,9 +45,25 @@ export function parseEntrySearchInput(
     errors.push("invalid_date_range");
 
   return {
-    filters: { q, from, to, tagId, catId, media } satisfies EntrySearchInput,
+    filters: {
+      q,
+      from,
+      to,
+      tagId,
+      catId,
+      media,
+      page,
+    } satisfies EntrySearchInput,
     errors,
   };
+}
+
+function parsePage(value: string) {
+  if (!/^\d+$/.test(value)) return 1;
+  const page = Number(value);
+  return Number.isSafeInteger(page) && page >= 1 && page <= MAX_SEARCH_PAGE
+    ? page
+    : 1;
 }
 
 function first(value: string | string[] | undefined) {

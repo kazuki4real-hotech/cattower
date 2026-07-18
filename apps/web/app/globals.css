@@ -164,6 +164,9 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
 .recent-entry-list > a { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 16px; padding: 16px 4px; border-bottom: 1px solid var(--line); }
 .recent-entry-list span, .recent-entry-list small { display: block; }
 .recent-entry-list small, .recent-entry-list time { color: var(--muted); font-size: 12px; }
+.recent-entry-footer { display: flex; justify-content: flex-end; margin-top: 18px; }
+.recent-entry-footer p { margin: 0; }
+.recent-entry-footer .text-link { display: inline-flex; align-items: center; gap: 4px; }
 
 .form-card, .entry-aside, .settings-panel { padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
 .field { display: grid; gap: 7px; margin-bottom: 24px; }
@@ -234,6 +237,8 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
 .search-empty h2 { margin-bottom: 5px; }
 .search-empty p { max-width: 46ch; margin: 0; color: var(--ink-soft); }
 .search-limit-note { margin: 18px 0 0; text-align: right; }
+.search-pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; }
+.search-pagination-actions { display: flex; justify-content: flex-end; gap: 10px; }
 
 .notice-list { border-top: 1px solid var(--line); }
 .notice { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; padding: 20px 4px; border-bottom: 1px solid var(--line); }
@@ -691,6 +696,10 @@ h3 { margin-bottom: 5px; font-size: 16px; line-height: 1.5; }
   .result-main { grid-template-columns: 82px minmax(0,1fr); gap: 12px; } .result-main img, .result-placeholder { width: 82px; height: 76px; } .result time { grid-column: 2; }
   .search-board-add { justify-items: stretch; padding-left: 94px; } .search-board-add .button { width: 100%; }
   .search-empty { grid-template-columns: 1fr; }
+  .search-pagination { align-items: flex-start; flex-direction: column; }
+  .search-pagination-actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .search-pagination-actions:has(> :only-child) { grid-template-columns: 1fr; }
+  .search-pagination-actions .button { width: 100%; }
   .walk-scene { min-height: 540px; } .walk-intro { display: block; } .walk-cat img { width: 58px; height: 58px; }
   .cat-a { left: 12%; } .cat-b { left: 43%; } .cat-c { right: 8%; } .cat-d { right: 27%; top: 27%; }
   .notice { grid-template-columns: auto 1fr; } .notice time { grid-column: 2; }

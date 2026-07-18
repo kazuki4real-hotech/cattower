@@ -12,6 +12,7 @@ describe("entry search input", () => {
         tagId: " tag-1 ",
         catId: "cat-1",
         media: "image",
+        page: "3",
       }),
     ).toEqual({
       filters: {
@@ -21,6 +22,7 @@ describe("entry search input", () => {
         tagId: "tag-1",
         catId: "cat-1",
         media: "image",
+        page: 3,
       },
       errors: [],
     });
@@ -44,5 +46,13 @@ describe("entry search input", () => {
     expect(parsed.errors).toEqual(["query_too_long"]);
     expect(parsed.filters.media).toBe("all");
     expect(parsed.filters.tagId).toBe("");
+  });
+
+  it("uses the first page for missing or unsupported page numbers", () => {
+    expect(parseEntrySearchInput({}).filters.page).toBe(1);
+    expect(parseEntrySearchInput({ page: "0" }).filters.page).toBe(1);
+    expect(parseEntrySearchInput({ page: "1.5" }).filters.page).toBe(1);
+    expect(parseEntrySearchInput({ page: "1001" }).filters.page).toBe(1);
+    expect(parseEntrySearchInput({ page: "12" }).filters.page).toBe(12);
   });
 });

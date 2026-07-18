@@ -220,7 +220,8 @@ D1 と Drizzle を使用する。詳細なテーブルは [データモデル](d
 - foreign key と主要 query の index を明示する
 - D1 binding から直接アクセスし、Worker 内から D1 REST API を呼ばない
 - 本文検索は MVP では正規化した `LIKE` と household/cat/date 絞り込みから開始する
-- P4-06の検索はServer ComponentでURL queryを検証し、`entries`をactive household、`ready`、未削除へ先に絞る。キーワードはtitle/bodyと同じhouseholdのtagにescaped `LIKE`を適用し、cat/tag/mediaは相関`EXISTS`、メディアなしは`NOT EXISTS`で判定する。結果と件数は最大50件の新しい順で取得し、関連猫・tag・ready mediaは既存のbounded hydration queryで解決する
+- P4-06の検索はServer ComponentでURL queryを検証し、`entries`をactive household、`ready`、未削除へ先に絞る。キーワードはtitle/bodyと同じhouseholdのtagにescaped `LIKE`を適用し、cat/tag/mediaは相関`EXISTS`、メディアなしは`NOT EXISTS`で判定する。関連猫・tag・ready mediaは既存のbounded hydration queryで解決する
+- P4-12の検索paginationは1ページ50件、最大1000ページに制限し、`occurred_at DESC, created_at DESC, id ASC`の固定順へoffsetを適用する。結果queryと同じ条件のcountを並行実行し、表示範囲、全件数、前後ページ、最終ページを判定する。ページURLは正規化済みの検索条件と管理可能な`boardId`だけを再構築し、範囲外ページは最後の有効ページへredirectする
 - P4-07の「去年の今ごろ」は`user_preferences.timezone`（不正値は`Asia/Tokyo`へfallback）で今日の日付を決め、前年同日を中心とする前後3日の半開区間を作る。active household、`ready`、未削除、選択中の猫へ絞った候補を日付距離・新しい日付・作成日時の順に並べ、1件だけ既存のentry hydrationへ渡す。日付範囲は既存の`entries(household_id, occurred_at, deleted_at)`と`entry_cats(cat_id, entry_id)`を利用し、schema追加は行わない
 - P4-08の「3年前と今日」も同じ年数指定の計算・queryを使い、3年前同日の前後3日から1件を取得する。1年・3年の候補queryは並列実行し、利用者タイムゾーンは1回だけ取得し、見つかったentryの関連データは一つのbounded hydrationへまとめる
 - P4-11のランダム再発見は対象件数を取得し、`timezone上の日付 + household ID + active cat ID`を非セキュリティ用途の安定hashへ通して`0..件数-1`のoffsetを決める。対象記録は`occurred_at DESC, created_at DESC, id ASC`で固定し、`ORDER BY random()`による全件random sortは行わない。件数・offset取得は1年・3年の候補queryと並行し、選ばれたentryは同じbounded hydrationへまとめる

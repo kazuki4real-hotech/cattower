@@ -165,7 +165,7 @@ describe("entry search", () => {
     expect((await search({ tagId: "tag-outside" })).items).toEqual([]);
   });
 
-  it("returns a bounded first result set with an accurate total", async () => {
+  it("paginates a bounded result set without overlap", async () => {
     const extraEntries = Array.from({ length: 50 }, (_, index) =>
       entry(
         `older-${index}`,
@@ -178,11 +178,20 @@ describe("entry search", () => {
     for (let index = 0; index < extraEntries.length; index += 10)
       await db.insert(entries).values(extraEntries.slice(index, index + 10));
 
-    const result = await search({});
-    expect(result.items).toHaveLength(50);
-    expect(result.total).toBe(52);
-    expect(result.hasMore).toBe(true);
-    expect(result.items[0]?.id).toBe("window");
+    const firstPage = await search({});
+    const secondPage = await search({ page: "2" });
+    expect(firstPage.items).toHaveLength(50);
+    expect(firstPage.total).toBe(52);
+    expect(firstPage.pageCount).toBe(2);
+    expect(firstPage.hasPrevious).toBe(false);
+    expect(firstPage.hasNext).toBe(true);
+    expect(firstPage.items[0]?.id).toBe("window");
+    expect(secondPage.items).toHaveLength(2);
+    expect(secondPage.hasPrevious).toBe(true);
+    expect(secondPage.hasNext).toBe(false);
+    expect(
+      new Set([...firstPage.items, ...secondPage.items].map(id)).size,
+    ).toBe(52);
   });
 });
 

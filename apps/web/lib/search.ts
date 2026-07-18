@@ -41,19 +41,29 @@ export async function getSearchFacets(viewer: Viewer) {
 
 export async function searchEntries(viewer: Viewer, filters: EntrySearchInput) {
   const where = searchWhere(viewer.household.id, filters);
+  const offset = (filters.page - 1) * SEARCH_RESULT_LIMIT;
   const [rows, countRows] = await Promise.all([
     viewer.db.query.entries.findMany({
       where,
-      orderBy: [desc(entries.occurredAt), desc(entries.createdAt)],
+      orderBy: [
+        desc(entries.occurredAt),
+        desc(entries.createdAt),
+        asc(entries.id),
+      ],
       limit: SEARCH_RESULT_LIMIT,
+      offset,
     }),
     viewer.db.select({ value: count() }).from(entries).where(where),
   ]);
   const total = countRows[0]?.value ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / SEARCH_RESULT_LIMIT));
   return {
     items: await hydrateEntries(viewer, rows),
     total,
-    hasMore: total > rows.length,
+    page: filters.page,
+    pageCount,
+    hasPrevious: filters.page > 1,
+    hasNext: offset + rows.length < total,
   };
 }
 
