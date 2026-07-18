@@ -149,6 +149,7 @@ Charcoal（`#2a2a2a`）は仕様の「濃いチャコール」に対応する追
 - オンボーディング背景は単色とし、大きな色の円、三角屋根、塔、部屋カードを使わない
 - 完了演出は紙吹雪、巨大なチェック、スコア、ランキング、streak を使わない。猫の写真またはアイコンと短い文で達成を示す
 - `prefers-reduced-motion: reduce` では自動アニメーションを停止し、状態変化を即時表示する
+- reduced motionではdurationを極端に短くするだけでなく、animationとtransition自体を無効化し、smooth scrollも使わない
 
 ## 7. Component and layout process
 
@@ -227,6 +228,15 @@ Cattower の静かな性格に合わせ、既定を低めにする。
 - page heading、empty state、固定navigationで同じ主操作を反復しない。empty state内に導線を置く画面ではpage heading側の重複を外す
 - 条件付き検索の0件は条件変更、データ自体が0件の検索はおうちへ戻る導線とし、投稿を唯一の出口にしない
 - 装飾的なeyebrowやsample dataで空白を埋めず、icon、見出し、説明、任意の補助操作だけで構成する
+
+### 7.10 Keyboardと読み上げ（決定）
+
+- skip linkの移動先はprogrammatic focusを受け取れるmain landmarkとし、キーボード操作時にvisible focus ringを常に保つ
+- navigationの開閉には`aria-controls`と`aria-expanded`、猫一覧の選択には`aria-pressed`を使い、色や位置だけに状態を依存させない
+- 動的な一覧操作の成功結果は`role="status"`のpolite live regionへ短く通知する。失敗は既存の`role="alert"`で即時通知する
+- 破壊操作のinline確認を開いたときは取消buttonへフォーカスを移し、取り消した場合は確認を開いたbuttonへ戻す
+- 並び替えはdragを必須にせず、読み上げ可能な名称を持つbuttonで上下移動できる状態を維持する
+- 小さい補助テキストに使う`--muted`は`#73736d`とし、`--paper`上で4.53:1以上のcontrastを保つ
 
 ## 8. お散歩 visual note
 

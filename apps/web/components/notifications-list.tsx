@@ -124,6 +124,7 @@ export function NotificationsList() {
           >
             <span
               className="notice-dot"
+              role="img"
               aria-label={notice.readAt ? "既読" : "未読"}
             />
             <div>

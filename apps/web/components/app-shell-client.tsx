@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { BrandWordmark } from "@/components/brand-wordmark";
 import { CatSwitcher } from "@/components/cat-switcher";
@@ -77,6 +83,8 @@ export function AppShellClient({
   wide?: boolean;
 }) {
   const pathname = usePathname();
+  const mobileNavRef = useRef<HTMLElement>(null);
+  const mobileNavButtonRef = useRef<HTMLButtonElement>(null);
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const loadUnreadCount = useCallback(async () => {
@@ -166,7 +174,7 @@ export function AppShellClient({
             </Link>
           </div>
         </header>
-        <main className="main" id="main">
+        <main className="main" id="main" tabIndex={-1}>
           <div
             className={`page${narrow ? " page-narrow" : ""}${wide ? " page-wide" : ""}`}
           >
@@ -178,17 +186,23 @@ export function AppShellClient({
           </div>
         </main>
         <button
+          ref={mobileNavButtonRef}
           className="mobile-nav-fab"
           type="button"
           aria-label="ナビゲーションを表示"
+          aria-controls="mobile-primary-navigation"
+          aria-expanded={!navCollapsed}
           data-visible={navCollapsed ? "true" : "false"}
-          onClick={() => setNavCollapsed(false)}
+          onClick={expandMobileNav}
         >
           <Icon name="menu" />
         </button>
         <nav
+          ref={mobileNavRef}
+          id="mobile-primary-navigation"
           className="mobile-nav"
           aria-label="主要ナビゲーション"
+          aria-hidden={navCollapsed}
           data-collapsed={navCollapsed ? "true" : "false"}
         >
           {mobilePrimary.map((item) => (
@@ -198,7 +212,9 @@ export function AppShellClient({
             className="mobile-nav-collapse"
             type="button"
             aria-label="ナビゲーションを縮小"
-            onClick={() => setNavCollapsed(true)}
+            aria-controls="mobile-primary-navigation"
+            aria-expanded={!navCollapsed}
+            onClick={collapseMobileNav}
           >
             <Icon name="close_fullscreen" />
           </button>
@@ -206,4 +222,16 @@ export function AppShellClient({
       </div>
     </>
   );
+
+  function expandMobileNav() {
+    setNavCollapsed(false);
+    requestAnimationFrame(() => {
+      mobileNavRef.current?.querySelector<HTMLElement>("a")?.focus();
+    });
+  }
+
+  function collapseMobileNav() {
+    setNavCollapsed(true);
+    requestAnimationFrame(() => mobileNavButtonRef.current?.focus());
+  }
 }

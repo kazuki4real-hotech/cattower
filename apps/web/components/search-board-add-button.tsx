@@ -20,10 +20,12 @@ export function SearchBoardAddButton({
   const [pending, setPending] = useState(false);
   const [added, setAdded] = useState(initiallyAdded);
   const [error, setError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
 
   async function add() {
     setPending(true);
     setError(null);
+    setAnnouncement("");
     try {
       const response = await fetch(`/api/boards/${boardId}/items`, {
         method: "POST",
@@ -36,6 +38,7 @@ export function SearchBoardAddButton({
         return;
       }
       setAdded(true);
+      setAnnouncement("ボードへ追加しました");
       router.refresh();
     } catch {
       setError(boardAddError());
@@ -60,6 +63,9 @@ export function SearchBoardAddButton({
           {error}
         </small>
       ) : null}
+      <small className="sr-only" role="status">
+        {announcement}
+      </small>
     </span>
   );
 }

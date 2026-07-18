@@ -26,6 +26,7 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
 
   function startCreate() {
     setError(null);
@@ -58,6 +59,9 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
           {error}
         </p>
       ) : null}
+      <p className="sr-only" role="status">
+        {announcement}
+      </p>
 
       {creating ? (
         <BoardEditor
@@ -71,6 +75,7 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
           onSubmit={async (value) => {
             setPendingId("new");
             setError(null);
+            setAnnouncement("");
             try {
               const response = await fetch("/api/boards", {
                 method: "POST",
@@ -86,6 +91,7 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
                 return;
               }
               setBoards((current) => [body.board!, ...current]);
+              setAnnouncement(`${body.board.name}を作成しました`);
               setCreating(false);
             } catch {
               setError(boardError());
@@ -116,6 +122,7 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
                   onSubmit={async (value) => {
                     setPendingId(board.id);
                     setError(null);
+                    setAnnouncement("");
                     try {
                       const response = await fetch(`/api/boards/${board.id}`, {
                         method: "PUT",
@@ -140,6 +147,7 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
                             : item,
                         ),
                       );
+                      setAnnouncement(`${value.name}を更新しました`);
                       setEditingId(null);
                     } catch {
                       setError(boardError());
@@ -189,7 +197,11 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
 
               {board.canManage && editingId !== board.id ? (
                 deletingId === board.id ? (
-                  <div className="board-delete-confirm">
+                  <div
+                    className="board-delete-confirm"
+                    role="group"
+                    aria-label={`${board.name}の削除確認`}
+                  >
                     <p>
                       「{board.name}
                       」を削除します。記録そのものは削除されません。
@@ -198,7 +210,8 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
                       <button
                         className="button button-quiet"
                         type="button"
-                        onClick={() => setDeletingId(null)}
+                        autoFocus
+                        onClick={() => cancelDelete(board.id)}
                         disabled={pendingId !== null}
                       >
                         キャンセル
@@ -215,6 +228,7 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
                   </div>
                 ) : (
                   <button
+                    id={`board-delete-${board.id}`}
                     className="board-delete-link"
                     type="button"
                     onClick={() => {
@@ -253,6 +267,7 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
   async function deleteBoard(board: Board) {
     setPendingId(board.id);
     setError(null);
+    setAnnouncement("");
     try {
       const response = await fetch(`/api/boards/${board.id}`, {
         method: "DELETE",
@@ -265,12 +280,20 @@ export function BoardManager({ initialBoards }: { initialBoards: Board[] }) {
         return;
       }
       setBoards((current) => current.filter((item) => item.id !== board.id));
+      setAnnouncement(`${board.name}を削除しました`);
       setDeletingId(null);
     } catch {
       setError(boardError());
     } finally {
       setPendingId(null);
     }
+  }
+
+  function cancelDelete(boardId: string) {
+    setDeletingId(null);
+    requestAnimationFrame(() => {
+      document.getElementById(`board-delete-${boardId}`)?.focus();
+    });
   }
 }
 

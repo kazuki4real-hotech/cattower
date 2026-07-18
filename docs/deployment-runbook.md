@@ -166,6 +166,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 同日におうち・検索・ボード・オンボーディング完了のempty stateを投稿を急かさない文言と補助導線へ統一し、Worker version `2fccfdfc-e2d3-4a0c-9d7f-b349562284ec`をdeployした。schema変更はない。gzip size `2662.69 KiB`、startup `29 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search?page=2`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
 
+同日にP4のアクセシビリティQAを行い、reduced motionの即時表示、mobile navigationと猫選択の状態属性、skip linkのfocus先、破壊操作のfocus管理、ボード操作のlive region、補助色contrastを改善したWorker version `037291b8-a11f-43f2-a49a-9d77f74d53ea`をdeployした。schema変更はない。gzip size `2663.95 KiB`、startup `24 ms`を確認した。公開入口はmain landmarkとh1が各1件、代替文なし画像と名前のないbuttonが0件で、公開入口が`200`、未認証の`/home`・`/search?page=2`・`/boards`が`307`、board item APIが`401`であることを確認した。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash

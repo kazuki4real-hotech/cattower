@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Icon } from "@/components/icon";
 
@@ -15,6 +15,7 @@ export function EntryActions({
   deleted: boolean;
 }) {
   const router = useRouter();
+  const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const [version, setVersion] = useState(initialVersion);
   const [confirming, setConfirming] = useState(false);
   const [pending, setPending] = useState(false);
@@ -87,6 +88,7 @@ export function EntryActions({
         </button>
         {!confirming ? (
           <button
+            ref={deleteButtonRef}
             className="button button-quiet"
             type="button"
             onClick={() => setConfirming(true)}
@@ -116,7 +118,8 @@ export function EntryActions({
             <button
               className="button button-secondary"
               type="button"
-              onClick={() => setConfirming(false)}
+              autoFocus
+              onClick={cancelDelete}
               disabled={pending}
             >
               やめる
@@ -131,4 +134,9 @@ export function EntryActions({
       ) : null}
     </div>
   );
+
+  function cancelDelete() {
+    setConfirming(false);
+    requestAnimationFrame(() => deleteButtonRef.current?.focus());
+  }
 }

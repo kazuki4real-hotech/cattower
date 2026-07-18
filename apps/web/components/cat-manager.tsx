@@ -113,6 +113,7 @@ export function CatManager({
               type="button"
               className="cat-manager-item"
               data-active={cat.id === selectedId}
+              aria-pressed={cat.id === selectedId}
               onClick={() => setSelectedId(cat.id)}
               key={cat.id}
             >

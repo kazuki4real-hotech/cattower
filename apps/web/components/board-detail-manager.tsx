@@ -21,6 +21,7 @@ export function BoardDetailManager({
   const [pending, setPending] = useState<string | null>(null);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
   const canManage = initialDetail.board.canManage;
 
   async function addEntry(event: FormEvent<HTMLFormElement>) {
@@ -29,6 +30,7 @@ export function BoardDetailManager({
     if (!entry) return;
     setPending("add");
     setError(null);
+    setAnnouncement("");
     try {
       const response = await fetch(
         `/api/boards/${initialDetail.board.id}/items`,
@@ -54,6 +56,7 @@ export function BoardDetailManager({
         current.filter((item) => item.id !== entry.id),
       );
       setSelectedEntryId("");
+      setAnnouncement(`${entryLabel(entry)}をボードへ追加しました`);
     } catch {
       setError(boardItemError());
     } finally {
@@ -70,6 +73,7 @@ export function BoardDetailManager({
     nextItems.splice(destination, 0, moved);
     setPending(`move:${moved.id}`);
     setError(null);
+    setAnnouncement("");
     try {
       const response = await fetch(
         `/api/boards/${initialDetail.board.id}/items`,
@@ -92,6 +96,9 @@ export function BoardDetailManager({
       }
       setItems(nextItems);
       setVersion(body.version);
+      setAnnouncement(
+        `${entryLabel(moved)}を${direction === -1 ? "上" : "下"}へ移動しました`,
+      );
     } catch {
       setError(boardItemError());
     } finally {
@@ -102,6 +109,7 @@ export function BoardDetailManager({
   async function removeEntry(entry: Entry) {
     setPending(`remove:${entry.id}`);
     setError(null);
+    setAnnouncement("");
     try {
       const response = await fetch(
         `/api/boards/${initialDetail.board.id}/items/${entry.id}`,
@@ -125,6 +133,7 @@ export function BoardDetailManager({
       );
       setVersion(body.version);
       setConfirmRemoveId(null);
+      setAnnouncement(`${entryLabel(entry)}をボードから外しました`);
     } catch {
       setError(boardItemError());
     } finally {
@@ -181,6 +190,9 @@ export function BoardDetailManager({
           {error}
         </p>
       ) : null}
+      <p className="sr-only" role="status">
+        {announcement}
+      </p>
 
       {items.length ? (
         <div className="board-entry-list" aria-busy={pending !== null}>
@@ -218,7 +230,11 @@ export function BoardDetailManager({
               {canManage ? (
                 <div className="board-entry-actions">
                   {initialDetail.board.sortMode === "manual" ? (
-                    <div className="board-order-actions" aria-label="並び順">
+                    <div
+                      className="board-order-actions"
+                      role="group"
+                      aria-label={`${entryLabel(entry)}の並び順`}
+                    >
                       <button
                         className="icon-button"
                         type="button"
@@ -242,12 +258,17 @@ export function BoardDetailManager({
                     </div>
                   ) : null}
                   {confirmRemoveId === entry.id ? (
-                    <div className="board-remove-confirm">
+                    <div
+                      className="board-remove-confirm"
+                      role="group"
+                      aria-label={`${entryLabel(entry)}をボードから外す確認`}
+                    >
                       <span>元の記録は残ります</span>
                       <button
                         className="button button-quiet"
                         type="button"
-                        onClick={() => setConfirmRemoveId(null)}
+                        autoFocus
+                        onClick={() => cancelRemove(entry.id)}
                         disabled={pending !== null}
                       >
                         やめる
@@ -263,6 +284,7 @@ export function BoardDetailManager({
                     </div>
                   ) : (
                     <button
+                      id={`board-remove-${entry.id}`}
                       className="board-remove-link"
                       type="button"
                       onClick={() => setConfirmRemoveId(entry.id)}
@@ -298,6 +320,13 @@ export function BoardDetailManager({
       </p>
     </>
   );
+
+  function cancelRemove(entryId: string) {
+    setConfirmRemoveId(null);
+    requestAnimationFrame(() => {
+      document.getElementById(`board-remove-${entryId}`)?.focus();
+    });
+  }
 }
 
 function sortEntries(
