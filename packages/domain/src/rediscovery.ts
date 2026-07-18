@@ -7,6 +7,12 @@ export type RediscoveryDateWindow = {
   timeZone: string;
 };
 
+export type DailyRediscoverySelection = {
+  date: string;
+  index: number;
+  timeZone: string;
+};
+
 export function getAnniversaryDateWindow(
   now: Date,
   yearsAgo: number,
@@ -26,6 +32,24 @@ export function getAnniversaryDateWindow(
     endDate: toIsoDate(addUtcDays(anchor, 4)),
     timeZone,
   };
+}
+
+export function getDailyRediscoverySelection(
+  now: Date,
+  itemCount: number,
+  scopeKey: string,
+  requestedTimeZone = DEFAULT_TIME_ZONE,
+): DailyRediscoverySelection {
+  if (!Number.isInteger(itemCount) || itemCount < 1)
+    throw new Error("invalid_rediscovery_item_count");
+  if (!scopeKey) throw new Error("invalid_rediscovery_scope");
+  const timeZone = normalizeTimeZone(requestedTimeZone);
+  const parts = getCalendarParts(now, timeZone);
+  const date = toIsoDate(
+    new Date(Date.UTC(parts.year, parts.month - 1, parts.day)),
+  );
+  const hash = stableHash(`${date}\0${scopeKey}`);
+  return { date, index: hash % itemCount, timeZone };
 }
 
 function normalizeTimeZone(value: string) {
@@ -63,4 +87,13 @@ function addUtcDays(value: Date, days: number) {
 
 function toIsoDate(value: Date) {
   return value.toISOString().slice(0, 10);
+}
+
+function stableHash(value: string) {
+  let hash = 2_166_136_261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16_777_619);
+  }
+  return hash >>> 0;
 }

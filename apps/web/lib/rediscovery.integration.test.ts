@@ -10,7 +10,7 @@ import {
 import { env } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { getAnniversaryMemories } from "@/lib/rediscovery";
+import { getRediscoveryMemories } from "@/lib/rediscovery";
 
 const db = createDatabase(env.DB);
 const ownerId = "rediscovery-owner";
@@ -39,8 +39,8 @@ beforeEach(async () => {
   });
 });
 
-describe("anniversary rediscovery", () => {
-  it("returns the closest ready records for both anniversaries", async () => {
+describe("rediscovery memories", () => {
+  it("returns both anniversaries and a stable daily selection", async () => {
     await db.insert(entries).values([
       entry("three-days-before", "2025-07-15"),
       entry("one-day-after", "2025-07-19"),
@@ -64,28 +64,48 @@ describe("anniversary rediscovery", () => {
       { entryId: "three-years-after", catId },
     ]);
 
-    const result = await getAnniversaryMemories(
-      viewer(),
-      catId,
-      new Date("2026-07-18T03:00:00.000Z"),
-    );
+    const now = new Date("2026-07-18T03:00:00.000Z");
+    const result = await getRediscoveryMemories(viewer(), catId, now);
+    const repeated = await getRediscoveryMemories(viewer(), catId, now);
 
     expect(result.lastYear?.id).toBe("one-day-after");
     expect(result.threeYearsAgo?.id).toBe("three-years-after");
     expect(result.threeYearsAgo?.cats).toEqual([{ id: catId, name: "むぎ" }]);
+    expect(result.daily?.id).toBe(repeated.daily?.id);
+    expect([
+      "three-days-before",
+      "one-day-after",
+      "outside-window",
+      "three-years-before",
+      "three-years-after",
+    ]).toContain(result.daily?.id);
   });
 
-  it("returns null for each seven-day window without an eligible record", async () => {
+  it("can select a daily record when both anniversary windows are empty", async () => {
     await db.insert(entries).values(entry("too-old", "2025-07-10"));
     await db.insert(entryCats).values({ entryId: "too-old", catId });
 
     await expect(
-      getAnniversaryMemories(
+      getRediscoveryMemories(
         viewer(),
         catId,
         new Date("2026-07-18T03:00:00.000Z"),
       ),
-    ).resolves.toEqual({ lastYear: null, threeYearsAgo: null });
+    ).resolves.toMatchObject({
+      lastYear: null,
+      threeYearsAgo: null,
+      daily: { id: "too-old" },
+    });
+  });
+
+  it("returns null for every rediscovery type without a record", async () => {
+    await expect(
+      getRediscoveryMemories(
+        viewer(),
+        catId,
+        new Date("2026-07-18T03:00:00.000Z"),
+      ),
+    ).resolves.toEqual({ lastYear: null, threeYearsAgo: null, daily: null });
   });
 });
 
@@ -95,7 +115,7 @@ function viewer() {
     session: { user: { id: ownerId } },
     household: { id: homeId },
     env: { DB: env.DB },
-  } as Parameters<typeof getAnniversaryMemories>[0];
+  } as Parameters<typeof getRediscoveryMemories>[0];
 }
 
 function entry(

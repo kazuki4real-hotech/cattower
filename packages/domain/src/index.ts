@@ -84,6 +84,8 @@ export {
 
 export {
   getAnniversaryDateWindow,
+  getDailyRediscoverySelection,
+  type DailyRediscoverySelection,
   type RediscoveryDateWindow,
 } from "./rediscovery";
 

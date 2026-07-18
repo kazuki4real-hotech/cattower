@@ -6,7 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { getCatOverview } from "@/lib/cats";
 import { getRecentEntries, type EntryView } from "@/lib/entries";
-import { getAnniversaryMemories } from "@/lib/rediscovery";
+import { getRediscoveryMemories } from "@/lib/rediscovery";
 import { getViewer } from "@/lib/viewer";
 import { PageHeading } from "@cattower/ui";
 
@@ -21,7 +21,7 @@ export default async function HomePage() {
   );
   const [records, memories] = await Promise.all([
     getRecentEntries(viewer, 12, overview?.activeCatId),
-    getAnniversaryMemories(viewer, overview?.activeCatId),
+    getRediscoveryMemories(viewer, overview?.activeCatId),
   ]);
   const latest = records[0];
 
@@ -110,7 +110,6 @@ export default async function HomePage() {
                 <p className="eyebrow">思い出をひらく</p>
                 <h2 id="anniversary-memories">あの頃の記録</h2>
               </div>
-              <span>それぞれ前後3日から</span>
             </div>
             <div className="rediscovery-list">
               <RediscoveryRow
@@ -122,6 +121,11 @@ export default async function HomePage() {
                 label="3年前と今日"
                 memory={memories.threeYearsAgo}
                 emptyText="3年前のこの時期の記録はありません"
+              />
+              <RediscoveryRow
+                label="今日の一枚"
+                memory={memories.daily}
+                emptyText="まだ選べる記録はありません"
               />
             </div>
           </section>

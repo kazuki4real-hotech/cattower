@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { getAnniversaryDateWindow } from "./rediscovery";
+import {
+  getAnniversaryDateWindow,
+  getDailyRediscoverySelection,
+} from "./rediscovery";
 
 describe("getAnniversaryDateWindow", () => {
   it("uses the calendar day in the requested time zone", () => {
@@ -52,5 +55,58 @@ describe("getAnniversaryDateWindow", () => {
     expect(() =>
       getAnniversaryDateWindow(new Date("2026-07-18T03:00:00.000Z"), 0),
     ).toThrow("invalid_anniversary_years");
+  });
+});
+
+describe("getDailyRediscoverySelection", () => {
+  it("keeps the same selection during a calendar day in the requested zone", () => {
+    const morning = getDailyRediscoverySelection(
+      new Date("2026-07-18T00:00:00.000Z"),
+      17,
+      "home:cat",
+      "Asia/Tokyo",
+    );
+    const evening = getDailyRediscoverySelection(
+      new Date("2026-07-18T14:59:59.000Z"),
+      17,
+      "home:cat",
+      "Asia/Tokyo",
+    );
+    expect(morning).toEqual(evening);
+    expect(morning.date).toBe("2026-07-18");
+    expect(morning.index).toBeGreaterThanOrEqual(0);
+    expect(morning.index).toBeLessThan(17);
+  });
+
+  it("uses the next local day after the time-zone boundary", () => {
+    expect(
+      getDailyRediscoverySelection(
+        new Date("2026-07-18T15:00:00.000Z"),
+        17,
+        "home:cat",
+        "Asia/Tokyo",
+      ).date,
+    ).toBe("2026-07-19");
+  });
+
+  it("includes the scope and validates the candidate count", () => {
+    const first = getDailyRediscoverySelection(
+      new Date("2026-07-18T03:00:00.000Z"),
+      101,
+      "home:first-cat",
+    );
+    const second = getDailyRediscoverySelection(
+      new Date("2026-07-18T03:00:00.000Z"),
+      101,
+      "home:second-cat",
+    );
+    expect(first.index).not.toBe(second.index);
+    expect(() =>
+      getDailyRediscoverySelection(
+        new Date("2026-07-18T03:00:00.000Z"),
+        0,
+        "home:cat",
+      ),
+    ).toThrow("invalid_rediscovery_item_count");
   });
 });
