@@ -83,6 +83,11 @@ export {
 } from "./search";
 
 export {
+  getLastYearDateWindow,
+  type RediscoveryDateWindow,
+} from "./rediscovery";
+
+export {
   HOUSEHOLD_INVITE_HOURLY_LIMIT,
   HOUSEHOLD_INVITE_TTL_MS,
   createInviteToken,

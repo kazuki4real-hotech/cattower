@@ -397,6 +397,7 @@ raw event 削除後も retention を集計するための日次 rollup。
 - `entries(household_id, occurred_at, deleted_at)`
 - `entry_cats(cat_id, entry_id)`
 - 初期検索は`entries(household_id, occurred_at, deleted_at)`でactive household、公開状態、日付を絞り、`entry_tags`、`entry_cats`、`entry_media`の相関`EXISTS`でtag、猫、メディア条件を適用する
+- 「去年の今ごろ」は同じentry scope indexで前年同日の前後3日に候補を限定し、選択中の猫がある場合は`entry_cats(cat_id, entry_id)`を結合する。タイムゾーンは候補の日付ではなく「今日」の算出に使い、`occurred_at`の日単位UTC正規化は維持する
 - 検索候補が増えた段階で`entries`の正規化本文をexternal-content FTS5 trigram indexへ同期し、1〜2文字は上記scope indexと`entry_cats`で絞って`LIKE`検索する
 - `media_assets(household_id, status)`
 - `board_items(board_id, sort_key)`

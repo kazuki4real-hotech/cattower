@@ -156,6 +156,8 @@ rollback 後は production smoke test を行い、原因を修正した新しい
 
 同日にキーワード・日付・tag・猫・mediaによる実データ検索と、検索結果からのボード追加を含むWorker version `3add05a5-7202-43f8-9b4e-f5ce70152108`をdeployした。schema変更はない。gzip size `2659.65 KiB`、startup `32 ms`を確認し、未認証の`/search`と`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
 
+同日に選択中の猫と利用者タイムゾーンに連動する「去年の今ごろ」を実データ化し、Worker version `c273fc5a-8bfb-418e-8b83-c54f29369ca0`をdeployした。schema変更はない。gzip size `2661.28 KiB`、startup `34 ms`を確認し、公開入口が`200`、未認証の`/home`・`/search`・`/boards`が`307`で公開入口へ戻ること、board item APIが`401`を返すことを確認した。
+
 schema 変更を含む push の前に migration を適用する。
 
 ```bash

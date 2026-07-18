@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { getCatOverview } from "@/lib/cats";
 import { getRecentEntries } from "@/lib/entries";
+import { getLastYearMemory } from "@/lib/rediscovery";
 import { getViewer } from "@/lib/viewer";
 import { PageHeading } from "@cattower/ui";
 
@@ -18,7 +19,10 @@ export default async function HomePage() {
   const activeCat = overview?.cats.find(
     (cat) => cat.id === overview.activeCatId,
   );
-  const records = await getRecentEntries(viewer, 12, overview?.activeCatId);
+  const [records, lastYearMemory] = await Promise.all([
+    getRecentEntries(viewer, 12, overview?.activeCatId),
+    getLastYearMemory(viewer, overview?.activeCatId),
+  ]);
   const latest = records[0];
 
   return (
@@ -100,6 +104,63 @@ export default async function HomePage() {
               </div>
             </section>
           ) : null}
+          <section className="section" aria-labelledby="last-year-memory">
+            <div className="section-head rediscovery-heading">
+              <div>
+                <p className="eyebrow">思い出をひらく</p>
+                <h2 id="last-year-memory">去年の今ごろ</h2>
+              </div>
+              <span>前後3日から</span>
+            </div>
+            {lastYearMemory ? (
+              <Link
+                className="last-year-memory"
+                href={`/entries/${lastYearMemory.id}`}
+              >
+                {lastYearMemory.media?.kind === "image" ? (
+                  <Image
+                    src={`/api/media/${lastYearMemory.media.assetId}?variant=entry`}
+                    width={lastYearMemory.media.width ?? 480}
+                    height={lastYearMemory.media.height ?? 360}
+                    unoptimized
+                    alt={
+                      lastYearMemory.title ||
+                      `${lastYearMemory.cats.map((cat) => cat.name).join("、")}の記録`
+                    }
+                  />
+                ) : (
+                  <span className="last-year-placeholder">
+                    <Icon
+                      name={
+                        lastYearMemory.media?.kind === "video"
+                          ? "movie"
+                          : "menu_book"
+                      }
+                    />
+                  </span>
+                )}
+                <span className="last-year-copy">
+                  <time dateTime={lastYearMemory.occurredDate}>
+                    {formatDate(lastYearMemory.occurredDate)}
+                  </time>
+                  <strong>
+                    {lastYearMemory.title ||
+                      lastYearMemory.body ||
+                      "写真の記録"}
+                  </strong>
+                  <small>
+                    {lastYearMemory.cats.map((cat) => cat.name).join("、")}
+                  </small>
+                </span>
+                <Icon name="chevron_right" />
+              </Link>
+            ) : (
+              <div className="last-year-empty">
+                <Icon name="calendar_today" />
+                <p>去年のこの時期の記録はありません</p>
+              </div>
+            )}
+          </section>
         </>
       ) : (
         <section className="home-empty" aria-labelledby="home-empty-title">
